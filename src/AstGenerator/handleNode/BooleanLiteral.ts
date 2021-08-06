@@ -1,11 +1,11 @@
-import { ENodeType, ETokenType, IBooleanLiteral } from '../../types.d'
-import { addBaseNodeAttr, createLoc, isToken } from '../../utils'
+import { ENodeType, ETokenType, IBooleanLiteral } from '../../types'
+import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 const booleanMap = {
   True: true,
-  Flase: false
+  False: false
 }
 
 /** 布尔 */
@@ -21,8 +21,8 @@ class BooleanLiteral extends BaseHandler {
       throw new TypeError("handleBooleanLiteral err: currentToken is not keyword 'True' or 'False'")
     }
 
-    const booleanLiteral = this.createNode(ENodeType.BooleanLiteral, booleanMap[currentToken.value])
-    const BooleanLiteral = addBaseNodeAttr(booleanLiteral, {
+    const BooleanLiteral = this.createNode(ENodeType.BooleanLiteral, {
+      value: booleanMap[currentToken.value],
       loc: createLoc(currentToken, currentToken)
     })
 

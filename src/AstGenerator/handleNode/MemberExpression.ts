@@ -7,10 +7,10 @@ import {
   TExpressionNode,
   TNode,
   TTokenItem
-} from '../../types.d'
+} from '../../types'
 import { addBaseNodeAttr, createLoc, isExpressionNode, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 class MemberExpression extends BaseHandler {
   handle() {
@@ -34,8 +34,9 @@ class MemberExpression extends BaseHandler {
       ? this._handlePointOfProperty()
       : this._handleMiddenBracketOfProperty()
 
-    const memberExpression = this.createNode(ENodeType.MemberExpression, object, property)
-    const MemberExpression = addBaseNodeAttr(memberExpression, {
+    const MemberExpression = this.createNode(ENodeType.MemberExpression, {
+      object,
+      property,
       loc: createLoc(object, property)
     })
 
@@ -86,8 +87,8 @@ class MemberExpression extends BaseHandler {
 
     this.tokens.next()
     const nodesFragment = this.findNodesFragmentByConformToken(
-      token => isToken(token, ETokenType.punctuation, ':'),
-      token => !isToken(token, ETokenType.bracket, ']')
+      (token) => isToken(token, ETokenType.punctuation, ':'),
+      (token) => !isToken(token, ETokenType.bracket, ']')
     )
     if (!nodesFragment) {
       throw new SyntaxError("handleMemberExpression err: can't find bracker ']'")
@@ -116,9 +117,9 @@ class MemberExpression extends BaseHandler {
   ): ISliceExpression {
     if (nodesFragment.length > 3) {
       throw new SyntaxError('handleSliceExpression err: nodesFragment length Is greater than 3')
-    } else if (!nodesFragment.every(nodes => Array.isArray(nodes) && nodes.length <= 1)) {
+    } else if (!nodesFragment.every((nodes) => Array.isArray(nodes) && nodes.length <= 1)) {
       throw new SyntaxError('handleSliceExpression err: nodes length Is greater than 1')
-    } else if (!nodesFragment.every(nodes => !nodes[0] || isExpressionNode(nodes[0]))) {
+    } else if (!nodesFragment.every((nodes) => !nodes[0] || isExpressionNode(nodes[0]))) {
       throw new TypeError('handleSliceExpression err: nodesFragment is not all expression node')
     }
 
@@ -127,8 +128,10 @@ class MemberExpression extends BaseHandler {
     const upper = nodes2[0]
     const step = nodes3[0]
 
-    const sliceExpression = this.createNode(ENodeType.SliceExpression, lower, upper, step)
-    const SliceExpression = addBaseNodeAttr(sliceExpression, {
+    const SliceExpression = this.createNode(ENodeType.SliceExpression, {
+      lower,
+      upper,
+      step,
       loc: createLoc(startToken, endToken)
     })
 

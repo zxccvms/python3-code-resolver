@@ -1,8 +1,7 @@
-import { getLatest } from 'src/base/common/objUtils'
-import { ENodeType, ETokenType, IIdentifier, IImportStatement } from '../../types.d'
-import { addBaseNodeAttr, createLoc, isNode, isSameRank, isToken } from '../../utils'
+import { ENodeType, ETokenType, IIdentifier, IImportStatement } from '../../types'
+import { addBaseNodeAttr, createLoc, getLatest, isNode, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 导入语句 */
 class ImportStatement extends BaseHandler {
@@ -22,8 +21,9 @@ class ImportStatement extends BaseHandler {
     const module = this._handleModule()
     const names = this._handleNames()
 
-    const importExpreesion = this.createNode(ENodeType.ImportStatement, names, module)
-    const ImportExpreesion = addBaseNodeAttr(importExpreesion, {
+    const ImportExpreesion = this.createNode(ENodeType.ImportStatement, {
+      names,
+      module,
       loc: createLoc(module || names[0], getLatest(names))
     })
 
@@ -35,7 +35,7 @@ class ImportStatement extends BaseHandler {
     if (!isToken(currentToken, ETokenType.keyword, 'from')) return null
 
     this.tokens.next()
-    const nodes = this.findNodesByConformToken(token => !isToken(token, ETokenType.keyword, 'import'))
+    const nodes = this.findNodesByConformToken((token) => !isToken(token, ETokenType.keyword, 'import'))
     if (!nodes) {
       throw new SyntaxError("ImportExpression err: can't find keyword 'import' ")
     } else if (nodes.length !== 1) {
@@ -55,7 +55,7 @@ class ImportStatement extends BaseHandler {
 
     this.tokens.next()
     const { payload: names } = this.findNodesByConformTokenAndStepFn(
-      token => isSameRank(currentToken, token, 'line'),
+      (token) => isSameRank(currentToken, token, 'line'),
       () => this._handleName()
     )
 

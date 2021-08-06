@@ -1,9 +1,9 @@
 import NodeGenerator from '../NodeGenerator'
-import { ENodeType, TNode, TTokenItem } from '../types.d'
+import { ENodeType, TNode, TTokenItem } from '../types'
 import AstProcessor from './AstProcessor'
 import Chain from './utils/Chain'
 import TokenArray from './utils/TokenArray'
-import { EHandleCode, ENodeEnvironment } from './types.d'
+import { EHandleCode, ENodeEnvironment } from './types'
 
 /** 节点基础的处理者 */
 class BaseHandler {

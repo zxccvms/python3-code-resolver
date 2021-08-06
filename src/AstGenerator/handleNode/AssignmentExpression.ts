@@ -1,7 +1,15 @@
-import { ENodeType, ETokenType, IAssignmentExpression } from '../../types.d'
-import { addBaseNodeAttr, createLoc, isNode, isSameRank, isToken } from '../../utils'
+import { ENodeType, ETokenType, IAssignmentExpression } from '../../types'
+import {
+  addBaseNodeAttr,
+  createLoc,
+  isAssignmentToken,
+  isExpressionNode,
+  isNode,
+  isSameRank,
+  isToken
+} from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 class AssignmentExpression extends BaseHandler {
   handle() {
@@ -12,8 +20,8 @@ class AssignmentExpression extends BaseHandler {
   /** 处理赋值表达式 */
   handleAssignmentExpression(): IAssignmentExpression {
     const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.operator, '=')) {
-      throw new TypeError('handleAssignmentExpression err: currentToken is not operator "="')
+    if (!isAssignmentToken(currentToken)) {
+      throw new TypeError('handleAssignmentExpression err: currentToken is not assignment token')
     }
 
     const lastNode = this.nodeChain.get()
@@ -21,25 +29,33 @@ class AssignmentExpression extends BaseHandler {
       throw new TypeError('handleAssignmentExpression err: lastNode is not Tuple or Identifier')
     }
 
-    this.tokens.next() // token '=' 在函数内被消费 将索引移至下一个
+    this.tokens.next()
     const nodes =
-      this.findNodesByConformToken(token => isSameRank(currentToken, token, 'line')) ||
+      this.findNodesByConformToken((token) => isSameRank(currentToken, token, 'line')) ||
       this.nodeChain.popByTarget(lastNode)
     if (nodes.length !== 1) {
-      throw new SyntaxError('_handleAssignmentExpression err: node count is not equal 1')
+      throw new SyntaxError('handleAssignmentExpression err: node count is not equal 1')
+    } else if (!isExpressionNode(nodes[0])) {
+      throw new TypeError('handleAssignmentExpression err: node is not expression node')
     }
 
     const node = nodes[0]
-    let assignmentExpression: IAssignmentExpression
+    let AssignmentExpression: IAssignmentExpression
     if (isNode(node, ENodeType.AssignmentExpression)) {
-      assignmentExpression = this.createNode(ENodeType.AssignmentExpression, [lastNode, ...node.targets], node.value)
+      AssignmentExpression = this.createNode(ENodeType.AssignmentExpression, {
+        targets: [lastNode, ...node.targets],
+        operator: currentToken.value,
+        value: node.value,
+        loc: createLoc(lastNode, node.value)
+      })
     } else {
-      assignmentExpression = this.createNode(ENodeType.AssignmentExpression, [lastNode], node)
+      AssignmentExpression = this.createNode(ENodeType.AssignmentExpression, {
+        targets: [lastNode],
+        operator: currentToken.value,
+        value: node,
+        loc: createLoc(lastNode, node)
+      })
     }
-
-    const AssignmentExpression = addBaseNodeAttr(assignmentExpression, {
-      loc: createLoc(lastNode, assignmentExpression.value)
-    })
 
     this.nodeChain.pop() // lastNode 被消费
     return AssignmentExpression

@@ -1,10 +1,10 @@
-import { addBaseNodeAttr, getPositionInfo, hasParenthesized, isLeftBracketToken, isSameRank, isToken } from '../utils'
+import { addBaseNodeAttr, getPositionInfo, hasParenthesized, isSameRank, isSeparateToken, isToken } from '../utils'
 import NodeGenerator from '../NodeGenerator'
 import Chain from './utils/Chain'
 import TokenArray from './utils/TokenArray'
-import { ETokenType, IIdentifier, INumberLiteral, IStringLiteral, TNode, TTokenItem } from '../types.d'
+import { ETokenType, IIdentifier, INumberLiteral, IStringLiteral, TNode, TTokenItem } from '../types'
 import CallExpression from './handleNode/CallExpression'
-import { EHandleCode, ENodeEnvironment } from './types.d'
+import { EHandleCode, ENodeEnvironment } from './types'
 import FunctionDeclaration from './handleNode/FunctionDeclaration'
 import MemberExpression from './handleNode/MemberExpression'
 import AssignmentExpression from './handleNode/AssignmentExpression'
@@ -26,6 +26,7 @@ import NumberLiteral from './handleNode/NumberLiteral'
 import BooleanLiteral from './handleNode/BooleanLiteral'
 import NoneLiteral from './handleNode/NoneLiteral'
 import ImportStatement from './handleNode/ImportStatement'
+import IfStatement from './handleNode/IfStatement'
 
 /** AST处理器 */
 class AstProcessor {
@@ -56,6 +57,7 @@ class AstProcessor {
   classDeclaration: ClassDeclaration
   blockStatement: BlockStatement
   emptyStatement: EmptyStatement
+  ifStatement: IfStatement
 
   constructor(tokens: TTokenItem[]) {
     const nodeGenerator = new NodeGenerator()
@@ -85,6 +87,7 @@ class AstProcessor {
     this.classDeclaration = new ClassDeclaration(this)
     this.blockStatement = new BlockStatement(this)
     this.emptyStatement = new EmptyStatement(this)
+    this.ifStatement = new IfStatement(this)
   }
 
   handle(): TNode[] {
@@ -95,10 +98,6 @@ class AstProcessor {
 
   walk(environment: ENodeEnvironment = ENodeEnvironment.normal) {
     const currentToken = this.tokens.getToken()
-    console.log(
-      'taozhizhu ~🚀 file: AstProcessor.ts ~🚀 line 98 ~🚀 AstProcessor ~🚀 walk ~🚀 currentToken',
-      currentToken
-    )
     const { code, payload } = this[currentToken.type](environment) || {
       code: EHandleCode.single | EHandleCode.addIndex,
       payload: currentToken
@@ -177,14 +176,14 @@ class AstProcessor {
 
     switch (currentToken.value) {
       case '(': {
-        if (!isLeftBracketToken(lastToken) && this.callExpression.isConformCallee(lastNode, currentToken)) {
+        if (!isSeparateToken(lastToken) && this.callExpression.isConformCallee(lastNode, currentToken)) {
           return this.callExpression.handle()
         } else {
           return this.handleSmallBracket()
         }
       }
       case '[': {
-        if (this.memberExpression.isConformObject(lastNode)) {
+        if (!isSeparateToken(lastToken) && this.memberExpression.isConformObject(lastNode)) {
           return this.memberExpression.handle()
         } else {
           return this.arrayExpression.handle()
@@ -217,7 +216,7 @@ class AstProcessor {
         if (isSameRank(lastNode, currentToken, 'line')) {
           return this.ifExpression.handle()
         } else {
-          return null // todo
+          return this.ifStatement.handle()
         }
       }
       case 'import':
@@ -225,6 +224,8 @@ class AstProcessor {
         return this.importStatement.handle()
       case 'try':
         return this.tryStatement.handle()
+      case 'not':
+        return this.unaryExpression.handle()
     }
   }
 
@@ -237,14 +238,14 @@ class AstProcessor {
 
     this.tokens.next()
     const nodes = this.baseHandler.findNodesByConformToken(
-      token => !isToken(token, ETokenType.bracket, ')'),
+      (token) => !isToken(token, ETokenType.bracket, ')'),
       ENodeEnvironment.smallBracket
     )
     if (!nodes) {
       throw new SyntaxError("_handleSmallBracket err: can't find bracket ')'")
     }
 
-    const newNodes = nodes.map(node =>
+    const newNodes = nodes.map((node) =>
       hasParenthesized(node)
         ? node
         : addBaseNodeAttr(node, {

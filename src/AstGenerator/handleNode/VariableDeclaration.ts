@@ -1,8 +1,7 @@
-import { getLatest } from 'src/base/common/objUtils'
-import { ENodeType, ETokenType, IIdentifier, IVariableDeclaration, TNode } from '../../types.d'
-import { addBaseNodeAttr, createLoc, isNode, isSameRank, isToken } from '../../utils'
+import { ENodeType, ETokenType, IIdentifier, IVariableDeclaration, TNode } from '../../types'
+import { addBaseNodeAttr, createLoc, getLatest, isNode, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 变量声明 */
 class VariableDeclaration extends BaseHandler {
@@ -19,8 +18,9 @@ class VariableDeclaration extends BaseHandler {
 
     const declarations = this._handleDeclarations()
 
-    const variabelDeclaration = this.createNode(ENodeType.VariableDeclaration, currentToken.value, declarations)
-    const VariableDeclaration = addBaseNodeAttr(variabelDeclaration, {
+    const VariableDeclaration = this.createNode(ENodeType.VariableDeclaration, {
+      kind: currentToken.value,
+      declarations,
       loc: createLoc(currentToken, getLatest(declarations))
     })
 
@@ -35,7 +35,7 @@ class VariableDeclaration extends BaseHandler {
 
     this.tokens.next()
     const { payload: declarations } = this.findNodesByConformTokenAndStepFn(
-      token => isSameRank(currentToken, token, 'line'),
+      (token) => isSameRank(currentToken, token, 'line'),
       () => this._handleDeclaration()
     )
 

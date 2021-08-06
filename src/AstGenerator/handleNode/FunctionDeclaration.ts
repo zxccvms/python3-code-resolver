@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType, IFunctionDeclaration, IIdentifier, TExpressionNode } from '../../types.d'
+import { ENodeType, ETokenType, IFunctionDeclaration, IIdentifier, TExpressionNode } from '../../types'
 import { addBaseNodeAttr, createLoc, isExpressionNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 处理函数定义节点 */
 class FunctionDeclaration extends BaseHandler {
@@ -23,8 +23,11 @@ class FunctionDeclaration extends BaseHandler {
 
     const body = this.astProcessor.blockStatement.handleBlockStatement()
 
-    const functionDeclaration = this.createNode(ENodeType.FunctionDeclaration, id, params, defaults, body)
-    const FunctionDeclaration = addBaseNodeAttr(functionDeclaration, {
+    const FunctionDeclaration = this.createNode(ENodeType.FunctionDeclaration, {
+      id,
+      params,
+      defaults,
+      body,
       loc: createLoc(defToken, body)
     })
 
@@ -43,7 +46,8 @@ class FunctionDeclaration extends BaseHandler {
 
     this.tokens.next()
     const { code, payload: params } = this.findNodesByConformTokenAndStepFn(
-      token => !isToken(token, ETokenType.bracket, ')') && !isToken(this.tokens.getToken(1), ETokenType.operator, '='),
+      (token) =>
+        !isToken(token, ETokenType.bracket, ')') && !isToken(this.tokens.getToken(1), ETokenType.operator, '='),
       () => this._handleParam()
     )
     if (code === 1) {
@@ -53,7 +57,7 @@ class FunctionDeclaration extends BaseHandler {
     let defaults = []
     if (!isToken(this.tokens.getToken(), ETokenType.bracket, ')')) {
       const { code, payload: nodesFragment } = this.findNodesByConformTokenAndStepFn(
-        token => !isToken(token, ETokenType.bracket, ')'),
+        (token) => !isToken(token, ETokenType.bracket, ')'),
         () => this._handleParamAndDefault()
       )
       if (code === 1) {
@@ -90,7 +94,7 @@ class FunctionDeclaration extends BaseHandler {
 
     this.tokens.next()
     const nodes = this.findNodesByConformToken(
-      token => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
+      (token) => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
     )
     if (!nodes) {
       throw new SyntaxError("FunctionDeclaration err: can't find punctuation ',' or bracket ')'")

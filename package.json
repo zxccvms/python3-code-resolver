@@ -1,0 +1,28 @@
+{
+  "name": "python3-code-resolver",
+  "version": "0.0.0",
+  "scripts": {
+    "dev1": "vite --config ./config/vite.config.ts",
+    "build": "tsc && vite build",
+    "serve": "vite preview",
+    "dev": "jest ./test/custom/custom.test.ts --watchAll --config ./config/jest.config.ts",
+    "test": "jest --watchAll --config ./config/jest.config.ts",
+    "debugger": "node --inspect-brk ./node_modules/jest/bin/jest --runInBand --no-cache --no-watchman",
+    "dev2": "nodemon --inspect test.js",
+    "dev3": "npx babel src -d dist -s --extensions \".ts\" --watch"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-typescript": "^7.15.0",
+    "@types/jest": "^26.0.24",
+    "babel-jest": "^27.0.6",
+    "jest": "^27.0.6",
+    "nodemon": "^2.0.12",
+    "ts-jest": "^27.0.4",
+    "ts-node": "^10.1.0",
+    "typescript": "^4.3.2",
+    "vite": "^2.4.4"
+  }
+}

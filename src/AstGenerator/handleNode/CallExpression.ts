@@ -6,10 +6,10 @@ import {
   TExpressionNode,
   TNode,
   TTokenItem
-} from '../../types.d'
-import { addBaseNodeAttr, createLoc, isExpressionNode, isNode, isSameRank, isToken } from '../../utils'
+} from '../../types'
+import { createLoc, isExpressionNode, isNode, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 函数调用表达式 */
 class CallExpression extends BaseHandler {
@@ -32,8 +32,10 @@ class CallExpression extends BaseHandler {
     const keywords = this.handleKeywords()
 
     const rightBracket = this.tokens.getToken()
-    const callExpression = this.createNode(ENodeType.CallExpression, callee, params, keywords)
-    const CallExpression = addBaseNodeAttr(callExpression, {
+    const CallExpression = this.createNode(ENodeType.CallExpression, {
+      callee,
+      params,
+      keywords,
       loc: createLoc(callee, rightBracket)
     })
 
@@ -61,7 +63,8 @@ class CallExpression extends BaseHandler {
 
   private _handleParams(): ICallExpression['params'] {
     const { code, payload: params } = this.findNodesByConformTokenAndStepFn(
-      token => !isToken(token, ETokenType.bracket, ')') && !isToken(this.tokens.getToken(1), ETokenType.operator, '='),
+      (token) =>
+        !isToken(token, ETokenType.bracket, ')') && !isToken(this.tokens.getToken(1), ETokenType.operator, '='),
       () => this._handleParam()
     )
 
@@ -74,7 +77,7 @@ class CallExpression extends BaseHandler {
 
   private _handleParam(): TExpressionNode {
     const nodes = this.findNodesByConformToken(
-      token => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
+      (token) => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
     )
     if (!nodes) {
       throw new SyntaxError("handleCallExpression err: can't find punctuation ',' or bracket ')'")
@@ -96,7 +99,7 @@ class CallExpression extends BaseHandler {
     if (isToken(currentToken, ETokenType.bracket, ')')) return []
 
     const { code, payload: keywords } = this.findNodesByConformTokenAndStepFn(
-      token => !isToken(token, ETokenType.bracket, ')'),
+      (token) => !isToken(token, ETokenType.bracket, ')'),
       () => this._handleKeyword()
     )
 
@@ -117,7 +120,7 @@ class CallExpression extends BaseHandler {
 
     this.tokens.next()
     const nodes = this.findNodesByConformToken(
-      token => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
+      (token) => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
     )
     if (!nodes) {
       throw new SyntaxError("handleCallExpression err: can't find punctuation ',' or bracket ')'")
@@ -127,8 +130,9 @@ class CallExpression extends BaseHandler {
       throw new TypeError('handleCallExpression err: value is not expression node')
     }
 
-    const assignmentParam = this.createNode(ENodeType.AssignmentParam, name, nodes[0])
-    const AssianmentParam = addBaseNodeAttr(assignmentParam, {
+    const AssianmentParam = this.createNode(ENodeType.AssignmentParam, {
+      name,
+      value: nodes[0],
       loc: createLoc(name, nodes[0])
     })
 

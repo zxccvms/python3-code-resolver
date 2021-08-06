@@ -1,5 +1,4 @@
-import { textShapeOptions } from 'src/editor/flow-editor/FlowEditor/custom/node/options'
-import { ENodeType, ETokenType, IIfExpression, TNode, TTokenItem } from '../../types.d'
+import { ENodeType, ETokenType, IIfExpression, TNode, TTokenItem } from '../../types'
 import {
   addBaseNodeAttr,
   createLoc,
@@ -10,7 +9,7 @@ import {
   isToken
 } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** if表达式
  * 'Z-Factory.exe' if port == '6444' else 'Z-Bot.exe'
@@ -31,8 +30,10 @@ class IfExpression extends BaseHandler {
     const test = this._handleTest(ifToken)
     const alternate = this._handleAlternate(ifToken)
 
-    const ifExpression = this.createNode(ENodeType.IfExpression, test, body, alternate)
-    const IfExpression = addBaseNodeAttr(ifExpression, {
+    const IfExpression = this.createNode(ENodeType.IfExpression, {
+      test,
+      body,
+      alternate,
       loc: createLoc(body, alternate)
     })
 
@@ -56,7 +57,7 @@ class IfExpression extends BaseHandler {
 
   private _handleTest(ifToken: TTokenItem): IIfExpression['test'] {
     const nodes = this.findNodesByConformToken(
-      token => !isToken(token, ETokenType.keyword, 'else') && isSameRank(ifToken, token, 'line')
+      (token) => !isToken(token, ETokenType.keyword, 'else') && isSameRank(ifToken, token, 'line')
     )
     if (!nodes) {
       throw new SyntaxError("handleIfExpression err: can't find keyword 'else'")
@@ -74,7 +75,7 @@ class IfExpression extends BaseHandler {
   private _handleAlternate(ifToken: TTokenItem): IIfExpression['alternate'] {
     const lastNode = this.nodeChain.get()
     const nodes =
-      this.findNodesByConformToken(token => isSameRank(ifToken, token, 'line') && !isRightBracketToken(token)) ||
+      this.findNodesByConformToken((token) => isSameRank(ifToken, token, 'line') && !isRightBracketToken(token)) ||
       this.nodeChain.popByTarget(lastNode)
     if (nodes.length !== 1) {
       throw new SyntaxError('handleIfExpression err: nodes length is equal 1')

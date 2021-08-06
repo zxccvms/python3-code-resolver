@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType, INoneLiteral } from '../../types.d'
+import { ENodeType, ETokenType, INoneLiteral } from '../../types'
 import { addBaseNodeAttr, createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 class NoneLiteral extends BaseHandler {
   handle() {
@@ -15,8 +15,7 @@ class NoneLiteral extends BaseHandler {
       throw new TypeError("handleNoneLiteral err: currentToken is not keyword 'None'")
     }
 
-    const noneLiteral = this.createNode(ENodeType.NoneLiteral)
-    const NoneLiteral = addBaseNodeAttr(noneLiteral, {
+    const NoneLiteral = this.createNode(ENodeType.NoneLiteral, {
       loc: createLoc(currentToken, currentToken)
     })
 

@@ -1,6 +1,19 @@
-import { toArray } from 'src/base/common/utils'
 import { expressionNodeTypes, statementNodeTypes } from './const'
-import { ENodeType, ETokenType, TBaseNodeAttr, TExpressionNode, TNode, TStatementNode, TTokenItem } from './types.d'
+import { ENodeType, ETokenType, TBaseNodeAttr, TExpressionNode, TNode, TStatementNode, TTokenItem } from './types'
+
+/** 得到数组的最后一项 */
+export function getLatest<T>(array: Array<T>): T {
+  if (!Array.isArray(array)) return null
+  return array[array.length - 1]
+}
+
+export function toArray<T>(array: T | T[]): T[] {
+  return Array.isArray(array) ? array : [array]
+}
+
+export function heavyArray<T>(targetArray: T[]): T[] {
+  return Array.from(new Set(targetArray))
+}
 
 /** 节点添加基础属性 */
 export function addBaseNodeAttr<T extends TNode>(node: T, baseAttr: TBaseNodeAttr): T {
@@ -14,7 +27,7 @@ export function addBaseNodeAttr<T extends TNode>(node: T, baseAttr: TBaseNodeAtt
 export function isSameRank(
   token1: TTokenItem | TNode,
   token2: TTokenItem | TNode,
-  mode: 'lineOrColumn' | 'line' | 'column' | 'endAndStartLine'
+  mode: 'lineOrColumn' | 'line' | 'column' | 'endColumn' | 'endAndStartLine'
 ) {
   if (!token1 || !token2) return false
 
@@ -30,6 +43,8 @@ export function isSameRank(
       return startPosition1.line === startPosition2.line
     case 'column':
       return startPosition1.column === startPosition2.column
+    case 'endColumn':
+      return endPosition1.column === endPosition2.column
     case 'endAndStartLine':
       return endPosition1.line === startPosition2.line
   }
@@ -43,17 +58,29 @@ export function isToken<T extends ETokenType>(
   if (!token) return false
 
   if (values === undefined) {
-    return toArray(types).some(type => type === token.type)
+    return toArray(types).some((type) => type === token.type)
   } else if (!Array.isArray(types) && Array.isArray(values)) {
-    return token.type === types && values.some(value => value === token.value)
+    return token.type === types && values.some((value) => value === token.value)
   } else {
     values = toArray(values)
     return toArray(types).some((type, index) => type === token.type && values[index] === token.value)
   }
 }
 
-export function isLeftBracketToken(token: TTokenItem): token is TTokenItem<ETokenType.bracket> {
-  return isToken(token, ETokenType.bracket, ['(', '[', '{'])
+export function isAssignmentToken(
+  token: TTokenItem
+): token is TTokenItem<ETokenType.operator, '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//='> {
+  return isToken(token, ETokenType.operator, ['=', '+=', '-=', '*=', '/=', '%=', '**=', '//='])
+}
+
+export function isSeparateToken(
+  token: TTokenItem
+): token is TTokenItem<ETokenType.bracket | ETokenType.punctuation | ETokenType.operator> {
+  return (
+    isToken(token, ETokenType.bracket, ['(', '[', '{']) ||
+    isToken(token, ETokenType.punctuation, [',', ':']) ||
+    isAssignmentToken(token)
+  )
 }
 
 export function isRightBracketToken(token: TTokenItem): token is TTokenItem<ETokenType.bracket> {
@@ -62,7 +89,7 @@ export function isRightBracketToken(token: TTokenItem): token is TTokenItem<ETok
 
 export function isNode<T extends ENodeType>(node: TNode, types: T | T[]): node is TNode<T> {
   if (!node) return false
-  return toArray(types).some(type => type === node.type)
+  return toArray(types).some((type) => type === node.type)
 }
 
 export function isExpressionNode(node: TNode): node is TExpressionNode {

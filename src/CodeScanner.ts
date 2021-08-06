@@ -1,5 +1,5 @@
-import PYTHON from 'src/editor/task-editor/const/PYTHON'
-import { ETokenType, TPositionInfo, TTokenItem } from './types.d'
+import { PYTHON } from './const'
+import { ETokenType, TPositionInfo, TTokenItem } from './types'
 
 /** 代码扫描器 */
 class CodeScanner {
@@ -103,7 +103,7 @@ class CodeScanner {
       else if (/[a-z|A-Z|_]/.test(currentChar)) {
         const { lineNum, columnNum, betweenContent } = this._findNextConformString(
           code.slice(i),
-          char => !/[a-z|A-Z|_|0-9]/.test(char)
+          (char) => !/[a-z|A-Z|_|0-9]/.test(char)
         )
 
         value = currentChar + betweenContent
@@ -113,7 +113,7 @@ class CodeScanner {
       // 处理数字
       else if (/[0-9]/.test(currentChar)) {
         let hasPoint = false
-        const { lineNum, columnNum, betweenContent } = this._findNextConformString(code.slice(i), char => {
+        const { lineNum, columnNum, betweenContent } = this._findNextConformString(code.slice(i), (char) => {
           if (char === '.') {
             if (hasPoint) return true
             else {
@@ -141,16 +141,12 @@ class CodeScanner {
       }
     }
 
-    console.log(
-      'taozhizhu ~🚀 file: TaskCodeResolver.ts ~🚀 line 128 ~🚀 TaskCodeResolverService ~🚀 _codeScanner ~🚀 result',
-      result
-    )
     return result
   }
 
   /** 处理引号字符 */
   private _handleQuotesChar(content: string, char: '"' | "'") {
-    const isRealQuotes = (_, index) => {
+    const isRealQuotes = (_: string, index: number) => {
       const beforeContent = content.slice(0, index)
       if (!beforeContent.length) return true
 

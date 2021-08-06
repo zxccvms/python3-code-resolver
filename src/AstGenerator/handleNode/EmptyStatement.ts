@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType, IEmptyStatement } from '../../types.d'
+import { ENodeType, ETokenType, IEmptyStatement } from '../../types'
 import { addBaseNodeAttr, createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 处理关键字 */
 class EmptyStatement extends BaseHandler {
@@ -16,8 +16,7 @@ class EmptyStatement extends BaseHandler {
       throw new TypeError("handlePass err: currentToken is not keyword 'pass'")
     }
 
-    const emptyStatement = this.createNode(ENodeType.EmptyStatement)
-    const EmptyStatement = addBaseNodeAttr(emptyStatement, {
+    const EmptyStatement = this.createNode(ENodeType.EmptyStatement, {
       loc: createLoc(passToken, passToken)
     })
 

@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType, IBinaryExpression, TNode, TTokenItem } from '../../types.d'
+import { ENodeType, ETokenType, IBinaryExpression, TNode, TTokenItem } from '../../types'
 import { addBaseNodeAttr, createLoc, isExpressionNode, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 二进制表达式 */
 class BinaryExpression extends BaseHandler {
@@ -31,9 +31,11 @@ class BinaryExpression extends BaseHandler {
       throw new TypeError('handleBinaryExpression err: currentToken is not expression node')
     }
 
-    const binaryExpression = this.createNode(ENodeType.BinaryExpression, currentToken.value, leftNode, rightNodes[0])
-    const BinaryExpression = addBaseNodeAttr(binaryExpression, {
-      loc: createLoc(binaryExpression.left, binaryExpression.right)
+    const BinaryExpression = this.createNode(ENodeType.BinaryExpression, {
+      operator: currentToken.value,
+      left: leftNode,
+      right: rightNodes[0],
+      loc: createLoc(leftNode, rightNodes[0])
     })
 
     this.nodeChain.pop()

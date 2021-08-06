@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType, IDictionaryExpression, IDictionaryProperty } from '../../types.d'
+import { ENodeType, ETokenType, IDictionaryExpression, IDictionaryProperty } from '../../types'
 import { addBaseNodeAttr, createLoc, isExpressionNode, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode, ENodeEnvironment } from '../types.d'
+import { EHandleCode, ENodeEnvironment } from '../types'
 
 class DictionaryExpression extends BaseHandler {
   handle() {
@@ -17,19 +17,19 @@ class DictionaryExpression extends BaseHandler {
 
     this.tokens.next()
     const { code, payload: properties } = this.findNodesByConformTokenAndStepFn(
-      token => !isToken(token, ETokenType.bracket, '}'),
+      (token) => !isToken(token, ETokenType.bracket, '}'),
       () => this._handleDictionaryProperty()
     )
     if (code === 1) {
       throw new SyntaxError("handleDictionaryExpression err: can't find bracket '}'")
-    } else if (!properties.every(node => isNode(node, ENodeType.DictionaryProperty))) {
+    } else if (!properties.every((node) => isNode(node, ENodeType.DictionaryProperty))) {
       throw new TypeError('handleDictionaryExpression err: properties is not all DictionaryProperty')
     }
 
     const rightBigBracket = this.tokens.getToken()
 
-    const dictionaryExpression = this.createNode(ENodeType.DictionaryExpression, properties)
-    const DictionaryExpression = addBaseNodeAttr(dictionaryExpression, {
+    const DictionaryExpression = this.createNode(ENodeType.DictionaryExpression, {
+      properties,
       loc: createLoc(leftBigBracket, rightBigBracket)
     })
 
@@ -39,7 +39,7 @@ class DictionaryExpression extends BaseHandler {
   }
 
   private _handleDictionaryProperty(): IDictionaryProperty {
-    const keys = this.findNodesByConformToken(token => !isToken(token, ETokenType.punctuation, ':'))
+    const keys = this.findNodesByConformToken((token) => !isToken(token, ETokenType.punctuation, ':'))
     if (!keys) {
       throw new SyntaxError("handleDictionaryProperty err: can't find punctuation ':'")
     } else if (keys.length !== 1) {
@@ -50,7 +50,7 @@ class DictionaryExpression extends BaseHandler {
 
     this.tokens.next()
     const values = this.findNodesByConformToken(
-      token => !isToken(token, [ETokenType.bracket, ETokenType.punctuation], ['}', ','])
+      (token) => !isToken(token, [ETokenType.bracket, ETokenType.punctuation], ['}', ','])
     )
     if (!values) {
       throw new SyntaxError('handleDictionaryProperty err: nextNode is not exsit')
@@ -63,9 +63,10 @@ class DictionaryExpression extends BaseHandler {
     const key = keys[0]
     const value = values[0]
 
-    const dictionaryProperty = this.createNode(ENodeType.DictionaryProperty, key, value)
-    const DictionaryProperty = addBaseNodeAttr(dictionaryProperty, {
-      loc: createLoc(dictionaryProperty.key, dictionaryProperty.value)
+    const DictionaryProperty = this.createNode(ENodeType.DictionaryProperty, {
+      key,
+      value,
+      loc: createLoc(key, value)
     })
 
     if (isToken(this.tokens.getToken(), ETokenType.punctuation, ',')) {

@@ -1,0 +1,16 @@
+{
+  "semi": false,
+  "editor.tabSize": 2,
+  "printWidth": 120,
+  "singleQuote": true,
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "trailingComma": "none",
+  "overrides": [
+    {
+      "files": ".prettierrc",
+      "options": {
+        "parser": "json"
+      }
+    }
+  ]
+}

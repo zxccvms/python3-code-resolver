@@ -1,8 +1,7 @@
-import { getLatest } from 'src/base/common/objUtils'
-import { ENodeType, ETokenType, IBlockStatement, TNode, TTokenItem } from '../../types.d'
-import { addBaseNodeAttr, createLoc, isSameRank, isToken } from '../../utils'
+import { ENodeType, ETokenType, IBlockStatement, TExpressionNode, TStatementNode, TTokenItem } from '../../types'
+import { addBaseNodeAttr, createLoc, getLatest, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 块声明 */
 class BlockStatement extends BaseHandler {
@@ -20,7 +19,7 @@ class BlockStatement extends BaseHandler {
     this.tokens.next()
     const body = this._handleBody(operator)
 
-    const blockStatement = this.createNode(ENodeType.BlockStatement, body)
+    const blockStatement = this.createNode(ENodeType.BlockStatement, { body })
     const BlockStatement = addBaseNodeAttr(blockStatement, {
       loc: createLoc(operator, getLatest(body))
     })
@@ -38,22 +37,22 @@ class BlockStatement extends BaseHandler {
 
     const startNode = this.nodeChain.get()
 
-    let body: TNode[]
+    let body: IBlockStatement['body']
     // 单行定义
     if (isSameRank(operator, markToken, 'line')) {
-      body = this.findNodesByConformToken(token => isSameRank(operator, token, 'line'))
+      body = this.findNodesByConformToken((token) => isSameRank(operator, token, 'line')) as TExpressionNode[]
     }
     // 多行定义
     else {
-      let lineToken
-      body = this.findNodesByConformToken(token => {
+      let lineToken: TTokenItem
+      body = this.findNodesByConformToken((token) => {
         const isSameColumn = isSameRank(markToken, token, 'column')
         if (isSameColumn) lineToken = token
 
         return isSameColumn || isSameRank(lineToken, token, 'line')
-      })
+      }) as TStatementNode[]
     }
-    if (!body) body = this.nodeChain.popByTarget(startNode)
+    if (!body) body = this.nodeChain.popByTarget(startNode) as (TExpressionNode | TStatementNode)[]
 
     this.tokens.last()
 

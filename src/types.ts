@@ -21,16 +21,16 @@ export type TPositionInfo = {
   column: number
 }
 
-export type TTokenItem<T extends ETokenType = ETokenType> = {
+export type TTokenItem<T extends ETokenType = ETokenType, V extends string = string> = {
   type: T
-  value: string
+  value: V
   loc: {
     start: TPositionInfo
     end: TPositionInfo
   }
 }
 
-export enum ENodeType {
+export const enum ENodeType {
   // 特殊类型 只能在某些类型里使用 不能单独使用
   /** 字典属性 DictionaryExpression内使用 a:1 */
   DictionaryProperty = 'DictionaryProperty',
@@ -97,6 +97,8 @@ export type TSpecialNodeMap = {
   [ENodeType.AssignmentParam]: IAssignmentParam
   [ENodeType.ExceptHandler]: IExceptHandler
 }
+
+export type TSpecialNode<T extends keyof TSpecialNodeMap = keyof TSpecialNodeMap> = TSpecialNodeMap[T]
 
 /** 表达式节点映射表 */
 export type TExpressionNodeMap = {
@@ -169,7 +171,7 @@ export interface IAssignmentParam extends TBaseNodeAttr {
 
 export interface IExceptHandler extends TBaseNodeAttr {
   type: ENodeType.ExceptHandler
-  errName?: IIdentifier
+  errName?: TExpressionNode
   name?: IIdentifier
   body: IBlockStatement
 }
@@ -203,14 +205,14 @@ export interface IIdentifier extends TBaseNodeAttr {
 
 export interface IUnaryExpression extends TBaseNodeAttr {
   type: ENodeType.UnaryExpression
-  oprator: '-' | '+'
+  oprator: '-' | '+' | 'not'
   argument: TExpressionNode
 }
 export interface IIfExpression extends TBaseNodeAttr {
   type: ENodeType.IfExpression
-  test: any // todo
-  body: any // todo
-  alternate: any | IIfExpression // todo
+  test: TExpressionNode
+  body: TExpressionNode
+  alternate: TExpressionNode
 }
 export interface ITupleExpression extends TBaseNodeAttr {
   type: ENodeType.TupleExpression
@@ -228,8 +230,8 @@ export interface IDictionaryExpression extends TBaseNodeAttr {
 export interface IBinaryExpression extends TBaseNodeAttr {
   type: ENodeType.BinaryExpression
   operator: string
-  left: any // todo
-  right: any // todo
+  left: TExpressionNode
+  right: TExpressionNode
 }
 
 export interface IVariableDeclaration extends TBaseNodeAttr {
@@ -241,7 +243,8 @@ export interface IVariableDeclaration extends TBaseNodeAttr {
 export interface IAssignmentExpression extends TBaseNodeAttr {
   type: ENodeType.AssignmentExpression
   targets: (IIdentifier | IMemberExpression | ITupleExpression)[]
-  value: any // todo
+  operator: '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//='
+  value: TExpressionNode
 }
 
 export interface ISliceExpression extends TBaseNodeAttr {
@@ -298,7 +301,7 @@ export interface IEmptyStatement extends TBaseNodeAttr {
 
 export interface IIfStatement extends TBaseNodeAttr {
   type: ENodeType.IfStatement
-  test: any // todo
+  test: TExpressionNode
   body: IBlockStatement
   alternate?: IBlockStatement | IIfStatement
 }

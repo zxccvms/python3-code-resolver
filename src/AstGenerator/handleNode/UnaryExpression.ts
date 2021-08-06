@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType, IUnaryExpression } from '../../types.d'
+import { ENodeType, ETokenType, IUnaryExpression } from '../../types'
 import { addBaseNodeAttr, createLoc, isExpressionNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 class UnaryExpression extends BaseHandler {
   handle() {
@@ -11,8 +11,8 @@ class UnaryExpression extends BaseHandler {
 
   handleUnaryExpression(): IUnaryExpression {
     const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, [ETokenType.operator, ETokenType.operator], ['+', '-'])) {
-      throw new TypeError("handleUnaryExpression err: currentToken is not operator '+' or '-' ")
+    if (!isToken(currentToken, [ETokenType.operator, ETokenType.operator, ETokenType.keyword], ['+', '-', 'not'])) {
+      throw new TypeError("handleUnaryExpression err: currentToken is not operator '+' or '-', keyword 'not' ")
     }
 
     this.tokens.next()
@@ -24,8 +24,9 @@ class UnaryExpression extends BaseHandler {
     }
 
     const nextExpression = nextExpressions[0]
-    const unaryExpression = this.createNode(ENodeType.UnaryExpression, currentToken.value as '-' | '+', nextExpression)
-    const UnaryExpression = addBaseNodeAttr(unaryExpression, {
+    const UnaryExpression = this.createNode(ENodeType.UnaryExpression, {
+      oprator: currentToken.value as '-' | '+',
+      argument: nextExpression,
       loc: createLoc(currentToken, nextExpression)
     })
 

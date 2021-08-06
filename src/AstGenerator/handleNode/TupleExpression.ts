@@ -1,8 +1,7 @@
-import { getLatest } from 'src/base/common/objUtils'
-import { ENodeType, ETokenType, ITupleExpression, TExpressionNode, TNode, TTokenItem } from '../../types.d'
-import { addBaseNodeAttr, createLoc, isExpressionNode, isNode, isSameRank, isToken } from '../../utils'
+import { ENodeType, ETokenType, ITupleExpression, TExpressionNode, TNode, TTokenItem } from '../../types'
+import { addBaseNodeAttr, createLoc, getLatest, isExpressionNode, isNode, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode, ENodeEnvironment } from '../types.d'
+import { EHandleCode, ENodeEnvironment } from '../types'
 
 /** 处理元组 */
 class TupleExpression extends BaseHandler {
@@ -19,8 +18,8 @@ class TupleExpression extends BaseHandler {
 
     const elements = this._handleElements(environment)
 
-    const tupleExpression = this.createNode(ENodeType.TupleExpression, elements)
-    const TupleExpression = addBaseNodeAttr(tupleExpression, {
+    const TupleExpression = this.createNode(ENodeType.TupleExpression, {
+      elements,
       loc: createLoc(elements[0], getLatest(elements))
     })
 
@@ -37,7 +36,7 @@ class TupleExpression extends BaseHandler {
 
     this.tokens.next()
     const { payload: _elements } = this.findNodesByConformTokenAndStepFn(
-      token => !this._isEndToken(token, environment),
+      (token) => !this._isEndToken(token, environment),
       () => this._handleElement(environment)
     )
 
@@ -52,10 +51,15 @@ class TupleExpression extends BaseHandler {
     const startNode = this.nodeChain.get()
     const nodes =
       this.findNodesByConformToken(
-        token => !isToken(token, ETokenType.punctuation, ',') && !this._isEndToken(token, environment)
+        (token) => !isToken(token, ETokenType.punctuation, ',') && !this._isEndToken(token, environment)
       ) || this.nodeChain.popByTarget(startNode)
 
     if (nodes.length !== 1) {
+      console.log(
+        'taozhizhu ~🚀 file: TupleExpression.ts ~🚀 line 58 ~🚀 TupleExpression ~🚀 _handleElement ~🚀 nodes',
+        nodes
+      )
+
       throw new SyntaxError("handleTupleExpression err: nodes length is not equal '1' ")
     } else if (!isExpressionNode(nodes[0])) {
       throw new TypeError('handleTupleExpression err: value is not expression node')

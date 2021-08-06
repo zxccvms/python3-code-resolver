@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType } from '../../types.d'
+import { ENodeType, ETokenType } from '../../types'
 import { addBaseNodeAttr, createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 字符串 */
 class StringLiteral extends BaseHandler {
@@ -16,8 +16,9 @@ class StringLiteral extends BaseHandler {
       throw new TypeError('handleStringLiteral err: currentToken is not string')
     }
 
-    const stringLiteral = this.createNode(ENodeType.StringLiteral, currentToken.value)
-    const StringLiteral = addBaseNodeAttr(stringLiteral, {
+    const StringLiteral = this.createNode(ENodeType.StringLiteral, {
+      value: currentToken.value,
+      raw: JSON.stringify(currentToken.value),
       loc: createLoc(currentToken, currentToken)
     })
 

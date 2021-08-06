@@ -1,8 +1,7 @@
-import { getLatest } from 'src/base/common/objUtils'
-import { ENodeType, ETokenType, IExceptHandler, ITryStatement } from '../../types.d'
-import { addBaseNodeAttr, createLoc, isExpressionNode, isNode, isSameRank, isToken } from '../../utils'
+import { ENodeType, ETokenType, IExceptHandler, ITryStatement } from '../../types'
+import { addBaseNodeAttr, createLoc, getLatest, isExpressionNode, isNode, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** try语句 */
 class TryStatement extends BaseHandler {
@@ -21,8 +20,10 @@ class TryStatement extends BaseHandler {
     const handlers = this._handleHandlers()
     const finalBody = this._handleFinalBody()
 
-    const tryStatement = this.createNode(ENodeType.TryStatement, body, handlers, finalBody)
-    const TryStatement = addBaseNodeAttr(tryStatement, {
+    const TryStatement = this.createNode(ENodeType.TryStatement, {
+      body,
+      handlers,
+      finalBody,
       loc: createLoc(body, finalBody || getLatest(handlers))
     })
 
@@ -45,7 +46,7 @@ class TryStatement extends BaseHandler {
     const markToken = this.tokens.getToken()
 
     const { payload: handlers } = this.findNodesByConformTokenAndStepFn(
-      token => isToken(token, ETokenType.keyword, 'except') && isSameRank(markToken, token, 'column'),
+      (token) => isToken(token, ETokenType.keyword, 'except') && isSameRank(markToken, token, 'column'),
       () => this._handleExceptHandlerStatement()
     )
 
@@ -67,7 +68,7 @@ class TryStatement extends BaseHandler {
     let name
     let errName
     if (!isToken(nextToken, ETokenType.punctuation, ':')) {
-      const errNames = this.findNodesByConformToken(token => !isToken(token, ETokenType.keyword, 'as'))
+      const errNames = this.findNodesByConformToken((token) => !isToken(token, ETokenType.keyword, 'as'))
       if (!errNames) {
         throw new SyntaxError("ExceptHandlerStatement err: can't find token keyword 'as' ")
       } else if (errNames.length !== 1) {
@@ -87,11 +88,13 @@ class TryStatement extends BaseHandler {
       name = names[0]
     }
 
-    const BlockStatement = this.astProcessor.blockStatement.handleBlockStatement()
+    const body = this.astProcessor.blockStatement.handleBlockStatement()
 
-    const exceptHandlerStatement = this.createNode(ENodeType.ExceptHandler, BlockStatement, errName, name)
-    const ExceptHandlerStatement = addBaseNodeAttr(exceptHandlerStatement, {
-      loc: createLoc(exceptToken, BlockStatement)
+    const ExceptHandlerStatement = this.createNode(ENodeType.ExceptHandler, {
+      body,
+      errName,
+      name,
+      loc: createLoc(exceptToken, body)
     })
 
     return ExceptHandlerStatement

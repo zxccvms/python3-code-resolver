@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType, IClassDeclaration, IIdentifier } from '../../types.d'
+import { ENodeType, ETokenType, IClassDeclaration, IIdentifier } from '../../types'
 import { addBaseNodeAttr, createLoc, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 类声明 */
 class ClassDeclaration extends BaseHandler {
@@ -24,8 +24,11 @@ class ClassDeclaration extends BaseHandler {
     this.tokens.next()
     const body = this.astProcessor.blockStatement.handleBlockStatement()
 
-    const classDeclaration = this.createNode(ENodeType.ClassDeclaration, id, bases, keywords, body)
-    const ClassDeclaration = addBaseNodeAttr(classDeclaration, {
+    const ClassDeclaration = this.createNode(ENodeType.ClassDeclaration, {
+      id,
+      bases,
+      keywords,
+      body,
       loc: createLoc(classToken, body)
     })
 
@@ -44,7 +47,8 @@ class ClassDeclaration extends BaseHandler {
 
     this.tokens.next()
     const { code, payload: bases } = this.findNodesByConformTokenAndStepFn(
-      token => !isToken(token, ETokenType.bracket, ')') && !isToken(this.tokens.getToken(1), ETokenType.operator, '='),
+      (token) =>
+        !isToken(token, ETokenType.bracket, ')') && !isToken(this.tokens.getToken(1), ETokenType.operator, '='),
       () => this._handleBase()
     )
 
@@ -57,7 +61,7 @@ class ClassDeclaration extends BaseHandler {
 
   private _handleBase(): IIdentifier {
     const nodes = this.findNodesByConformToken(
-      token => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
+      (token) => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
     )
     if (!nodes) {
       throw new SyntaxError("handleClassDeclaration err: can't find punctuation ',' or bracket ')'")

@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType } from '../../types.d'
+import { ENodeType, ETokenType } from '../../types'
 import { addBaseNodeAttr, createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 数字 */
 class NumberLiteral extends BaseHandler {
@@ -16,8 +16,9 @@ class NumberLiteral extends BaseHandler {
       throw new TypeError('handleNumberLiteral err: currentToken is not number')
     }
 
-    const numberLiteral = this.createNode(ENodeType.NumberLiteral, currentToken.value)
-    const NumberLiteral = addBaseNodeAttr(numberLiteral, {
+    const NumberLiteral = this.createNode(ENodeType.NumberLiteral, {
+      value: Number(currentToken.value),
+      raw: currentToken.value,
       loc: createLoc(currentToken, currentToken)
     })
 

@@ -1,7 +1,7 @@
-import { ENodeType, ETokenType, IArrayExpression, TExpressionNode } from '../../types.d'
+import { ENodeType, ETokenType, IArrayExpression, TExpressionNode } from '../../types'
 import { addBaseNodeAttr, createLoc, isExpressionNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { EHandleCode } from '../types.d'
+import { EHandleCode } from '../types'
 
 /** 数组表达式 */
 class ArrayExpression extends BaseHandler {
@@ -21,8 +21,8 @@ class ArrayExpression extends BaseHandler {
 
     const rightBracket = this.tokens.getToken()
 
-    const arrayExpression = this.createNode(ENodeType.ArrayExpression, elements)
-    const ArrayExpression = addBaseNodeAttr(arrayExpression, {
+    const ArrayExpression = this.createNode(ENodeType.ArrayExpression, {
+      elements,
       loc: createLoc(leftBracket, rightBracket)
     })
 
@@ -33,7 +33,7 @@ class ArrayExpression extends BaseHandler {
 
   private _handleElements(): IArrayExpression['elements'] {
     const { code, payload: elements } = this.findNodesByConformTokenAndStepFn(
-      token => !isToken(token, ETokenType.bracket, ']'),
+      (token) => !isToken(token, ETokenType.bracket, ']'),
       () => this._handleElement()
     )
     if (code === 1) {
@@ -45,7 +45,7 @@ class ArrayExpression extends BaseHandler {
 
   private _handleElement(): TExpressionNode {
     const nodes = this.findNodesByConformToken(
-      token => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ']'])
+      (token) => !isToken(token, [ETokenType.punctuation, ETokenType.bracket], [',', ']'])
     )
     if (!nodes) {
       throw new SyntaxError("handleArrayExpression err: can't find punctuation ',' or bracket ']'")

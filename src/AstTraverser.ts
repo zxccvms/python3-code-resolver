@@ -1,6 +1,4 @@
-import { inject } from 'src/base/common/injector'
-import LogService from 'src/platform/log/browser'
-import { ENodeType, ICallExpression, IMemberExpression, IProgram, TNode } from './types.d'
+import { ENodeType, ICallExpression, IMemberExpression, IProgram, TNode } from './types'
 
 export type TTraverseOptions = {
   /** 每个节点都遍历 */
@@ -18,16 +16,13 @@ type TNodePath<T extends ENodeType = ENodeType> = {
 
 /** ast遍历器 */
 class AstTraverser {
-  @inject() logService!: LogService
-  log = this.logService.tag('AstTraverser')
-
   traverse(node: TNode, options = {} as TTraverseOptions, parent: TNode = null) {
     try {
       const type = node.type
       const nodePath = { node, parent }
 
       options.enter?.(nodePath)
-      options[type]?.(nodePath)
+      options[type]?.(nodePath as any)
 
       const returnNode = options.custom?.(nodePath)
       if (returnNode) {
@@ -36,7 +31,7 @@ class AstTraverser {
         this[type]?.(node, options) // todo 部分token未转成node
       }
     } catch (e) {
-      this.log.error('traverse err: ', e)
+      console.error('AstTraverser traverse err: ', e)
     }
   }
 
