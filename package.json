@@ -2,14 +2,8 @@
   "name": "python3-code-resolver",
   "version": "0.0.0",
   "scripts": {
-    "dev1": "vite --config ./config/vite.config.ts",
     "build": "tsc && vite build",
-    "serve": "vite preview",
-    "dev": "jest ./test/custom/custom.test.ts --watchAll --config ./config/jest.config.ts",
-    "test": "jest --watchAll --config ./config/jest.config.ts",
-    "debugger": "node --inspect-brk ./node_modules/jest/bin/jest --runInBand --no-cache --no-watchman",
-    "dev2": "nodemon --inspect test.js",
-    "dev3": "npx babel src -d dist -s --extensions \".ts\" --watch"
+    "test": "jest --config ./config/jest.config.ts"
   },
   "_moduleAliases": {
     "src": "src"
