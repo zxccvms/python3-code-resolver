@@ -1,5 +1,14 @@
-import { expressionNodeTypes, statementNodeTypes } from './const'
-import { ENodeType, ETokenType, TBaseNodeAttr, TExpressionNode, TNode, TStatementNode, TTokenItem } from './types'
+import { conditionExpressionNodeTypes, expressionNodeTypes, statementNodeTypes } from './const'
+import {
+  ENodeType,
+  ETokenType,
+  TBaseNodeAttr,
+  TConditionExpressionNode,
+  TExpressionNode,
+  TNode,
+  TStatementNode,
+  TTokenItem
+} from './types'
 
 /** 得到数组的最后一项 */
 export function getLatest<T>(array: Array<T>): T {
@@ -90,6 +99,10 @@ export function isRightBracketToken(token: TTokenItem): token is TTokenItem<ETok
 export function isNode<T extends ENodeType>(node: TNode, types: T | T[]): node is TNode<T> {
   if (!node) return false
   return toArray(types).some((type) => type === node.type)
+}
+
+export function isConditionExpressionNode(node: TNode): node is TConditionExpressionNode {
+  return isNode(node, conditionExpressionNodeTypes)
 }
 
 export function isExpressionNode(node: TNode): node is TExpressionNode {

@@ -27,6 +27,7 @@ import BooleanLiteral from './handleNode/BooleanLiteral'
 import NoneLiteral from './handleNode/NoneLiteral'
 import ImportStatement from './handleNode/ImportStatement'
 import IfStatement from './handleNode/IfStatement'
+import ForStatement from './handleNode/ForStatement'
 
 /** AST处理器 */
 class AstProcessor {
@@ -58,6 +59,7 @@ class AstProcessor {
   blockStatement: BlockStatement
   emptyStatement: EmptyStatement
   ifStatement: IfStatement
+  forStatement: ForStatement
 
   constructor(tokens: TTokenItem[]) {
     const nodeGenerator = new NodeGenerator()
@@ -88,6 +90,7 @@ class AstProcessor {
     this.blockStatement = new BlockStatement(this)
     this.emptyStatement = new EmptyStatement(this)
     this.ifStatement = new IfStatement(this)
+    this.forStatement = new ForStatement(this)
   }
 
   handle(): TNode[] {
@@ -132,6 +135,13 @@ class AstProcessor {
 
     switch (currentToken.value) {
       case '=':
+      case '+=':
+      case '-=':
+      case '*=':
+      case '/=':
+      case '%=':
+      case '**=':
+      case '//=':
         return this.assignmentExpression.handle()
       case '+':
       case '-': {
@@ -226,6 +236,8 @@ class AstProcessor {
         return this.tryStatement.handle()
       case 'not':
         return this.unaryExpression.handle()
+      case 'for':
+        return this.forStatement.handle()
     }
   }
 

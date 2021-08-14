@@ -88,7 +88,9 @@ export const enum ENodeType {
   /** try语句 */
   TryStatement = 'TryStatement',
   /** AST根节点 */
-  Program = 'Program'
+  Program = 'Program',
+  /** for 语句 */
+  ForStatement = 'ForStatement'
 }
 
 /** 特殊的节点映射表 */
@@ -96,9 +98,18 @@ export type TSpecialNodeMap = {
   [ENodeType.DictionaryProperty]: IDictionaryProperty
   [ENodeType.AssignmentParam]: IAssignmentParam
   [ENodeType.ExceptHandler]: IExceptHandler
+  [ENodeType.SliceExpression]: ISliceExpression
 }
 
 export type TSpecialNode<T extends keyof TSpecialNodeMap = keyof TSpecialNodeMap> = TSpecialNodeMap[T]
+
+/** 条件表达式节点映射表 */
+export type TConditionExpressionNodeMap = {
+  [ENodeType.IfExpression]: IIfExpression
+}
+
+export type TConditionExpressionNode<T extends keyof TConditionExpressionNodeMap = keyof TConditionExpressionNodeMap> =
+  TConditionExpressionNodeMap[T]
 
 /** 表达式节点映射表 */
 export type TExpressionNodeMap = {
@@ -108,17 +119,15 @@ export type TExpressionNodeMap = {
   [ENodeType.StringLiteral]: IStringLiteral
   [ENodeType.Identifier]: IIdentifier
   [ENodeType.UnaryExpression]: IUnaryExpression
-  [ENodeType.IfExpression]: IIfExpression
   [ENodeType.ArrayExpression]: IArrayExpression
   [ENodeType.DictionaryExpression]: IDictionaryExpression
   [ENodeType.BinaryExpression]: IBinaryExpression
   [ENodeType.VariableDeclaration]: IVariableDeclaration
   [ENodeType.AssignmentExpression]: IAssignmentExpression
-  [ENodeType.SliceExpression]: ISliceExpression
   [ENodeType.MemberExpression]: IMemberExpression
   [ENodeType.CallExpression]: ICallExpression
   [ENodeType.TupleExpression]: ITupleExpression
-}
+} & TConditionExpressionNodeMap
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
 
@@ -132,6 +141,7 @@ export type TStatementNodeMap = {
   [ENodeType.IfStatement]: IIfStatement
   [ENodeType.TryStatement]: ITryStatement
   [ENodeType.Program]: IProgram
+  [ENodeType.ForStatement]: IForStatement
 }
 
 export type TStatementNode<T extends keyof TStatementNodeMap = keyof TStatementNodeMap> = TStatementNodeMap[T]
@@ -316,4 +326,11 @@ export interface ITryStatement extends TBaseNodeAttr {
 export interface IProgram extends TBaseNodeAttr {
   type: ENodeType.Program
   body: (TExpressionNode | TStatementNode)[]
+}
+
+export interface IForStatement extends TBaseNodeAttr {
+  type: ENodeType.ForStatement
+  left: TExpressionNode
+  right: TExpressionNode
+  body: IBlockStatement
 }

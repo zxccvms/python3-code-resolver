@@ -1,7 +1,7 @@
-import { AstGenerator, CodeScanner } from '../src'
-const path = require('path')
-const fs = require('fs')
-const util = require('util')
+import 'module-alias/register'
+import { AstGenerator, CodeScanner } from 'src'
+import path from 'path'
+import fs from 'fs'
 
 try {
   const codeScanner = new CodeScanner()
@@ -13,6 +13,7 @@ try {
   const astGenerator = new AstGenerator(tokens)
 
   const ast = astGenerator.generate()
+  console.log('运行成功')
   console.log('ast: ', ast)
 } catch (e) {
   console.error(e)

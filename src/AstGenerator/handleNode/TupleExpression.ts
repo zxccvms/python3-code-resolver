@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, ITupleExpression, TExpressionNode, TNode, TTokenItem } from '../../types'
-import { addBaseNodeAttr, createLoc, getLatest, isExpressionNode, isNode, isSameRank, isToken } from '../../utils'
+import { ENodeType, ETokenType, ITupleExpression, TExpressionNode, TTokenItem } from '../../types'
+import { createLoc, getLatest, isExpressionNode, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EHandleCode, ENodeEnvironment } from '../types'
 
@@ -49,17 +49,13 @@ class TupleExpression extends BaseHandler {
 
   private _handleElement(environment: ENodeEnvironment): TExpressionNode {
     const startNode = this.nodeChain.get()
+
     const nodes =
       this.findNodesByConformToken(
         (token) => !isToken(token, ETokenType.punctuation, ',') && !this._isEndToken(token, environment)
       ) || this.nodeChain.popByTarget(startNode)
 
     if (nodes.length !== 1) {
-      console.log(
-        'taozhizhu ~🚀 file: TupleExpression.ts ~🚀 line 58 ~🚀 TupleExpression ~🚀 _handleElement ~🚀 nodes',
-        nodes
-      )
-
       throw new SyntaxError("handleTupleExpression err: nodes length is not equal '1' ")
     } else if (!isExpressionNode(nodes[0])) {
       throw new TypeError('handleTupleExpression err: value is not expression node')
@@ -73,10 +69,10 @@ class TupleExpression extends BaseHandler {
   }
 
   private _isEndToken(token: TTokenItem, environment: ENodeEnvironment) {
-    let isConform = isToken(token, [ETokenType.bracket, ETokenType.operator], [')', '='])
+    let isConform = isToken(token, [ETokenType.bracket, ETokenType.operator, ETokenType.keyword], [')', '=', 'in'])
 
     if (environment !== ENodeEnvironment.smallBracket) {
-      isConform = isConform && !isSameRank(this.nodeChain.get(), token, 'endAndStartLine')
+      isConform = isConform && isSameRank(this.nodeChain.get(), token, 'endAndStartLine')
     }
 
     return isConform

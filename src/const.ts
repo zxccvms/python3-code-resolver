@@ -1,4 +1,4 @@
-import { ENodeType, TExpressionNodeMap, TStatementNodeMap } from './types'
+import { ENodeType, TConditionExpressionNodeMap, TExpressionNodeMap, TStatementNodeMap } from './types'
 
 export const PYTHON = {
   INDENT: '  ',
@@ -43,6 +43,8 @@ export const PYTHON = {
   ]
 }
 
+export const conditionExpressionNodeTypes: (keyof TConditionExpressionNodeMap)[] = [ENodeType.IfExpression]
+
 export const expressionNodeTypes: (keyof TExpressionNodeMap)[] = [
   ENodeType.NoneLiteral,
   ENodeType.BooleanLiteral,
@@ -56,7 +58,6 @@ export const expressionNodeTypes: (keyof TExpressionNodeMap)[] = [
   ENodeType.BinaryExpression,
   ENodeType.VariableDeclaration,
   ENodeType.AssignmentExpression,
-  ENodeType.SliceExpression,
   ENodeType.MemberExpression,
   ENodeType.CallExpression,
   ENodeType.TupleExpression
