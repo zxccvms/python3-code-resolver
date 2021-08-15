@@ -8,6 +8,8 @@
       // "runtimeExecutable": "nodemon",
       "args": [
         "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
+        "-r",
+        "${workspaceRoot}/node_modules/ts-node/register",
         // "NODE_PATH=\"${workspaceRoot}/src/index.ts\"",
         "${workspaceRoot}/.vscode/custom.ts" // 入口文件
       ],
