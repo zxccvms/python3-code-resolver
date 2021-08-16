@@ -28,6 +28,7 @@ import NoneLiteral from './handleNode/NoneLiteral'
 import ImportStatement from './handleNode/ImportStatement'
 import IfStatement from './handleNode/IfStatement'
 import ForStatement from './handleNode/ForStatement'
+import CompareExpression from './handleNode/CompareExpression'
 
 /** AST处理器 */
 class AstProcessor {
@@ -52,6 +53,7 @@ class AstProcessor {
   memberExpression: MemberExpression
   callExpression: CallExpression
   tryStatement: TryStatement
+  compareExpression: CompareExpression
 
   importStatement: ImportStatement
   functionDeclaration: FunctionDeclaration
@@ -84,6 +86,7 @@ class AstProcessor {
     this.callExpression = new CallExpression(this)
     this.importStatement = new ImportStatement(this)
     this.tryStatement = new TryStatement(this)
+    this.compareExpression = new CompareExpression(this)
 
     this.functionDeclaration = new FunctionDeclaration(this)
     this.classDeclaration = new ClassDeclaration(this)
@@ -206,6 +209,7 @@ class AstProcessor {
 
   private [ETokenType.keyword](): TStateResponse {
     const currentToken = this.tokens.getToken()
+    const nextToken = this.tokens.getToken(1)
     const lastNode = this.nodeChain.get()
 
     switch (currentToken.value) {
@@ -235,7 +239,11 @@ class AstProcessor {
       case 'try':
         return this.tryStatement.handle()
       case 'not':
-        return this.unaryExpression.handle()
+        if (!isToken(nextToken, ETokenType.keyword, 'in')) {
+          return this.unaryExpression.handle()
+        }
+      case 'in':
+        return this.compareExpression.handle()
       case 'for':
         return this.forStatement.handle()
     }

@@ -71,6 +71,8 @@ export const enum ENodeType {
   MemberExpression = 'MemberExpression',
   /** 函数调用表达式 a() */
   CallExpression = 'CallExpression',
+  /** 比较表达式 a in b */
+  CompareExpression = 'CompareExpression',
 
   // 语句
   /** 导入语句 */
@@ -127,6 +129,7 @@ export type TExpressionNodeMap = {
   [ENodeType.MemberExpression]: IMemberExpression
   [ENodeType.CallExpression]: ICallExpression
   [ENodeType.TupleExpression]: ITupleExpression
+  [ENodeType.CompareExpression]: ICompareExpression
 } & TConditionExpressionNodeMap
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
@@ -281,6 +284,13 @@ export interface IImportStatement extends TBaseNodeAttr {
   type: ENodeType.ImportStatement
   names: IIdentifier[]
   module?: IIdentifier | IMemberExpression
+}
+
+export interface ICompareExpression extends TBaseNodeAttr {
+  type: ENodeType.CompareExpression
+  left: TExpressionNode
+  operators: ('in' | 'not in')[]
+  comparators: TExpressionNode[]
 }
 
 // 语句节点定义

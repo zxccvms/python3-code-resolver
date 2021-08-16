@@ -60,7 +60,8 @@ export const expressionNodeTypes: (keyof TExpressionNodeMap)[] = [
   ENodeType.AssignmentExpression,
   ENodeType.MemberExpression,
   ENodeType.CallExpression,
-  ENodeType.TupleExpression
+  ENodeType.TupleExpression,
+  ENodeType.CompareExpression
 ]
 
 export const statementNodeTypes: (keyof TStatementNodeMap)[] = [

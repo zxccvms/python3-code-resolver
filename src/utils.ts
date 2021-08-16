@@ -76,24 +76,42 @@ export function isToken<T extends ETokenType>(
   }
 }
 
+/** 赋值token */
 export function isAssignmentToken(
   token: TTokenItem
 ): token is TTokenItem<ETokenType.operator, '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//='> {
   return isToken(token, ETokenType.operator, ['=', '+=', '-=', '*=', '/=', '%=', '**=', '//='])
 }
 
+/** 左括号token */
+export function isLeftBracketToken(token: TTokenItem): token is TTokenItem<ETokenType.bracket, '(' | '[' | '{'> {
+  return isToken(token, ETokenType.bracket, ['(', '[', '{'])
+}
+
+/** 右括号token */
+export function isRightBracketToken(token: TTokenItem): token is TTokenItem<ETokenType.bracket, ')' | ']' | '}'> {
+  return isToken(token, ETokenType.bracket, [')', ']', '}'])
+}
+
+/** 隔断的标点符号token */
+export function isSeparatePunctuationToken(token: TTokenItem): token is TTokenItem<ETokenType.punctuation, ',' | ':'> {
+  return isToken(token, ETokenType.punctuation, [',', ':'])
+}
+
+export function isSeparateKeywordToken(token: TTokenItem): token is TTokenItem<ETokenType.punctuation, 'in' | 'not'> {
+  return isToken(token, ETokenType.keyword, ['in', 'not'])
+}
+
+/** 隔断token */
 export function isSeparateToken(
   token: TTokenItem
 ): token is TTokenItem<ETokenType.bracket | ETokenType.punctuation | ETokenType.operator> {
   return (
-    isToken(token, ETokenType.bracket, ['(', '[', '{']) ||
-    isToken(token, ETokenType.punctuation, [',', ':']) ||
-    isAssignmentToken(token)
+    isLeftBracketToken(token) ||
+    isAssignmentToken(token) ||
+    isSeparatePunctuationToken(token) ||
+    isSeparateKeywordToken(token)
   )
-}
-
-export function isRightBracketToken(token: TTokenItem): token is TTokenItem<ETokenType.bracket> {
-  return isToken(token, ETokenType.bracket, [')', ']', '}'])
 }
 
 export function isNode<T extends ENodeType>(node: TNode, types: T | T[]): node is TNode<T> {
