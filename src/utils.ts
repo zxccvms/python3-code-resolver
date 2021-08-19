@@ -32,6 +32,10 @@ export function addBaseNodeAttr<T extends TNode>(node: T, baseAttr: TBaseNodeAtt
   }
 }
 
+export function getTokenExtra<T extends TTokenItem>(token: T): T['extra'] {
+  return token.extra || {}
+}
+
 /** 是否同级token 同行 或者 同列*/
 export function isSameRank(
   token1: TTokenItem | TNode,
@@ -127,14 +131,18 @@ export function isExpressionNode(node: TNode): node is TExpressionNode {
   return isNode(node, expressionNodeTypes)
 }
 
+export function isExpressionNodes(nodes: TNode[]): nodes is TExpressionNode[] {
+  return nodes.every((node) => isNode(node, expressionNodeTypes))
+}
+
 export function isStatementNode(node: TNode): node is TStatementNode {
   return isNode(node, statementNodeTypes)
 }
 
-export function createLoc(start: TTokenItem | TNode, end: TTokenItem | TNode): TBaseNodeAttr['loc'] {
+export function createLoc(start: TTokenItem | TNode, end?: TTokenItem | TNode): TBaseNodeAttr['loc'] {
   return {
     start: getPositionInfo(start, 'start'),
-    end: getPositionInfo(end, 'end')
+    end: getPositionInfo(end || start, 'end')
   }
 }
 

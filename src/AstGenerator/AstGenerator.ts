@@ -6,6 +6,8 @@ class AstGenerator {
   private astProcessor: AstProcessor
 
   constructor(tokens: TTokenItem[]) {
+    if (!Array.isArray(tokens)) throw new TypeError('tokens is not Array')
+
     this.astProcessor = new AstProcessor(tokens)
   }
 

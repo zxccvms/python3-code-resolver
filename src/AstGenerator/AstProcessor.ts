@@ -1,8 +1,16 @@
-import { addBaseNodeAttr, getPositionInfo, hasParenthesized, isSameRank, isSeparateToken, isToken } from '../utils'
+import {
+  addBaseNodeAttr,
+  getPositionInfo,
+  getTokenExtra,
+  hasParenthesized,
+  isSameRank,
+  isSeparateToken,
+  isToken
+} from '../utils'
 import NodeGenerator from '../NodeGenerator'
 import Chain from './utils/Chain'
 import TokenArray from './utils/TokenArray'
-import { ETokenType, IIdentifier, INumberLiteral, IStringLiteral, TNode, TTokenItem } from '../types'
+import { ETokenType, IIdentifier, INumberLiteral, IStringLiteral, ITemplateLiteral, TNode, TTokenItem } from '../types'
 import CallExpression from './handleNode/CallExpression'
 import { EHandleCode, ENodeEnvironment } from './types'
 import FunctionDeclaration from './handleNode/FunctionDeclaration'
@@ -29,6 +37,7 @@ import ImportStatement from './handleNode/ImportStatement'
 import IfStatement from './handleNode/IfStatement'
 import ForStatement from './handleNode/ForStatement'
 import CompareExpression from './handleNode/CompareExpression'
+import TemplateLiteral from './handleNode/TemplateLiteral'
 
 /** AST处理器 */
 class AstProcessor {
@@ -41,6 +50,7 @@ class AstProcessor {
   booleanLiteral: BooleanLiteral
   numberLiteral: NumberLiteral
   stringLiteral: StringLiteral
+  templateLiteral: TemplateLiteral
   identifierHandler: Identifier
   unaryExpression: UnaryExpression
   ifExpression: IfExpression
@@ -73,6 +83,7 @@ class AstProcessor {
     this.booleanLiteral = new BooleanLiteral(this)
     this.numberLiteral = new NumberLiteral(this)
     this.stringLiteral = new StringLiteral(this)
+    this.templateLiteral = new TemplateLiteral(this)
     this.identifierHandler = new Identifier(this)
     this.unaryExpression = new UnaryExpression(this)
     this.ifExpression = new IfExpression(this)
@@ -124,8 +135,13 @@ class AstProcessor {
     return this.numberLiteral.handle()
   }
 
-  private [ETokenType.string](): TStateResponse<IStringLiteral> {
-    return this.stringLiteral.handle()
+  private [ETokenType.string](): TStateResponse<IStringLiteral | ITemplateLiteral> {
+    const currentToken = this.tokens.getToken<TTokenItem<ETokenType.string>>()
+    if (getTokenExtra(currentToken).prefix === 'f') {
+      return this.templateLiteral.handle()
+    } else {
+      return this.stringLiteral.handle()
+    }
   }
 
   private [ETokenType.identifier](): TStateResponse<IIdentifier> {

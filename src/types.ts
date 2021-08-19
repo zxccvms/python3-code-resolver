@@ -15,6 +15,21 @@ export enum ETokenType {
   punctuation = 'punctuation'
 }
 
+export type TStringTokenExtra =
+  | {
+      prefix?: 'u' | 'r'
+    }
+  | {
+      prefix?: 'f'
+      tokens?: TTokenItem[]
+    }
+
+export type TTokenExtraMap = {
+  [ETokenType.string]: TStringTokenExtra
+}
+
+export type TTokenExtra<T extends keyof TTokenExtraMap = keyof TTokenExtraMap> = TTokenExtraMap[T]
+
 /** 定位信息 */
 export type TPositionInfo = {
   line: number
@@ -28,6 +43,7 @@ export type TTokenItem<T extends ETokenType = ETokenType, V extends string = str
     start: TPositionInfo
     end: TPositionInfo
   }
+  extra?: T extends keyof TTokenExtraMap ? TTokenExtraMap[T] : never
 }
 
 export const enum ENodeType {
@@ -47,6 +63,8 @@ export const enum ENodeType {
   NumberLiteral = 'NumberLiteral',
   /** 字符串 'a' */
   StringLiteral = 'StringLiteral',
+  /** 模版字符串 '{a}a' */
+  TemplateLiteral = 'TemplateLiteral',
   /** 标识符 a */
   Identifier = 'Identifier',
   /** 一元表达式 -1 +1 */
@@ -119,6 +137,7 @@ export type TExpressionNodeMap = {
   [ENodeType.BooleanLiteral]: IBooleanLiteral
   [ENodeType.NumberLiteral]: INumberLiteral
   [ENodeType.StringLiteral]: IStringLiteral
+  [ENodeType.TemplateLiteral]: ITemplateLiteral
   [ENodeType.Identifier]: IIdentifier
   [ENodeType.UnaryExpression]: IUnaryExpression
   [ENodeType.ArrayExpression]: IArrayExpression
@@ -209,6 +228,12 @@ export interface IStringLiteral extends TBaseNodeAttr {
   type: ENodeType.StringLiteral
   value: string
   raw: string
+  prefix?: 'u' | 'r'
+}
+
+export interface ITemplateLiteral extends TBaseNodeAttr {
+  type: ENodeType.TemplateLiteral
+  expressions: TExpressionNode[]
 }
 
 export interface IIdentifier extends TBaseNodeAttr {

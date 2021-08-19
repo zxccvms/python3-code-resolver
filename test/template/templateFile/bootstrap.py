@@ -111,19 +111,19 @@ if __name__ == '__main__':
                 except getopt.GetoptError as ex:
                     log.error('bootstrap.py --processFile=<processFile>')
                     sys.exit(2)
-                # for opt, arg in opts:
-                #     log.info(opt + ' ' + arg)
-                #     if opt == '-h':
-                #         log.info(
-                #             'y.py -i <inputfile> -o <outputfile>'
-                #         )
-                #         sys.exit()
-                #     elif opt in ("-p", "--processFile"):
-                #         processFile = arg
-                #         log.info('输入的文件路徑为：' + processFile)
-                #     elif opt in ("-d", "--directRun"):
-                #         directRunDir = arg
-                #         log.info('directRun的文件路徑为：' + directRunDir)
+                for opt, arg in opts:
+                    log.info(opt + ' ' + arg)
+                    if opt == '-h':
+                        log.info(
+                            'y.py -i <inputfile> -o <outputfile>'
+                        )
+                        sys.exit()
+                    elif opt in ("-p", "--processFile"):
+                        processFile = arg
+                        log.info('输入的文件路徑为：' + processFile)
+                    elif opt in ("-d", "--directRun"):
+                        directRunDir = arg
+                        log.info('directRun的文件路徑为：' + directRunDir)
 
                 if not directRunDir:
                     pass

@@ -1,5 +1,12 @@
 import { PYTHON } from './const'
-import { ETokenType, TPositionInfo, TTokenItem } from './types'
+import { ETokenType, TPositionInfo, TTokenExtra, TTokenItem } from './types'
+
+type TFindResult = {
+  sumLength: number
+  betweenContent: string
+  lineNum: number
+  columnNum: number
+}
 
 /** 代码扫描器 */
 class CodeScanner {
@@ -21,6 +28,7 @@ class CodeScanner {
       const nextChar = code[i]
       let type: ETokenType
       let value: string = currentChar
+      let extra: TTokenExtra
       const startPosition = { line, column }
 
       // 处理换行符
@@ -99,6 +107,25 @@ class CodeScanner {
         value = betweenContent
         handleCycleParams(sumLength, lineNum, columnNum + 1) // 将光标移至引号后面
       }
+      // 处理字符串
+      else if ((currentChar === 'u' || currentChar === 'r') && (nextChar === '"' || nextChar === "'")) {
+        const { sumLength, lineNum, columnNum, betweenContent } = this._handleQuotesChar(code.slice(++i), nextChar)
+
+        type = ETokenType.string
+        value = betweenContent
+        extra = { prefix: currentChar }
+        handleCycleParams(sumLength, lineNum, columnNum + 1) // 将光标移至引号后面
+      }
+      // 处理字符串 todo
+      else if (currentChar === 'f' && (nextChar === '"' || nextChar === "'")) {
+        const { findResult, tokens } = this._handleTemplateChar(code.slice(++i), nextChar)
+        const { sumLength, lineNum, columnNum, betweenContent } = findResult
+
+        type = ETokenType.string
+        value = betweenContent
+        extra = { prefix: currentChar, tokens }
+        handleCycleParams(sumLength, lineNum, columnNum + 1) // 将光标移至引号后面
+      }
       // 处理关键字和标识符
       else if (/[a-z|A-Z|_]/.test(currentChar)) {
         const { lineNum, columnNum, betweenContent } = this._findNextConformString(
@@ -136,12 +163,25 @@ class CodeScanner {
         result.push({
           type,
           value,
-          loc: this._createLocInfo(startPosition, { line, column })
+          loc: this._createLocInfo(startPosition, { line, column }),
+          extra
         })
       }
     }
 
     return result
+  }
+
+  /** 处理模版字符串 */
+  private _handleTemplateChar(content: string, char: '"' | "'"): { findResult: TFindResult; tokens: TTokenItem[] } {
+    const findResult = this._handleQuotesChar(content, char)
+    const { betweenContent } = findResult
+    console.log(
+      'taozhizhu ~🚀 file: CodeScanner.ts ~🚀 line 179 ~🚀 CodeScanner ~🚀 _handleTemplateChar ~🚀 betweenContent',
+      betweenContent
+    )
+
+    return { findResult, tokens: [] }
   }
 
   /** 处理引号字符 */
@@ -157,14 +197,15 @@ class CodeScanner {
       return backslashCount % 2 === 0 // 引号前的反斜杠数量为偶数 就是字符串结束的引号
     }
 
-    if (content.startsWith(char + char)) {
-      // 多行字符串
-      const result = this._findNextString(content.slice(2), char + char + char, true, isRealQuotes)
+    // 多行字符串
+    if (content.startsWith(char.repeat(2))) {
+      const result = this._findNextString(content.slice(2), char.repeat(3), true, isRealQuotes)
       if (!result) return null
       result.sumLength += 2
       return result
-    } else {
-      // 单行字符串
+    }
+    // 单行字符串
+    else {
       return this._findNextString(content, char, false, isRealQuotes)
     }
   }
@@ -180,7 +221,7 @@ class CodeScanner {
       content,
       (currentString, index) => {
         if (extraCb) {
-          return currentString === target && extraCb?.(currentString, index)
+          return currentString === target && extraCb(currentString, index)
         } else {
           return currentString === target
         }
@@ -196,12 +237,7 @@ class CodeScanner {
     cb: (currentString: string, index: number) => boolean,
     targetLength: number = 1,
     isFindForMultiLine: boolean = false
-  ): {
-    sumLength: number
-    betweenContent: string
-    lineNum: number
-    columnNum: number
-  } {
+  ): TFindResult {
     let i = 0
     let lineNum = 0
     let columnNum = 0

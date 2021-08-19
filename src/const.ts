@@ -50,6 +50,7 @@ export const expressionNodeTypes: (keyof TExpressionNodeMap)[] = [
   ENodeType.BooleanLiteral,
   ENodeType.NumberLiteral,
   ENodeType.StringLiteral,
+  ENodeType.TemplateLiteral,
   ENodeType.Identifier,
   ENodeType.UnaryExpression,
   ENodeType.IfExpression,
