@@ -71,8 +71,8 @@ class TupleExpression extends BaseHandler {
   private _isEndToken(token: TTokenItem, environment: ENodeEnvironment) {
     let isConform = isToken(token, [ETokenType.bracket, ETokenType.operator, ETokenType.keyword], [')', '=', 'in'])
 
-    if (environment !== ENodeEnvironment.smallBracket) {
-      isConform = isConform && isSameRank(this.nodeChain.get(), token, 'endAndStartLine')
+    if (!isConform && environment !== ENodeEnvironment.smallBracket) {
+      isConform = !isSameRank(this.nodeChain.get(), token, 'endAndStartLine')
     }
 
     return isConform
