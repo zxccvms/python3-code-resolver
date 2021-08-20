@@ -5,8 +5,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'logging',
+          asname: undefined,
           loc: {
             start: {
               line: 1,
@@ -20,6 +21,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 1,
@@ -35,8 +37,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'multiprocessing',
+          asname: undefined,
           loc: {
             start: {
               line: 2,
@@ -50,6 +53,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 2,
@@ -65,8 +69,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'socket',
+          asname: undefined,
           loc: {
             start: {
               line: 3,
@@ -80,6 +85,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 3,
@@ -95,8 +101,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'sys',
+          asname: undefined,
           loc: {
             start: {
               line: 4,
@@ -110,6 +117,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 4,
@@ -125,8 +133,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'env_util',
+          asname: undefined,
           loc: {
             start: {
               line: 5,
@@ -180,6 +189,7 @@ export default {
           }
         }
       },
+      level: 0,
       loc: {
         start: {
           line: 5,
@@ -195,8 +205,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'log',
+          asname: undefined,
           loc: {
             start: {
               line: 6,
@@ -277,6 +288,7 @@ export default {
           }
         }
       },
+      level: 0,
       loc: {
         start: {
           line: 6,
@@ -292,8 +304,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'VERSION',
+          asname: undefined,
           loc: {
             start: {
               line: 7,
@@ -320,6 +333,7 @@ export default {
           }
         }
       },
+      level: 0,
       loc: {
         start: {
           line: 7,
@@ -335,8 +349,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'subprocess',
+          asname: undefined,
           loc: {
             start: {
               line: 8,
@@ -350,6 +365,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 8,
@@ -365,8 +381,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'ctypes',
+          asname: undefined,
           loc: {
             start: {
               line: 9,
@@ -380,6 +397,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 9,
@@ -395,8 +413,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'importlib',
+          asname: undefined,
           loc: {
             start: {
               line: 10,
@@ -410,6 +429,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 10,
@@ -425,8 +445,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'getopt',
+          asname: undefined,
           loc: {
             start: {
               line: 11,
@@ -440,6 +461,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 11,
@@ -455,8 +477,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'ws_server',
+          asname: undefined,
           loc: {
             start: {
               line: 12,
@@ -510,6 +533,7 @@ export default {
           }
         }
       },
+      level: 0,
       loc: {
         start: {
           line: 12,
@@ -525,8 +549,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'os',
+          asname: undefined,
           loc: {
             start: {
               line: 13,
@@ -540,6 +565,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 13,
@@ -555,8 +581,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'toolsInit',
+          asname: undefined,
           loc: {
             start: {
               line: 14,
@@ -610,6 +637,7 @@ export default {
           }
         }
       },
+      level: 0,
       loc: {
         start: {
           line: 14,
@@ -625,8 +653,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'warnings',
+          asname: undefined,
           loc: {
             start: {
               line: 16,
@@ -640,6 +669,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 16,
@@ -708,7 +738,8 @@ export default {
               line: 17,
               column: 32
             }
-          }
+          },
+          prefix: undefined
         },
         {
           type: 'StringLiteral',
@@ -723,7 +754,8 @@ export default {
               line: 17,
               column: 58
             }
-          }
+          },
+          prefix: undefined
         }
       ],
       keywords: [
@@ -784,8 +816,9 @@ export default {
       type: 'ImportStatement',
       names: [
         {
-          type: 'Identifier',
+          type: 'AliasExpression',
           name: 'pyautogui',
+          asname: undefined,
           loc: {
             start: {
               line: 20,
@@ -799,6 +832,7 @@ export default {
         }
       ],
       module: null,
+      level: null,
       loc: {
         start: {
           line: 20,
@@ -1038,7 +1072,8 @@ export default {
                   line: 23,
                   column: 58
                 }
-              }
+              },
+              prefix: undefined
             }
           ],
           keywords: [],
@@ -1209,7 +1244,8 @@ export default {
                   line: 25,
                   column: 42
                 }
-              }
+              },
+              prefix: undefined
             }
           ],
           keywords: [],
@@ -1380,7 +1416,8 @@ export default {
                   line: 27,
                   column: 45
                 }
-              }
+              },
+              prefix: undefined
             }
           ],
           keywords: [],
@@ -1544,7 +1581,8 @@ export default {
                       line: 34,
                       column: 14
                     }
-                  }
+                  },
+                  extra: undefined
                 },
                 {
                   type: 'CallExpression',
@@ -1686,7 +1724,8 @@ export default {
                           line: 36,
                           column: 14
                         }
-                      }
+                      },
+                      extra: undefined
                     },
                     {
                       type: 'BooleanLiteral',
@@ -2208,7 +2247,8 @@ export default {
                           line: 45,
                           column: 47
                         }
-                      }
+                      },
+                      prefix: undefined
                     },
                     right: {
                       type: 'Identifier',
@@ -2248,7 +2288,8 @@ export default {
                         line: 45,
                         column: 62
                       }
-                    }
+                    },
+                    prefix: undefined
                   },
                   loc: {
                     start: {
@@ -2435,7 +2476,8 @@ export default {
                         line: 47,
                         column: 25
                       }
-                    }
+                    },
+                    prefix: undefined
                   },
                   value: {
                     type: 'StringLiteral',
@@ -2450,7 +2492,8 @@ export default {
                         line: 47,
                         column: 34
                       }
-                    }
+                    },
+                    prefix: undefined
                   },
                   loc: {
                     start: {
@@ -2478,7 +2521,8 @@ export default {
                         line: 47,
                         column: 42
                       }
-                    }
+                    },
+                    prefix: undefined
                   },
                   value: {
                     type: 'StringLiteral',
@@ -2493,7 +2537,8 @@ export default {
                         line: 47,
                         column: 51
                       }
-                    }
+                    },
+                    prefix: undefined
                   },
                   loc: {
                     start: {
@@ -2586,7 +2631,8 @@ export default {
                     line: 49,
                     column: 56
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -2788,7 +2834,8 @@ export default {
                     line: 54,
                     column: 54
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -2894,7 +2941,8 @@ export default {
                   line: 59,
                   column: 20
                 }
-              }
+              },
+              prefix: undefined
             },
             loc: {
               start: {
@@ -3249,7 +3297,8 @@ export default {
                               line: 63,
                               column: 34
                             }
-                          }
+                          },
+                          prefix: undefined
                         },
                         property: {
                           type: 'Identifier',
@@ -3343,7 +3392,8 @@ export default {
                       line: 64,
                       column: 14
                     }
-                  }
+                  },
+                  extra: undefined
                 },
                 {
                   type: 'BooleanLiteral',
@@ -3438,7 +3488,8 @@ export default {
                                   line: 66,
                                   column: 43
                                 }
-                              }
+                              },
+                              prefix: undefined
                             },
                             property: {
                               type: 'Identifier',
@@ -3532,7 +3583,8 @@ export default {
                           line: 67,
                           column: 14
                         }
-                      }
+                      },
+                      extra: undefined
                     },
                     {
                       type: 'BooleanLiteral',
@@ -3737,7 +3789,8 @@ export default {
               line: 72,
               column: 25
             }
-          }
+          },
+          prefix: undefined
         },
         loc: {
           start: {
@@ -3866,7 +3919,8 @@ export default {
                     line: 75,
                     column: 68
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -3938,7 +3992,8 @@ export default {
                     line: 76,
                     column: 62
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -4010,7 +4065,8 @@ export default {
                     line: 77,
                     column: 62
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -4082,7 +4138,8 @@ export default {
                     line: 78,
                     column: 62
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -4154,7 +4211,8 @@ export default {
                     line: 79,
                     column: 62
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -4226,7 +4284,8 @@ export default {
                     line: 80,
                     column: 62
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -4298,7 +4357,8 @@ export default {
                     line: 81,
                     column: 61
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -4370,7 +4430,8 @@ export default {
                     line: 82,
                     column: 16
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -4442,7 +4503,8 @@ export default {
                     line: 83,
                     column: 57
                   }
-                }
+                },
+                prefix: undefined
               },
               {
                 type: 'Identifier',
@@ -4531,7 +4593,8 @@ export default {
                       line: 84,
                       column: 56
                     }
-                  }
+                  },
+                  prefix: undefined
                 },
                 right: {
                   type: 'CallExpression',
@@ -4650,7 +4713,8 @@ export default {
                     line: 85,
                     column: 64
                   }
-                }
+                },
+                prefix: undefined
               }
             ],
             keywords: [],
@@ -5063,7 +5127,8 @@ export default {
                                 line: 93,
                                 column: 34
                               }
-                            }
+                            },
+                            prefix: undefined
                           },
                           loc: {
                             start: {
@@ -5136,7 +5201,8 @@ export default {
                                       line: 95,
                                       column: 93
                                     }
-                                  }
+                                  },
+                                  prefix: undefined
                                 }
                               ],
                               keywords: [],
@@ -5208,7 +5274,8 @@ export default {
                                       line: 97,
                                       column: 82
                                     }
-                                  }
+                                  },
+                                  prefix: undefined
                                 }
                               ],
                               keywords: [],
@@ -5284,7 +5351,8 @@ export default {
                                           line: 99,
                                           column: 41
                                         }
-                                      }
+                                      },
+                                      prefix: undefined
                                     },
                                     property: {
                                       type: 'Identifier',
@@ -5587,7 +5655,8 @@ export default {
                                         line: 101,
                                         column: 64
                                       }
-                                    }
+                                    },
+                                    prefix: undefined
                                   },
                                   loc: {
                                     start: {
@@ -5613,7 +5682,8 @@ export default {
                                       line: 101,
                                       column: 46
                                     }
-                                  }
+                                  },
+                                  prefix: undefined
                                 },
                                 alternate: {
                                   type: 'StringLiteral',
@@ -5628,7 +5698,8 @@ export default {
                                       line: 101,
                                       column: 81
                                     }
-                                  }
+                                  },
+                                  prefix: undefined
                                 },
                                 loc: {
                                   start: {
@@ -5851,7 +5922,8 @@ export default {
                                   line: 103,
                                   column: 36
                                 }
-                              }
+                              },
+                              prefix: undefined
                             },
                             loc: {
                               start: {
@@ -5928,7 +6000,8 @@ export default {
                                             line: 104,
                                             column: 41
                                           }
-                                        }
+                                        },
+                                        prefix: undefined
                                       },
                                       property: {
                                         type: 'Identifier',
@@ -6231,7 +6304,8 @@ export default {
                                           line: 106,
                                           column: 66
                                         }
-                                      }
+                                      },
+                                      prefix: undefined
                                     },
                                     loc: {
                                       start: {
@@ -6257,7 +6331,8 @@ export default {
                                         line: 106,
                                         column: 48
                                       }
-                                    }
+                                    },
+                                    prefix: undefined
                                   },
                                   alternate: {
                                     type: 'StringLiteral',
@@ -6272,7 +6347,8 @@ export default {
                                         line: 106,
                                         column: 85
                                       }
-                                    }
+                                    },
+                                    prefix: undefined
                                   },
                                   loc: {
                                     start: {
@@ -6590,7 +6666,8 @@ export default {
                                                 line: 110,
                                                 column: 68
                                               }
-                                            }
+                                            },
+                                            prefix: undefined
                                           },
                                           {
                                             type: 'ArrayExpression',
@@ -6608,7 +6685,8 @@ export default {
                                                     line: 110,
                                                     column: 85
                                                   }
-                                                }
+                                                },
+                                                prefix: undefined
                                               },
                                               {
                                                 type: 'StringLiteral',
@@ -6623,7 +6701,8 @@ export default {
                                                     line: 110,
                                                     column: 96
                                                   }
-                                                }
+                                                },
+                                                prefix: undefined
                                               },
                                               {
                                                 type: 'StringLiteral',
@@ -6638,7 +6717,8 @@ export default {
                                                     line: 110,
                                                     column: 110
                                                   }
-                                                }
+                                                },
+                                                prefix: undefined
                                               }
                                             ],
                                             loc: {
@@ -6751,7 +6831,8 @@ export default {
                                                   line: 112,
                                                   column: 72
                                                 }
-                                              }
+                                              },
+                                              prefix: undefined
                                             }
                                           ],
                                           keywords: [],
@@ -7068,7 +7149,8 @@ export default {
                                                   line: 115,
                                                   column: 38
                                                 }
-                                              }
+                                              },
+                                              prefix: undefined
                                             },
                                             loc: {
                                               start: {
@@ -7151,7 +7233,8 @@ export default {
                                               line: 116,
                                               column: 34
                                             }
-                                          }
+                                          },
+                                          prefix: undefined
                                         },
                                         loc: {
                                           start: {
@@ -7224,7 +7307,8 @@ export default {
                                                     line: 118,
                                                     column: 65
                                                   }
-                                                }
+                                                },
+                                                prefix: undefined
                                               }
                                             ],
                                             keywords: [],
@@ -7343,7 +7427,8 @@ export default {
                                                       line: 121,
                                                       column: 37
                                                     }
-                                                  }
+                                                  },
+                                                  prefix: undefined
                                                 },
                                                 {
                                                   type: 'StringLiteral',
@@ -7358,7 +7443,8 @@ export default {
                                                       line: 121,
                                                       column: 54
                                                     }
-                                                  }
+                                                  },
+                                                  prefix: undefined
                                                 }
                                               ],
                                               loc: {
@@ -7498,7 +7584,8 @@ export default {
                                                         line: 123,
                                                         column: 44
                                                       }
-                                                    }
+                                                    },
+                                                    prefix: undefined
                                                   },
                                                   right: {
                                                     type: 'Identifier',
@@ -7586,7 +7673,8 @@ export default {
                                                         line: 124,
                                                         column: 37
                                                       }
-                                                    }
+                                                    },
+                                                    prefix: undefined
                                                   },
                                                   {
                                                     type: 'StringLiteral',
@@ -7601,7 +7689,8 @@ export default {
                                                         line: 124,
                                                         column: 52
                                                       }
-                                                    }
+                                                    },
+                                                    prefix: undefined
                                                   }
                                                 ],
                                                 loc: {
@@ -7741,7 +7830,8 @@ export default {
                                                           line: 126,
                                                           column: 51
                                                         }
-                                                      }
+                                                      },
+                                                      prefix: undefined
                                                     },
                                                     right: {
                                                       type: 'Identifier',

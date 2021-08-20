@@ -56,6 +56,8 @@ export const enum ENodeType {
   AssignmentParam = 'AssignmentParam',
   /** Except语句 TryStatement except: */
   ExceptHandler = 'ExceptHandler',
+  /** 别名表达式 ImportStatement A as B */
+  AliasExpression = 'AliasExpression',
 
   //表达式
   NoneLiteral = 'NoneLiteral',
@@ -121,6 +123,7 @@ export type TSpecialNodeMap = {
   [ENodeType.AssignmentParam]: IAssignmentParam
   [ENodeType.ExceptHandler]: IExceptHandler
   [ENodeType.SliceExpression]: ISliceExpression
+  [ENodeType.AliasExpression]: IAliasExpression
 }
 
 export type TSpecialNode<T extends keyof TSpecialNodeMap = keyof TSpecialNodeMap> = TSpecialNodeMap[T]
@@ -291,6 +294,12 @@ export interface ISliceExpression extends TBaseNodeAttr {
   step: TExpressionNode
 }
 
+export interface IAliasExpression extends TBaseNodeAttr {
+  type: ENodeType.AliasExpression
+  name: string
+  asname?: string
+}
+
 export interface IMemberExpression extends TBaseNodeAttr {
   type: ENodeType.MemberExpression
   object: IIdentifier | IStringLiteral | IMemberExpression | ICallExpression
@@ -306,7 +315,8 @@ export interface ICallExpression extends TBaseNodeAttr {
 
 export interface IImportStatement extends TBaseNodeAttr {
   type: ENodeType.ImportStatement
-  names: IIdentifier[]
+  names: IAliasExpression[]
+  level?: number
   module?: IIdentifier | IMemberExpression
 }
 

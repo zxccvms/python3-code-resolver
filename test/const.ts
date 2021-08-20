@@ -65,7 +65,8 @@ export const CallExpression = nodeGenerator.generate(ENodeType.CallExpression, {
   params: [NumberLiteral],
   keywords: [AssignmentParam]
 })
-export const ImportStatement = nodeGenerator.generate(ENodeType.ImportStatement, { names: [Identifier] })
+export const AliasExpression = nodeGenerator.generate(ENodeType.AliasExpression, { name: 'a' })
+export const ImportStatement = nodeGenerator.generate(ENodeType.ImportStatement, { names: [AliasExpression] })
 export const FunctionDeclaration = nodeGenerator.generate(ENodeType.FunctionDeclaration, {
   body: BlockStatement,
   params: [Identifier],
