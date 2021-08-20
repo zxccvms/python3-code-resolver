@@ -1,4 +1,4 @@
-f'''{version}.snapshot{date}'''
+f'''{{version:1}}.snapshot{date}'''
 r'\123'
 '\123'
 u'{version}.snapshot{date}'

@@ -1,5 +1,6 @@
 import { PYTHON } from './const'
-import { ETokenType, TPositionInfo, TTokenExtra, TTokenItem } from './types'
+import { ETokenType, TTokenExtra, TTokenItem } from './types'
+import { createLocByPosition } from './utils'
 
 type TFindResult = {
   sumLength: number
@@ -118,12 +119,12 @@ class CodeScanner {
       }
       // 处理字符串 todo
       else if (currentChar === 'f' && (nextChar === '"' || nextChar === "'")) {
-        const { findResult, tokens } = this._handleTemplateChar(code.slice(++i), nextChar)
+        const { findResult, tokensFragment } = this._handleTemplateChar(code.slice(++i), nextChar)
         const { sumLength, lineNum, columnNum, betweenContent } = findResult
 
         type = ETokenType.string
         value = betweenContent
-        extra = { prefix: currentChar, tokens }
+        extra = { prefix: currentChar, tokensFragment }
         handleCycleParams(sumLength, lineNum, columnNum + 1) // 将光标移至引号后面
       }
       // 处理关键字和标识符
@@ -160,12 +161,12 @@ class CodeScanner {
       column++
 
       if (type) {
-        result.push({
-          type,
+        const token = this._createToken(type, {
           value,
-          loc: this._createLocInfo(startPosition, { line, column }),
+          loc: createLocByPosition(startPosition, { line, column }),
           extra
         })
+        result.push(token)
       }
     }
 
@@ -173,15 +174,68 @@ class CodeScanner {
   }
 
   /** 处理模版字符串 */
-  private _handleTemplateChar(content: string, char: '"' | "'"): { findResult: TFindResult; tokens: TTokenItem[] } {
+  private _handleTemplateChar(
+    content: string,
+    char: '"' | "'"
+  ): { findResult: TFindResult; tokensFragment: TTokenItem[][] } {
     const findResult = this._handleQuotesChar(content, char)
     const { betweenContent } = findResult
-    console.log(
-      'taozhizhu ~🚀 file: CodeScanner.ts ~🚀 line 179 ~🚀 CodeScanner ~🚀 _handleTemplateChar ~🚀 betweenContent',
-      betweenContent
-    )
 
-    return { findResult, tokens: [] }
+    let leftbracketCount = 0
+    const contentFragment = this._sliceContent(betweenContent, (char) => {
+      if (char === '{' && leftbracketCount++ === 0) return { code: 1 }
+      else if (char === '}' && --leftbracketCount === 0) return { code: 2 }
+      else return { code: 0 }
+    })
+
+    const tokensFragment: TTokenItem<ETokenType, string>[][] = []
+    for (const content of contentFragment) {
+      if (!content) continue
+
+      if (content.startsWith('{{') && content.endsWith('}}')) {
+        const stringToken = this._createToken(ETokenType.string, {
+          value: content.slice(1, -1),
+          loc: createLocByPosition({ line: 0, column: 0 }, { line: 0, column: 0 })
+        })
+        tokensFragment.push([stringToken])
+      } else if (content.startsWith('{') && content.endsWith('}')) {
+        const tokens = this.scan(content.slice(1, -1))
+        tokensFragment.push(tokens)
+      } else {
+        const stringToken = this._createToken(ETokenType.string, {
+          value: content,
+          loc: createLocByPosition({ line: 0, column: 0 }, { line: 0, column: 0 })
+        })
+        tokensFragment.push([stringToken])
+      }
+    }
+
+    return { findResult, tokensFragment }
+  }
+
+  /** 切割字符串 */
+  private _sliceContent(content: string, cb: (currentString: string) => TStateResponse): string[] {
+    const result: string[] = []
+    let i = 0
+    let lastSliceIndex = 0
+    let currentChar
+    while ((currentChar = content[i++])) {
+      if (!currentChar) {
+        result.push(content.slice(lastSliceIndex, i))
+        break
+      }
+
+      const { code } = cb(currentChar)
+      if (code === 1) {
+        result.push(content.slice(lastSliceIndex, i - 1))
+        lastSliceIndex = i - 1
+      } else if (code === 2) {
+        result.push(content.slice(lastSliceIndex, i))
+        lastSliceIndex = i
+      }
+    }
+
+    return result
   }
 
   /** 处理引号字符 */
@@ -280,12 +334,11 @@ class CodeScanner {
     }
   }
 
-  /** 创建定位信息 */
-  private _createLocInfo(start: TPositionInfo, end: TPositionInfo) {
+  private _createToken<T extends ETokenType>(type: T, remainArg: Omit<TTokenItem, 'type'>): TTokenItem<T> {
     return {
-      start,
-      end
-    }
+      type,
+      ...remainArg
+    } as TTokenItem<T>
   }
 }
 

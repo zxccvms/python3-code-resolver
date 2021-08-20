@@ -29,7 +29,6 @@ import {
   IVariableDeclaration,
   TNode
 } from './types'
-import { getLatest, isSameRank } from './utils'
 
 class AstToCode {
   generate(node: TNode): string {

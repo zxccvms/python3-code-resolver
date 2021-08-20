@@ -21,7 +21,7 @@ export type TStringTokenExtra =
     }
   | {
       prefix?: 'f'
-      tokens?: TTokenItem[]
+      tokensFragment?: TTokenItem[][]
     }
 
 export type TTokenExtraMap = {
@@ -36,13 +36,15 @@ export type TPositionInfo = {
   column: number
 }
 
+export type TLoc = {
+  start: TPositionInfo
+  end: TPositionInfo
+}
+
 export type TTokenItem<T extends ETokenType = ETokenType, V extends string = string> = {
   type: T
   value: V
-  loc: {
-    start: TPositionInfo
-    end: TPositionInfo
-  }
+  loc: TLoc
   extra?: T extends keyof TTokenExtraMap ? TTokenExtraMap[T] : never
 }
 
@@ -182,10 +184,7 @@ export type TBaseNodeAttr = {
     parentStart?: TPositionInfo
   }
   /** 定位信息 */
-  loc?: {
-    start: TPositionInfo
-    end: TPositionInfo
-  }
+  loc?: TLoc
 }
 
 // 特殊节点定义

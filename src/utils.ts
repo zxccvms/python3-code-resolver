@@ -5,7 +5,9 @@ import {
   TBaseNodeAttr,
   TConditionExpressionNode,
   TExpressionNode,
+  TLoc,
   TNode,
+  TPositionInfo,
   TStatementNode,
   TTokenItem
 } from './types'
@@ -139,10 +141,17 @@ export function isStatementNode(node: TNode): node is TStatementNode {
   return isNode(node, statementNodeTypes)
 }
 
-export function createLoc(start: TTokenItem | TNode, end?: TTokenItem | TNode): TBaseNodeAttr['loc'] {
+export function createLoc(start: TTokenItem | TNode, end?: TTokenItem | TNode): TLoc {
   return {
     start: getPositionInfo(start, 'start'),
     end: getPositionInfo(end || start, 'end')
+  }
+}
+
+export function createLocByPosition(start: TPositionInfo, end: TPositionInfo): TLoc {
+  return {
+    start,
+    end
   }
 }
 

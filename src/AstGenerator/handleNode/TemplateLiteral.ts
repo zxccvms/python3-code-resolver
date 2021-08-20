@@ -21,7 +21,7 @@ class TemplateLiteral extends BaseHandler {
       throw new TypeError("handleTemplateLiteral err: currentToken'prefix is not 'f'")
     }
 
-    const expressions = this._handleExpressions(extra.tokens)
+    const expressions = this._handleExpressions(extra.tokensFragment)
 
     const TemplateLiteral = this.createNode(ENodeType.TemplateLiteral, {
       expressions,
@@ -33,9 +33,12 @@ class TemplateLiteral extends BaseHandler {
     return TemplateLiteral
   }
 
-  private _handleExpressions(tokens: TTokenItem[]): ITemplateLiteral['expressions'] {
-    const astGenerator = new AstGenerator(tokens)
-    const nodes = astGenerator.generateNodes()
+  private _handleExpressions(tokensFragment: TTokenItem[][]): ITemplateLiteral['expressions'] {
+    const nodes = []
+    for (const tokens of tokensFragment) {
+      const _nodes = new AstGenerator(tokens).generateNodes()
+      nodes.push(..._nodes)
+    }
     if (!isExpressionNodes(nodes)) {
       throw new TypeError('handleTemplateLiteral err: nodes is not all expression node')
     }

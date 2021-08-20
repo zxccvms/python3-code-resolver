@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    // "target": "ESNext",
+    "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": false,
@@ -9,7 +9,6 @@
     "suppressImplicitAnyIndexErrors": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    // "module": "ESNext",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": false,
@@ -20,7 +19,6 @@
       "src/*": ["./src/*"]
     },
     "module": "commonjs",
-    "target": "es5",
     "noImplicitAny": true,
     "outDir": "./dist",
     "sourceMap": true
