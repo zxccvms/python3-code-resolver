@@ -72,33 +72,33 @@ class AstToCode {
     return node.value ? 'True' : 'False'
   }
   private [ENodeType.UnaryExpression](node: IUnaryExpression) {
-    return node.oprator + this.generate(node.argument)
+    return node.operator + this.generate(node.argument)
   }
   private [ENodeType.IfExpression](node: IIfExpression) {
     return `${this.generate(node.body)} if ${this.generate(node.test)} else ${this.generate(node.alternate)}`
   }
   private [ENodeType.TupleExpression](node: ITupleExpression) {
-    const codes = node.elements.map((element) => this.generate(element))
+    const codes = node.elements.map(element => this.generate(element))
     return codes.join(', ')
   }
   private [ENodeType.ArrayExpression](node: IArrayExpression) {
-    const codes = node.elements.map((element) => this.generate(element))
+    const codes = node.elements.map(element => this.generate(element))
     return `[${codes.join(', ')}]`
   }
   private [ENodeType.DictionaryExpression](node: IDictionaryExpression) {
-    const codes = node.properties.map((property) => this.generate(property))
+    const codes = node.properties.map(property => this.generate(property))
     return `{${PYTHON.LINE_BREAK}${codes.join(`,${PYTHON.LINE_BREAK}`)}${PYTHON.LINE_BREAK}}`
   }
   private [ENodeType.BinaryExpression](node: IBinaryExpression) {
     return `${this.generate(node.left)} ${node.operator} ${this.generate(node.right)}`
   }
   private [ENodeType.VariableDeclaration](node: IVariableDeclaration) {
-    const codes = node.declarations.map((declaration) => this.generate(declaration))
+    const codes = node.declarations.map(declaration => this.generate(declaration))
 
     return `${node.kind} ${codes.join(', ')}`
   }
   private [ENodeType.AssignmentExpression](node: IAssignmentExpression) {
-    const codes = node.targets.map((target) => this.generate(target))
+    const codes = node.targets.map(target => this.generate(target))
 
     return `${codes.join(', ')} = ${this.generate(node.value)}`
   }
@@ -114,8 +114,8 @@ class AstToCode {
   private [ENodeType.CallExpression](node: ICallExpression) {
     const calleeCode = this.generate(node.callee)
 
-    const paramCodes = node.params.map((param) => this.generate(param))
-    const keywordCodes = node.keywords.map((keyword) => this.generate(keyword))
+    const paramCodes = node.params.map(param => this.generate(param))
+    const keywordCodes = node.keywords.map(keyword => this.generate(keyword))
 
     const paramsCode = [...paramCodes, ...keywordCodes].join(', ')
 

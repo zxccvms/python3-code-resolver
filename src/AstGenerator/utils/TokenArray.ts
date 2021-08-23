@@ -1,10 +1,10 @@
-import { ETokenType, TTokenItem } from '../../types'
+import { ETokenType, TToken } from '../../types'
 
 class TokenArray {
   private index: number = 0
-  private tokens: TTokenItem[]
+  private tokens: TToken[]
 
-  constructor(tokens: TTokenItem[]) {
+  constructor(tokens: TToken[]) {
     this.tokens = tokens
   }
 
@@ -16,7 +16,7 @@ class TokenArray {
     this.index += extraIndex
   }
 
-  getToken<T extends TTokenItem>(extraIndex: number = 0): T {
+  getToken<T extends TToken>(extraIndex: number = 0): T {
     return this.tokens[this.index + extraIndex] as T
   }
 

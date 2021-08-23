@@ -1,5 +1,5 @@
 import { PYTHON } from './const'
-import { ETokenType, TTokenExtra, TTokenItem } from './types'
+import { ETokenType, TTokenExtra, TToken } from './types'
 import { createLocByPosition } from './utils'
 
 type TFindResult = {
@@ -11,8 +11,8 @@ type TFindResult = {
 
 /** 代码扫描器 */
 class CodeScanner {
-  scan(code: string): TTokenItem[] {
-    const result = [] as TTokenItem[]
+  scan(code: string): TToken[] {
+    const result = [] as TToken[]
     let i = 0
     let line = 1
     let column = 0
@@ -131,17 +131,17 @@ class CodeScanner {
       else if (/[a-z|A-Z|_]/.test(currentChar)) {
         const { lineNum, columnNum, betweenContent } = this._findNextConformString(
           code.slice(i),
-          (char) => !/[a-z|A-Z|_|0-9]/.test(char)
+          char => !/[a-z|A-Z|_|0-9]/.test(char)
         )
 
         value = currentChar + betweenContent
-        type = PYTHON.KEYWORDS.indexOf(value) !== -1 ? ETokenType.keyword : ETokenType.identifier
+        type = PYTHON.KEYWORDS.includes(value) ? ETokenType.keyword : ETokenType.identifier
         handleCycleParams(betweenContent.length, lineNum, columnNum)
       }
       // 处理数字
       else if (/[0-9]/.test(currentChar)) {
         let hasPoint = false
-        const { lineNum, columnNum, betweenContent } = this._findNextConformString(code.slice(i), (char) => {
+        const { lineNum, columnNum, betweenContent } = this._findNextConformString(code.slice(i), char => {
           if (char === '.') {
             if (hasPoint) return true
             else {
@@ -177,18 +177,18 @@ class CodeScanner {
   private _handleTemplateChar(
     content: string,
     char: '"' | "'"
-  ): { findResult: TFindResult; tokensFragment: TTokenItem[][] } {
+  ): { findResult: TFindResult; tokensFragment: TToken[][] } {
     const findResult = this._handleQuotesChar(content, char)
     const { betweenContent } = findResult
 
     let leftbracketCount = 0
-    const contentFragment = this._sliceContent(betweenContent, (char) => {
+    const contentFragment = this._sliceContent(betweenContent, char => {
       if (char === '{' && leftbracketCount++ === 0) return { code: 1 }
       else if (char === '}' && --leftbracketCount === 0) return { code: 2 }
       else return { code: 0 }
     })
 
-    const tokensFragment: TTokenItem<ETokenType, string>[][] = []
+    const tokensFragment: TToken<ETokenType, string>[][] = []
     for (const content of contentFragment) {
       if (!content) continue
 
@@ -334,11 +334,11 @@ class CodeScanner {
     }
   }
 
-  private _createToken<T extends ETokenType>(type: T, remainArg: Omit<TTokenItem, 'type'>): TTokenItem<T> {
+  private _createToken<T extends ETokenType>(type: T, remainArg: Omit<TToken, 'type'>): TToken<T> {
     return {
       type,
       ...remainArg
-    } as TTokenItem<T>
+    } as TToken<T>
   }
 }
 

@@ -1,4 +1,4 @@
-import { ENodeType, TConditionExpressionNodeMap, TExpressionNodeMap, TStatementNodeMap } from './types'
+import { ENodeType, TExpressionNodeMap, TStatementNodeMap, TTokenExtraConfigMap } from './types'
 
 export const PYTHON = {
   INDENT: '  ',
@@ -43,7 +43,118 @@ export const PYTHON = {
   ]
 }
 
-export const conditionExpressionNodeTypes: (keyof TConditionExpressionNodeMap)[] = [ENodeType.IfExpression]
+export const tokenExtraConfig: TTokenExtraConfigMap = {
+  '.': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '[': {
+    beforeExpression: true
+  },
+  and: {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  or: {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  if: {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  else: {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '+': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '-': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '*': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '/': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '%': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '//': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '**': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '==': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '!=': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '>=': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '<=': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '<': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  '>': {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  not: {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  in: {
+    beforeExpression: true,
+    afterExpression: true
+  },
+  ',': {
+    beforeExpression: true
+  },
+  '=': {
+    afterExpression: true
+  },
+  '+=': {
+    afterExpression: true
+  },
+  '-=': {
+    afterExpression: true
+  },
+  '*=': {
+    afterExpression: true
+  },
+  '/=': {
+    afterExpression: true
+  },
+  '%=': {
+    afterExpression: true
+  },
+  '**=': {
+    afterExpression: true
+  },
+  '//=': {
+    afterExpression: true
+  }
+}
 
 export const expressionNodeTypes: (keyof TExpressionNodeMap)[] = [
   ENodeType.NoneLiteral,
@@ -57,15 +168,17 @@ export const expressionNodeTypes: (keyof TExpressionNodeMap)[] = [
   ENodeType.ArrayExpression,
   ENodeType.DictionaryExpression,
   ENodeType.BinaryExpression,
-  ENodeType.VariableDeclaration,
   ENodeType.AssignmentExpression,
   ENodeType.MemberExpression,
+  ENodeType.SubscriptExpression,
   ENodeType.CallExpression,
   ENodeType.TupleExpression,
-  ENodeType.CompareExpression
+  ENodeType.CompareExpression,
+  ENodeType.LogicalExpression
 ]
 
 export const statementNodeTypes: (keyof TStatementNodeMap)[] = [
+  ENodeType.VariableDeclaration,
   ENodeType.ImportStatement,
   ENodeType.FunctionDeclaration,
   ENodeType.ClassDeclaration,

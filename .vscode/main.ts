@@ -11,8 +11,8 @@ new Promise(() => {
 
   const tokens = codeScanner.scan(pythonCode)
   const astGenerator = new AstGenerator(tokens)
-
   const ast = astGenerator.generate()
+
   console.log('运行成功')
   console.log('ast: ', ast)
 })

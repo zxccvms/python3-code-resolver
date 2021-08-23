@@ -1,25 +1,56 @@
-import { ENodeType, IProgram, TExpressionNode, TNode, TStatementNode, TTokenItem } from '../types'
-import AstProcessor from './AstProcessor'
+import NodeGenerator from 'src/NodeGenerator'
+import { getColumn } from 'src/utils'
+import { ENodeType, IProgram, TExpressionNode, TNode, TStatementNode, TToken } from '../types'
+import Expression from './expression'
+import Statement from './statement'
+import { ENodeEnvironment } from './types'
+import TokenArray from './utils/TokenArray'
 
 /** AST生成器 */
 class AstGenerator {
-  private astProcessor: AstProcessor
+  tokens: TokenArray
+  createNode: NodeGenerator['generate']
+  expression: Expression
+  statement: Statement
 
-  constructor(tokens: TTokenItem[]) {
+  constructor(tokens: TToken[]) {
     if (!Array.isArray(tokens)) throw new TypeError('tokens is not Array')
 
-    this.astProcessor = new AstProcessor(tokens)
+    this.tokens = new TokenArray(tokens)
+    const nodeGenerator = new NodeGenerator()
+    this.createNode = nodeGenerator.generate.bind(nodeGenerator)
+    this.expression = new Expression(this)
+    this.statement = new Statement(this)
   }
 
   generate(): IProgram {
-    const body = this.generateNodes()
-    const programNode = this.astProcessor.createNode(ENodeType.Program, { body })
+    const body = this.handleNodes()
+    const programNode = this.createNode(ENodeType.Program, { body })
 
     return programNode
   }
 
-  generateNodes(): (TExpressionNode | TStatementNode)[] {
-    return this.astProcessor.handle() as (TExpressionNode | TStatementNode)[]
+  handleNodes(): TNode[] {
+    const nodes = []
+    while (this.tokens.getIndex() < this.tokens.getLength()) {
+      nodes.push(this.handleNode())
+    }
+
+    return nodes
+  }
+
+  handleNode(
+    environment: ENodeEnvironment = ENodeEnvironment.normal,
+    indentCount: number = 0
+  ): TExpressionNode | TStatementNode {
+    const token = this.tokens.getToken()
+    const column = getColumn(token, 'start')
+    if (indentCount !== column) {
+      throw new SyntaxError('unexpected indent')
+    }
+
+    // todo Statements must be separated by newlines or semicolons
+    return this.statement.handle() || this.expression.handle(environment)
   }
 }
 

@@ -2,26 +2,31 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "typescript",
+      "type": "pwa-node",
+      "request": "launch",
+      "args": [
+        "${workspaceRoot}/node_modules/ts-node/dist/bin.js",
+        "-T",
+        "${workspaceRoot}/.vscode/main.ts" // 入口文件
+      ],
+      "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector"
+    },
+    {
       "name": "python",
       "type": "python",
       "request": "launch",
       "program": "${workspaceRoot}/.vscode/main.py",
       "console": "internalConsole",
       "cwd": "${workspaceRoot}"
-    },
+    }
+  ],
+  "compounds": [
     {
-      "name": "typescript",
-      "type": "pwa-node",
-      "request": "launch",
-      "args": [
-        "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
-        "-r",
-        "${workspaceRoot}/node_modules/ts-node/register",
-        "${workspaceRoot}/.vscode/main.ts" // 入口文件
-      ],
-      "sourceMaps": true,
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector"
+      "name": "typescript & python",
+      "configurations": ["python", "typescript"]
     }
   ]
 }

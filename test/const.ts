@@ -12,7 +12,7 @@ export const TupleExpression = nodeGenerator.generate(ENodeType.TupleExpression,
   elements: [NumberLiteral, StringLiteral]
 })
 export const UnaryExpression = nodeGenerator.generate(ENodeType.UnaryExpression, {
-  oprator: '-',
+  operator: '-',
   argument: NumberLiteral
 })
 export const dictionaryProperty = nodeGenerator.generate(ENodeType.DictionaryProperty, {
@@ -58,7 +58,7 @@ export const SliceExpression = nodeGenerator.generate(ENodeType.SliceExpression,
 })
 export const MemberExpression = nodeGenerator.generate(ENodeType.MemberExpression, {
   object: Identifier,
-  property: NumberLiteral
+  property: Identifier
 })
 export const CallExpression = nodeGenerator.generate(ENodeType.CallExpression, {
   callee: Identifier,
@@ -70,14 +70,12 @@ export const ImportStatement = nodeGenerator.generate(ENodeType.ImportStatement,
 export const FunctionDeclaration = nodeGenerator.generate(ENodeType.FunctionDeclaration, {
   body: BlockStatement,
   params: [Identifier],
-  id: Identifier,
-  defaults: [NumberLiteral]
+  id: Identifier
 })
 export const ClassDeclaration = nodeGenerator.generate(ENodeType.ClassDeclaration, {
   body: BlockStatement,
-  keywords: [AssignmentParam],
   id: Identifier,
-  bases: [Identifier]
+  params: [Identifier]
 })
 export const EmptyStatement = nodeGenerator.generate(ENodeType.EmptyStatement, {})
 export const IfStatement = nodeGenerator.generate(ENodeType.IfStatement, { body: BlockStatement, test: BooleanLiteral })
