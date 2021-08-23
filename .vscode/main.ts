@@ -3,9 +3,9 @@ import { AstGenerator, CodeScanner } from 'src'
 import path from 'path'
 import fs from 'fs'
 
-try {
+new Promise(() => {
   const codeScanner = new CodeScanner()
-  const customFilePath = path.join(__dirname, 'custom.py')
+  const customFilePath = path.join(__dirname, 'code.py')
 
   const pythonCode = fs.readFileSync(customFilePath, { encoding: 'utf-8' })
 
@@ -15,8 +15,6 @@ try {
   const ast = astGenerator.generate()
   console.log('运行成功')
   console.log('ast: ', ast)
-} catch (e) {
-  console.error(e)
-}
+})
 
 setTimeout(() => {}, 9999999)

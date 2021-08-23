@@ -2,16 +2,22 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "运行项目",
+      "name": "python",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceRoot}/.vscode/main.py",
+      "console": "internalConsole",
+      "cwd": "${workspaceRoot}"
+    },
+    {
+      "name": "typescript",
       "type": "pwa-node",
       "request": "launch",
-      // "runtimeExecutable": "nodemon",
       "args": [
         "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
         "-r",
         "${workspaceRoot}/node_modules/ts-node/register",
-        // "NODE_PATH=\"${workspaceRoot}/src/index.ts\"",
-        "${workspaceRoot}/.vscode/custom.ts" // 入口文件
+        "${workspaceRoot}/.vscode/main.ts" // 入口文件
       ],
       "sourceMaps": true,
       "cwd": "${workspaceRoot}",
