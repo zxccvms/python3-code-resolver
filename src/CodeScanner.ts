@@ -45,23 +45,15 @@ class CodeScanner {
         continue
       }
 
-      // 处理算术运算符
-      if (/[\+|\-|\*|\/|\%｜\/]/.test(currentChar)) {
-        type = ETokenType.operator
-        if (/\*\*|\/\//.test(currentChar + nextChar)) {
-          value = currentChar + nextChar
-          handleCycleParams(1, 0, 1)
-        }
-      }
-      // 处理关系运算符
-      else if (/[\<|\>]/.test(currentChar)) {
-        type = ETokenType.operator
-      }
       // 处理关系运算符
       else if (/\=\=|\!\=|\>\=|\<\=/.test(currentChar + nextChar)) {
         type = ETokenType.operator
         value = currentChar + nextChar
         handleCycleParams(1, 0, 1)
+      }
+      // 处理关系运算符
+      else if (/[\<|\>]/.test(currentChar)) {
+        type = ETokenType.operator
       }
 
       // 赋值运算符
@@ -79,6 +71,15 @@ class CodeScanner {
         type = ETokenType.operator
         value = currentChar + nextChar + code[i + 1]
         handleCycleParams(1, 0, 2)
+      }
+
+      // 处理算术运算符
+      if (/[\+|\-|\*|\/|\%｜\/]/.test(currentChar)) {
+        type = ETokenType.operator
+        if (/\*\*|\/\//.test(currentChar + nextChar)) {
+          value = currentChar + nextChar
+          handleCycleParams(1, 0, 1)
+        }
       }
 
       // 位运算符

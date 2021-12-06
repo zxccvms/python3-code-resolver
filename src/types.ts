@@ -101,9 +101,9 @@ export const enum ENodeType {
   BinaryExpression = 'BinaryExpression',
   /** 赋值表达式 a = 1 */
   AssignmentExpression = 'AssignmentExpression',
-  /** 对象引用表达式 a.b a["b"] a[1:] */
+  /** 对象引用表达式 a.b  */
   MemberExpression = 'MemberExpression',
-  /** 下标表达式 */
+  /** 下标表达式 a["b"] a[1:] */
   SubscriptExpression = 'SubscriptExpression',
   /** 函数调用表达式 a() */
   CallExpression = 'CallExpression',
@@ -134,7 +134,11 @@ export const enum ENodeType {
   /** 变量声明语句 global a,b */
   VariableDeclaration = 'VariableDeclaration',
   /** 返回语句 return 1*/
-  ReturnStatement = 'ReturnStatement'
+  ReturnStatement = 'ReturnStatement',
+  /** while语句 */
+  WhileStatement = 'WhileStatement',
+  /** continue语句 */
+  ContinueStatement = 'ContinueStatement'
 }
 
 /** 特殊的节点映射表 */
@@ -194,6 +198,8 @@ export type TStatementNodeMap = {
   [ENodeType.ForStatement]: IForStatement
   [ENodeType.VariableDeclaration]: IVariableDeclaration
   [ENodeType.ReturnStatement]: IReturnStatement
+  [ENodeType.WhileStatement]: IWhileStatement
+  [ENodeType.ContinueStatement]: IContinueStatement
 }
 
 export type TStatementNode<T extends keyof TStatementNodeMap = keyof TStatementNodeMap> = TStatementNodeMap[T]
@@ -335,9 +341,19 @@ export interface IReturnStatement extends TBaseNodeAttr {
   argument: TExpressionNode
 }
 
+export interface IWhileStatement extends TBaseNodeAttr {
+  type: ENodeType.WhileStatement
+  test: TExpressionNode
+  body: IBlockStatement
+}
+
+export interface IContinueStatement extends TBaseNodeAttr {
+  type: ENodeType.ContinueStatement
+}
+
 export interface IAssignmentExpression extends TBaseNodeAttr {
   type: ENodeType.AssignmentExpression
-  targets: TExpressionNode[] //(IIdentifier | IMemberExpression | ITupleExpression)[]
+  targets: (IIdentifier | IMemberExpression | ISubscriptExpression | ITupleExpression)[]
   operator: '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//='
   value: TExpressionNode
 }

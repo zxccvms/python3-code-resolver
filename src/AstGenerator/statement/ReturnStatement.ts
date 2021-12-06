@@ -1,5 +1,5 @@
 import { ENodeType, ETokenType, IReturnStatement } from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { createLoc, isSameRank, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 
 class ReturnStatement extends BaseHandler {
@@ -10,7 +10,10 @@ class ReturnStatement extends BaseHandler {
     })
 
     this.tokens.next()
-    const argument = this.astGenerator.expression.handleMaybeTuple()
+    let argument
+    if (isSameRank([returnToken, this.tokens.getToken()], 'endAndStartLine')) {
+      argument = this.astGenerator.expression.handleMaybeTuple()
+    }
 
     const ReturnStatement = this.createNode(ENodeType.ReturnStatement, {
       argument,

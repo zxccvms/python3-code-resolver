@@ -84,11 +84,11 @@ class CallExpression extends BaseHandler {
     })
 
     this.tokens.next()
-    const value = this.astGenerator.expression.handle()
+    const value = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
 
-    if (!isToken(this.tokens.getToken(), [ETokenType.punctuation, ETokenType.bracket], [',', ')'])) {
-      throw new TypeError("Expected ')'")
-    }
+    this.check({
+      checkToken: () => isToken(this.tokens.getToken(), [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
+    })
 
     const AssignmentParam = this.createNode(ENodeType.AssignmentParam, {
       name,

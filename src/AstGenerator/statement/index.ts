@@ -4,6 +4,7 @@ import BaseHandler from '../BaseHandler'
 
 import BlockStatement from './BlockStatement'
 import ClassDeclaration from './ClassDeclaration'
+import ContinueStatement from './ContinueStatement'
 import EmptyStatement from './EmptyStatement'
 import ForStatement from './ForStatement'
 import FunctionDeclaration from './FunctionDeclaration'
@@ -12,6 +13,7 @@ import ImportStatement from './ImportStatement'
 import ReturnStatement from './ReturnStatement'
 import TryStatement from './TryStatement'
 import VariableDeclaration from './VariableDeclaration'
+import WhileStatement from './WhileStatement'
 
 class Statement extends BaseHandler {
   variableDeclaration: VariableDeclaration
@@ -24,6 +26,8 @@ class Statement extends BaseHandler {
   ifStatement: IfStatement
   forStatement: ForStatement
   returnStatement: ReturnStatement
+  whileStatement: WhileStatement
+  continueStatement: ContinueStatement
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -38,6 +42,8 @@ class Statement extends BaseHandler {
     this.ifStatement = new IfStatement(astGenerator)
     this.forStatement = new ForStatement(astGenerator)
     this.returnStatement = new ReturnStatement(astGenerator)
+    this.whileStatement = new WhileStatement(astGenerator)
+    this.continueStatement = new ContinueStatement(astGenerator)
   }
 
   /** 处理语句 */
@@ -64,6 +70,10 @@ class Statement extends BaseHandler {
         return this.forStatement.handle()
       case 'return':
         return this.returnStatement.handle()
+      case 'while':
+        return this.whileStatement.handle()
+      case 'continue':
+        return this.continueStatement.handle()
     }
   }
 }

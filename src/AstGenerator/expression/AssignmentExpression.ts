@@ -4,6 +4,7 @@ import {
   IAssignmentExpression,
   IIdentifier,
   IMemberExpression,
+  ISubscriptExpression,
   ITupleExpression,
   TExpressionNode,
   TNode,
@@ -24,7 +25,7 @@ class AssignmentExpression extends BaseHandler {
   }
 
   handle(
-    lastNode: ITupleExpression | IIdentifier | IMemberExpression,
+    lastNode: ITupleExpression | IIdentifier | IMemberExpression | ISubscriptExpression,
     environment: ENodeEnvironment
   ): IAssignmentExpression {
     const currentToken = this.tokens.getToken()
@@ -52,7 +53,12 @@ class AssignmentExpression extends BaseHandler {
   }
 
   private _isConformNode(node: TNode): node is ITupleExpression | IIdentifier | IMemberExpression {
-    return isNode(node, [ENodeType.TupleExpression, ENodeType.Identifier, ENodeType.MemberExpression])
+    return isNode(node, [
+      ENodeType.TupleExpression,
+      ENodeType.Identifier,
+      ENodeType.MemberExpression,
+      ENodeType.SubscriptExpression
+    ])
   }
 
   private _isConformToken(token: TToken) {

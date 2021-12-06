@@ -1,6 +1,6 @@
 import AstGenerator from 'src/AstGenerator/AstGenerator'
-import { ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
-import { addBaseNodeAttr, getPositionInfo, getTokenExtra, hasParenthesized, isToken } from 'src/utils'
+import { ENodeType, ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
+import { addBaseNodeAttr, createLoc, getPositionInfo, getTokenExtra, hasParenthesized, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
 
@@ -151,15 +151,28 @@ class Expression extends BaseHandler {
 
   /** 处理小括号token */
   handleSmallBracket(handleExpressionCb = () => this.handleMaybeTuple(ENodeEnvironment.bracket)): TExpressionNode {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.bracket, '(')) {
+    const leftBracket = this.tokens.getToken()
+    if (!isToken(leftBracket, ETokenType.bracket, '(')) {
       throw new TypeError("handleSmallBracket err: current token is not bracket '('")
     }
 
     this.tokens.next()
-    const expression = handleExpressionCb()
-    if (!isToken(this.tokens.getToken(), ETokenType.bracket, ')')) {
-      throw new TypeError("handleSmallBracket err: current token is not bracket ')'")
+
+    let expression: TExpressionNode
+    const currentToken = this.tokens.getToken()
+    if (isToken(currentToken, ETokenType.bracket, ')')) {
+      expression = this.createNode(ENodeType.TupleExpression, {
+        elements: [],
+        loc: {
+          start: getPositionInfo(currentToken, 'start'),
+          end: getPositionInfo(currentToken, 'start')
+        }
+      })
+    } else {
+      expression = handleExpressionCb()
+      if (!isToken(this.tokens.getToken(), ETokenType.bracket, ')')) {
+        throw new TypeError("handleSmallBracket err: current token is not bracket ')'")
+      }
     }
 
     this.tokens.next()
@@ -167,9 +180,10 @@ class Expression extends BaseHandler {
     return hasParenthesized(expression)
       ? expression
       : addBaseNodeAttr(expression, {
+          // loc: createLoc(leftBracket, this.tokens.getToken()),
           extra: {
             parenthesized: true,
-            parentStart: getPositionInfo(currentToken, 'start')
+            parentStart: getPositionInfo(leftBracket, 'start')
           }
         })
   }
