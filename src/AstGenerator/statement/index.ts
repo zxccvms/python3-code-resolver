@@ -1,6 +1,7 @@
 import { TStatementNode } from 'src/types'
 import AstGenerator from '../AstGenerator'
 import BaseHandler from '../BaseHandler'
+import { ENodeEnvironment } from '../types'
 
 import BlockStatement from './BlockStatement'
 import ClassDeclaration from './ClassDeclaration'
@@ -47,7 +48,7 @@ class Statement extends BaseHandler {
   }
 
   /** 处理语句 */
-  handle(): TStatementNode {
+  handle(environment: ENodeEnvironment): TStatementNode {
     const currentToken = this.tokens.getToken()
     switch (currentToken.value) {
       case 'pass':
@@ -69,7 +70,7 @@ class Statement extends BaseHandler {
       case 'for':
         return this.forStatement.handle()
       case 'return':
-        return this.returnStatement.handle()
+        return this.returnStatement.handle(environment)
       case 'while':
         return this.whileStatement.handle()
       case 'continue':

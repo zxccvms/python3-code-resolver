@@ -5,14 +5,14 @@ import { ENodeEnvironment } from '../types'
 
 /** 块声明 */
 class BlockStatement extends BaseHandler {
-  handle(startToken: TToken): IBlockStatement {
+  handle(startToken: TToken, environment: ENodeEnvironment = ENodeEnvironment.normal): IBlockStatement {
     let colonToken = this.tokens.getToken()
     if (!isToken(colonToken, ETokenType.punctuation, ':')) {
       throw new TypeError("handleBlockStatement err: currentToken is not operator ':'")
     }
 
     this.tokens.next()
-    const body = this._handleBody(startToken, colonToken)
+    const body = this._handleBody(startToken, colonToken, environment)
 
     const BlockStatement = this.createNode(ENodeType.BlockStatement, {
       body,
@@ -22,7 +22,7 @@ class BlockStatement extends BaseHandler {
     return BlockStatement
   }
 
-  private _handleBody(startToken: TToken, colonToken: TToken): IBlockStatement['body'] {
+  private _handleBody(startToken: TToken, colonToken: TToken, environment: ENodeEnvironment): IBlockStatement['body'] {
     const markToken = this.tokens.getToken()
     if (!markToken) {
       throw new TypeError('handleBlockStatement err: markToken is not exist')
@@ -30,7 +30,7 @@ class BlockStatement extends BaseHandler {
 
     // 单行定义
     if (isSameRank([colonToken, markToken], 'line')) {
-      return [this.astGenerator.expression.handle()]
+      return [this.astGenerator.expression.handle(environment)]
     }
     // 多行定义
     else {
@@ -42,7 +42,7 @@ class BlockStatement extends BaseHandler {
 
       const { payload } = this.findNodes({
         end: token => getColumn(token, 'start') <= indentCount,
-        step: () => this.astGenerator.handleNode(ENodeEnvironment.normal, nextIndentCount)
+        step: () => this.astGenerator.handleNode(environment, nextIndentCount)
       })
 
       return payload

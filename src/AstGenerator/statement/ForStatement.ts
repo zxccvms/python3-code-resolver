@@ -14,7 +14,7 @@ class ForStatement extends BaseHandler {
     this.tokens.next()
     const left = this._handleLeft()
     const right = this._handleRight()
-    const body = this.astGenerator.statement.blockStatement.handle(currentToken)
+    const body = this.astGenerator.statement.blockStatement.handle(currentToken, ENodeEnvironment.loopBody)
 
     const ForStatement = this.createNode(ENodeType.ForStatement, {
       left,

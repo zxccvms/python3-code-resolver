@@ -1,6 +1,7 @@
 import { ENodeType, ETokenType, IWhileStatement } from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
+import { ENodeEnvironment } from '../types'
 
 /** while循环语句 */
 class WhileStatement extends BaseHandler {
@@ -13,7 +14,7 @@ class WhileStatement extends BaseHandler {
 
     this.tokens.next()
     const test = this.astGenerator.expression.handleMaybeIf()
-    const body = this.astGenerator.statement.blockStatement.handle(whileToken)
+    const body = this.astGenerator.statement.blockStatement.handle(whileToken, ENodeEnvironment.loopBody)
 
     const WhileStatement = this.createNode(ENodeType.WhileStatement, {
       test,

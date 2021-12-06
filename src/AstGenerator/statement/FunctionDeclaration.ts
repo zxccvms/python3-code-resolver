@@ -8,6 +8,7 @@ import {
 } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
+import { ENodeEnvironment } from '../types'
 
 /** 处理函数定义节点 */
 class FunctionDeclaration extends BaseHandler {
@@ -21,7 +22,7 @@ class FunctionDeclaration extends BaseHandler {
     this.tokens.next()
     const id = this.astGenerator.expression.identifier.handle()
     const params = this._handleParams()
-    const body = this.astGenerator.statement.blockStatement.handle(defToken)
+    const body = this.astGenerator.statement.blockStatement.handle(defToken, ENodeEnvironment.functionBody)
 
     const FunctionDeclaration = this.createNode(ENodeType.FunctionDeclaration, {
       id,

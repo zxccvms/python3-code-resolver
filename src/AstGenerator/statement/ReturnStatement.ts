@@ -1,9 +1,14 @@
 import { ENodeType, ETokenType, IReturnStatement } from 'src/types'
-import { createLoc, isSameRank, isToken } from 'src/utils'
+import { createLoc, hasEnvironment, isSameRank, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
+import { ENodeEnvironment } from '../types'
 
 class ReturnStatement extends BaseHandler {
-  handle(): IReturnStatement {
+  handle(environment: ENodeEnvironment): IReturnStatement {
+    if (!hasEnvironment(environment, ENodeEnvironment.functionBody)) {
+      throw new SyntaxError('"return" can be used only within a function')
+    }
+
     const returnToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(returnToken, ETokenType.keyword, 'return')

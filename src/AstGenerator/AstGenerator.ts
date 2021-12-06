@@ -48,7 +48,7 @@ class AstGenerator {
     }
 
     // todo Statements must be separated by newlines or semicolons
-    return this.statement.handle() || this.expression.handle(environment)
+    return this.statement.handle(environment) || this.expression.handle(environment)
   }
 }
 
