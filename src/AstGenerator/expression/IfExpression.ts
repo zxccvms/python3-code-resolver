@@ -9,7 +9,7 @@ import { ENodeEnvironment } from '../types'
 class IfExpression extends BaseHandler {
   handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment) {
     const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.keyword, 'if')) {
+    if (isToken(currentToken, ETokenType.keyword, 'if') && this.isContinue(environment)) {
       return this.handle(lastNode, environment)
     }
 

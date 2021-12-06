@@ -33,6 +33,15 @@ class BaseHandler {
     return { code: currentToken ? 0 : 1, payload: result }
   }
 
+  /** 是否继续执行 */
+  isContinue(environment: ENodeEnvironment) {
+    if (environment === ENodeEnvironment.bracket) return true
+
+    const lastToken = this.tokens.getToken(-1)
+    const currentToken = this.tokens.getToken()
+    return isSameRank([lastToken, currentToken], 'endAndStartLine')
+  }
+
   /** 检查 */
   check(checkParams: ICheckParams) {
     if (!checkParams.checkToken()) {

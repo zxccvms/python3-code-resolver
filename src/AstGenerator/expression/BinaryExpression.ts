@@ -7,7 +7,7 @@ import { ENodeEnvironment } from '../types'
 class BinaryExpression extends BaseHandler {
   handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment): TExpressionNode {
     const currentToken = this.tokens.getToken()
-    if (this._isConformToken(currentToken)) {
+    if (this._isConformToken(currentToken) && this.isContinue(environment)) {
       const binaryExpression = this.handle(lastNode, environment)
       return this.handleMaybe(binaryExpression, environment)
     }

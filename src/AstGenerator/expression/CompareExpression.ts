@@ -1,15 +1,15 @@
 import { ENodeType, ETokenType, ICompareExpression, TExpressionNode, TToken } from 'src/types'
 import { createLoc, hasEnvironment, isExpressionNode, isSameRank, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment, IExpressionHandler } from '../types'
+import { ENodeEnvironment } from '../types'
 
 /** todo  比较表达式 a in b */
-class CompareExpression extends BaseHandler implements IExpressionHandler<ICompareExpression> {
+class CompareExpression extends BaseHandler {
   handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment) {
     const currentToken = this.tokens.getToken()
     const nextToken = this.tokens.getToken(1)
 
-    if (this._isConformToken(currentToken, nextToken, environment)) {
+    if (this._isConformToken(currentToken, nextToken, environment) && this.isContinue(environment)) {
       return this.handle(lastNode, environment)
     }
 

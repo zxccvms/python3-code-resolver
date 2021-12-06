@@ -6,6 +6,8 @@ import { ENodeEnvironment } from '../types'
 /** 逻辑表达式 */
 class LogicalExpression extends BaseHandler {
   handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment, disableOr: boolean = false): TExpressionNode {
+    if (!this.isContinue(environment)) return lastNode
+
     const currentToken = this.tokens.getToken()
     if (disableOr && isToken(currentToken, ETokenType.keyword, 'or')) return lastNode
 

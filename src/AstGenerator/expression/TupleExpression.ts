@@ -11,7 +11,7 @@ type THandleTupleOptions = {
 /** 处理元组 */
 class TupleExpression extends BaseHandler {
   handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment, options?: THandleTupleOptions) {
-    if (isToken(this.tokens.getToken(), ETokenType.punctuation, ',')) {
+    if (isToken(this.tokens.getToken(), ETokenType.punctuation, ',') && this.isContinue(environment)) {
       return this.handle(lastNode, environment, options)
     }
 
