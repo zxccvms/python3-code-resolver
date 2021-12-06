@@ -10,7 +10,7 @@ class TemplateLiteral extends BaseHandler {
     const extra = getTokenExtra(currentToken)
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.string),
-      extraCheck: () => extra.prefix !== 'f'
+      extraCheck: () => extra.prefix === 'f'
     })
 
     const expressions = this._handleExpressions(extra.tokensFragment)
