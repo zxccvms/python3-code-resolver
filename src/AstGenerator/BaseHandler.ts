@@ -1,5 +1,5 @@
 import NodeGenerator from '../NodeGenerator'
-import { ETokenType, TNode, TToken } from '../types'
+import { ETokenType } from '../types'
 import TokenArray from './utils/TokenArray'
 import { ENodeEnvironment, ICheckParams, IFindNodesParams } from './types'
 import { hasEnvironment, isSameRank, isToken } from 'src/utils'

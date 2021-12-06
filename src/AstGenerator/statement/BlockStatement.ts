@@ -41,7 +41,7 @@ class BlockStatement extends BaseHandler {
       }
 
       const { payload } = this.findNodes({
-        end: token => getColumn(token, 'start') !== indentCount,
+        end: token => getColumn(token, 'start') <= indentCount,
         step: () => this.astGenerator.handleNode(ENodeEnvironment.normal, nextIndentCount)
       })
 

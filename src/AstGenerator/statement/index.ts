@@ -9,6 +9,7 @@ import ForStatement from './ForStatement'
 import FunctionDeclaration from './FunctionDeclaration'
 import IfStatement from './IfStatement'
 import ImportStatement from './ImportStatement'
+import ReturnStatement from './ReturnStatement'
 import TryStatement from './TryStatement'
 import VariableDeclaration from './VariableDeclaration'
 
@@ -22,6 +23,7 @@ class Statement extends BaseHandler {
   emptyStatement: EmptyStatement
   ifStatement: IfStatement
   forStatement: ForStatement
+  returnStatement: ReturnStatement
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -35,6 +37,7 @@ class Statement extends BaseHandler {
     this.emptyStatement = new EmptyStatement(astGenerator)
     this.ifStatement = new IfStatement(astGenerator)
     this.forStatement = new ForStatement(astGenerator)
+    this.returnStatement = new ReturnStatement(astGenerator)
   }
 
   /** 处理语句 */
@@ -59,6 +62,8 @@ class Statement extends BaseHandler {
         return this.tryStatement.handle()
       case 'for':
         return this.forStatement.handle()
+      case 'return':
+        return this.returnStatement.handle()
     }
   }
 }

@@ -9,16 +9,14 @@ import TokenArray from './utils/TokenArray'
 /** AST生成器 */
 class AstGenerator {
   tokens: TokenArray
-  createNode: NodeGenerator['generate']
   expression: Expression
   statement: Statement
+  createNode = new NodeGenerator().generate
 
   constructor(tokens: TToken[]) {
     if (!Array.isArray(tokens)) throw new TypeError('tokens is not Array')
 
     this.tokens = new TokenArray(tokens)
-    const nodeGenerator = new NodeGenerator()
-    this.createNode = nodeGenerator.generate.bind(nodeGenerator)
     this.expression = new Expression(this)
     this.statement = new Statement(this)
   }

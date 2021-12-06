@@ -131,8 +131,10 @@ export const enum ENodeType {
   Program = 'Program',
   /** for 语句 */
   ForStatement = 'ForStatement',
-  /** 变量声明表达式 global a,b */
-  VariableDeclaration = 'VariableDeclaration'
+  /** 变量声明语句 global a,b */
+  VariableDeclaration = 'VariableDeclaration',
+  /** 返回语句 return 1*/
+  ReturnStatement = 'ReturnStatement'
 }
 
 /** 特殊的节点映射表 */
@@ -191,6 +193,7 @@ export type TStatementNodeMap = {
   [ENodeType.Program]: IProgram
   [ENodeType.ForStatement]: IForStatement
   [ENodeType.VariableDeclaration]: IVariableDeclaration
+  [ENodeType.ReturnStatement]: IReturnStatement
 }
 
 export type TStatementNode<T extends keyof TStatementNodeMap = keyof TStatementNodeMap> = TStatementNodeMap[T]
@@ -325,6 +328,11 @@ export interface IVariableDeclaration extends TBaseNodeAttr {
   type: ENodeType.VariableDeclaration
   kind: string
   declarations: IIdentifier[]
+}
+
+export interface IReturnStatement extends TBaseNodeAttr {
+  type: ENodeType.ReturnStatement
+  argument: TExpressionNode
 }
 
 export interface IAssignmentExpression extends TBaseNodeAttr {

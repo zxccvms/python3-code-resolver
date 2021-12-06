@@ -197,10 +197,9 @@ class Expression extends BaseHandler {
         }
       default: {
         const position = getPositionInfo(currentToken, 'start')
-        throw new TypeError(`Unexpected token: 
-				value: ${currentToken.value} 
-				line: ${position.line} 
-				column: ${position.column}`)
+        throw new TypeError(
+          `Unexpected token: value: ${currentToken.value} line: ${position.line} column: ${position.column}`
+        )
       }
     }
   }
