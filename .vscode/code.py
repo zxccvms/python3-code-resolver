@@ -1,2 +1,1 @@
-with (a,b) as a[1:]:
-  text = f.read()
+[1] = 1

@@ -1,6 +1,7 @@
 import {
   ENodeType,
   ETokenType,
+  IArrayExpression,
   IAssignmentExpression,
   IIdentifier,
   IMemberExpression,
@@ -17,17 +18,14 @@ import { ENodeEnvironment } from '../types'
 class AssignmentExpression extends BaseHandler {
   handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment): TExpressionNode {
     const currentToken = this.tokens.getToken()
-    if (this._isConformToken(currentToken) && this._isConformNode(lastNode)) {
+    if (this._isConformToken(currentToken)) {
       return this.handle(lastNode, environment)
     }
 
     return lastNode
   }
 
-  handle(
-    lastNode: ITupleExpression | IIdentifier | IMemberExpression | ISubscriptExpression,
-    environment: ENodeEnvironment
-  ): IAssignmentExpression {
+  handle(lastNode: TExpressionNode, environment: ENodeEnvironment): IAssignmentExpression {
     const currentToken = this.tokens.getToken()
 
     this.check({
@@ -42,9 +40,14 @@ class AssignmentExpression extends BaseHandler {
     const rightNode = this.astGenerator.expression.handleMaybeAssignment()
 
     const isAssignmentExpression = isNode(rightNode, ENodeType.AssignmentExpression)
+    const targets = (
+      isAssignmentExpression ? [lastNode, ...rightNode.targets] : [lastNode]
+    ) as IAssignmentExpression['targets']
+    const value = isAssignmentExpression ? rightNode.value : rightNode
+
     const AssignmentExpression = this.createNode(ENodeType.AssignmentExpression, {
-      targets: isAssignmentExpression ? [lastNode, ...rightNode.targets] : [lastNode],
-      value: isAssignmentExpression ? rightNode.value : rightNode,
+      targets,
+      value,
       operator: currentToken.value as '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//=',
       loc: createLoc(lastNode, rightNode)
     })
@@ -52,13 +55,18 @@ class AssignmentExpression extends BaseHandler {
     return AssignmentExpression
   }
 
-  private _isConformNode(node: TNode): node is ITupleExpression | IIdentifier | IMemberExpression {
-    return isNode(node, [
-      ENodeType.TupleExpression,
-      ENodeType.Identifier,
-      ENodeType.MemberExpression,
-      ENodeType.SubscriptExpression
-    ])
+  private _isConformNode(
+    node: TNode
+  ): node is ITupleExpression | IIdentifier | IMemberExpression | ISubscriptExpression | IArrayExpression {
+    if (isNode(node, ENodeType.ArrayExpression)) {
+      return node.elements.every(node => isNode(node, ENodeType.Identifier))
+    } else
+      return isNode(node, [
+        ENodeType.TupleExpression,
+        ENodeType.Identifier,
+        ENodeType.MemberExpression,
+        ENodeType.SubscriptExpression
+      ])
   }
 
   private _isConformToken(token: TToken) {
