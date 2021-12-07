@@ -4,7 +4,10 @@ import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
 
 class MemberExpression extends BaseHandler {
-  handleMaybe<T extends TExpressionNode>(lastNode: T, environment: ENodeEnvironment): T | IMemberExpression {
+  handleMaybe<T extends TExpressionNode>(
+    lastNode: T,
+    environment: ENodeEnvironment = ENodeEnvironment.normal
+  ): T | IMemberExpression {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.punctuation, '.')) {
       const memberExpression = this.handle(lastNode, environment)

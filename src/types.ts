@@ -118,6 +118,8 @@ export const enum ENodeType {
   // 语句
   /** 导入语句 */
   ImportStatement = 'ImportStatement',
+  /** 导入来自语句 */
+  ImportFromStatement = 'ImportFromStatement',
   /** 函数定义 def a(): 1 */
   FunctionDeclaration = 'FunctionDeclaration',
   /** 类定义 class a: 1 */
@@ -197,6 +199,7 @@ export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressi
 /** 语句节点映射表 */
 export type TStatementNodeMap = {
   [ENodeType.ImportStatement]: IImportStatement
+  [ENodeType.ImportFromStatement]: IImportFromStatement
   [ENodeType.FunctionDeclaration]: IFunctionDeclaration
   [ENodeType.ClassDeclaration]: IClassDeclaration
   [ENodeType.BlockStatement]: IBlockStatement
@@ -377,8 +380,13 @@ export interface ICallExpression extends TBaseNodeAttr {
 export interface IImportStatement extends TBaseNodeAttr {
   type: ENodeType.ImportStatement
   names: IAliasExpression[]
-  level?: number
-  module?: IIdentifier | IMemberExpression
+}
+
+export interface IImportFromStatement extends TBaseNodeAttr {
+  type: ENodeType.ImportFromStatement
+  names: IAliasExpression[]
+  level: number
+  module: IIdentifier | IMemberExpression
 }
 
 export interface ICompareExpression extends TBaseNodeAttr {

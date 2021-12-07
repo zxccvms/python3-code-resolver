@@ -12,6 +12,7 @@ import EmptyStatement from './EmptyStatement'
 import ForStatement from './ForStatement'
 import FunctionDeclaration from './FunctionDeclaration'
 import IfStatement from './IfStatement'
+import ImportFromStatement from './ImportFromStatement'
 import ImportStatement from './ImportStatement'
 import ReturnStatement from './ReturnStatement'
 import TryStatement from './TryStatement'
@@ -23,6 +24,7 @@ class Statement extends BaseHandler {
   variableDeclaration: VariableDeclaration
   tryStatement: TryStatement
   importStatement: ImportStatement
+  importFromStatement: ImportFromStatement
   functionDeclaration: FunctionDeclaration
   classDeclaration: ClassDeclaration
   blockStatement: BlockStatement
@@ -42,6 +44,7 @@ class Statement extends BaseHandler {
     this.variableDeclaration = new VariableDeclaration(astGenerator)
     this.tryStatement = new TryStatement(astGenerator)
     this.importStatement = new ImportStatement(astGenerator)
+    this.importFromStatement = new ImportFromStatement(astGenerator)
     this.functionDeclaration = new FunctionDeclaration(astGenerator)
     this.classDeclaration = new ClassDeclaration(astGenerator)
     this.blockStatement = new BlockStatement(astGenerator)
@@ -72,8 +75,9 @@ class Statement extends BaseHandler {
       case 'if':
         return this.ifStatement.handle(environment)
       case 'import':
-      case 'from':
         return this.importStatement.handle()
+      case 'from':
+        return this.importFromStatement.handle()
       case 'try':
         return this.tryStatement.handle(environment)
       case 'for':
