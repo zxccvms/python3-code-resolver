@@ -143,7 +143,11 @@ export const enum ENodeType {
   /** continue语句 */
   ContinueStatement = 'ContinueStatement',
   /** with语句 */
-  WithStatement = 'WithStatement'
+  WithStatement = 'WithStatement',
+  /** break语句 */
+  BreakStatement = 'BreakStatement',
+  /** del语句 */
+  DeleteStatement = 'DeleteStatement'
 }
 
 /** 特殊的节点映射表 */
@@ -206,6 +210,8 @@ export type TStatementNodeMap = {
   [ENodeType.WhileStatement]: IWhileStatement
   [ENodeType.ContinueStatement]: IContinueStatement
   [ENodeType.WithStatement]: IWithStatement
+  [ENodeType.BreakStatement]: IBreakStatement
+  [ENodeType.DeleteStatement]: IDeleteStatement
 }
 
 export type TStatementNode<T extends keyof TStatementNodeMap = keyof TStatementNodeMap> = TStatementNodeMap[T]
@@ -457,4 +463,13 @@ export interface IWithStatement extends TBaseNodeAttr {
   left: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
   right: (IIdentifier | MemberExpression | SubscriptExpression | IArrayExpression)[]
   body: IBlockStatement
+}
+
+export interface IBreakStatement extends TBaseNodeAttr {
+  type: ENodeType.BreakStatement
+}
+
+export interface IDeleteStatement extends TBaseNodeAttr {
+  type: ENodeType.DeleteStatement
+  targets: Omit<TExpressionNode, ENodeType.AssignmentExpression | ENodeType.IfExpression>[]
 }

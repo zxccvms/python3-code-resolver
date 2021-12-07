@@ -1,10 +1,11 @@
 import { ENodeType, ETokenType, IExceptHandler, ITryStatement } from '../../types'
 import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
+import { ENodeEnvironment } from '../types'
 
 /** try语句 */
 class TryStatement extends BaseHandler {
-  handle(): ITryStatement {
+  handle(environment: ENodeEnvironment): ITryStatement {
     const currentToken = this.tokens.getToken()
     if (!isToken(currentToken, ETokenType.keyword, 'try')) {
       throw new TypeError("TryStatement err: currentToken is not keyword 'try'")
@@ -12,8 +13,8 @@ class TryStatement extends BaseHandler {
 
     this.tokens.next()
     const body = this.astGenerator.statement.blockStatement.handle(currentToken)
-    const handlers = this._handleHandlers()
-    const finalBody = this._handleFinalBody()
+    const handlers = this._handleHandlers(environment)
+    const finalBody = this._handleFinalBody(environment)
 
     const TryStatement = this.createNode(ENodeType.TryStatement, {
       body,
@@ -25,18 +26,18 @@ class TryStatement extends BaseHandler {
     return TryStatement
   }
 
-  private _handleHandlers(): ITryStatement['handlers'] {
+  private _handleHandlers(environment: ENodeEnvironment): ITryStatement['handlers'] {
     const markToken = this.tokens.getToken()
 
     const { payload: handlers } = this.findNodes({
       end: token => !isToken(token, ETokenType.keyword, 'except') || !isSameRank([markToken, token], 'column'),
-      step: () => this._handleExceptHandler()
+      step: () => this._handleExceptHandler(environment)
     })
 
     return handlers
   }
 
-  private _handleExceptHandler(): IExceptHandler {
+  private _handleExceptHandler(environment: ENodeEnvironment): IExceptHandler {
     const exceptToken = this.tokens.getToken()
     if (!isToken(exceptToken, ETokenType.keyword, 'except')) {
       throw new TypeError("ExceptHandler err: currentToken is not keyword 'except'")
@@ -50,7 +51,7 @@ class TryStatement extends BaseHandler {
 
     const errName = this._handleErrName()
     const name = this._handleName()
-    const body = this.astGenerator.statement.blockStatement.handle(exceptToken)
+    const body = this.astGenerator.statement.blockStatement.handle(exceptToken, environment)
 
     const ExceptHandlerStatement = this.createNode(ENodeType.ExceptHandler, {
       body,
@@ -81,12 +82,12 @@ class TryStatement extends BaseHandler {
     return name
   }
 
-  private _handleFinalBody(): ITryStatement['finalBody'] {
+  private _handleFinalBody(environment: ENodeEnvironment): ITryStatement['finalBody'] {
     const finallyToken = this.tokens.getToken()
     if (!isToken(finallyToken, ETokenType.keyword, 'finally')) return null
 
     this.tokens.next()
-    const BlockStatement = this.astGenerator.statement.blockStatement.handle(finallyToken)
+    const BlockStatement = this.astGenerator.statement.blockStatement.handle(finallyToken, environment)
 
     return BlockStatement
   }

@@ -58,15 +58,9 @@ class AssignmentExpression extends BaseHandler {
   private _isConformNode(
     node: TNode
   ): node is ITupleExpression | IIdentifier | IMemberExpression | ISubscriptExpression | IArrayExpression {
-    if (isNode(node, ENodeType.ArrayExpression)) {
+    if (isNode(node, [ENodeType.ArrayExpression, ENodeType.TupleExpression])) {
       return node.elements.every(node => isNode(node, ENodeType.Identifier))
-    } else
-      return isNode(node, [
-        ENodeType.TupleExpression,
-        ENodeType.Identifier,
-        ENodeType.MemberExpression,
-        ENodeType.SubscriptExpression
-      ])
+    } else return isNode(node, [ENodeType.Identifier, ENodeType.MemberExpression, ENodeType.SubscriptExpression])
   }
 
   private _isConformToken(token: TToken) {

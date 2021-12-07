@@ -5,7 +5,7 @@ import { ENodeEnvironment } from '../types'
 
 /** for 语句 */
 class ForStatement extends BaseHandler {
-  handle(): IForStatement {
+  handle(environment: ENodeEnvironment): IForStatement {
     const currentToken = this.tokens.getToken()
     if (!isToken(currentToken, ETokenType.keyword, 'for')) {
       throw new TypeError("handleForStatement err: currentToken is not keyword 'for'")
@@ -14,7 +14,10 @@ class ForStatement extends BaseHandler {
     this.tokens.next()
     const left = this._handleLeft()
     const right = this._handleRight()
-    const body = this.astGenerator.statement.blockStatement.handle(currentToken, ENodeEnvironment.loopBody)
+    const body = this.astGenerator.statement.blockStatement.handle(
+      currentToken,
+      environment | ENodeEnvironment.loopBody
+    )
 
     const ForStatement = this.createNode(ENodeType.ForStatement, {
       left,

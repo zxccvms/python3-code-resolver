@@ -7,9 +7,9 @@ export enum ENodeEnvironment {
   /** 括号环境 */
   bracket = 0b1,
   /** 循环体内 */
-  loopBody = 0b01,
+  loopBody = 0b10,
   /** 函数体内 */
-  functionBody = 0b001
+  functionBody = 0b100
 }
 
 export interface IFindNodesParams<T> {

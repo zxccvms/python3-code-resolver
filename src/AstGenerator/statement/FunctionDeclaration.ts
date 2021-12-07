@@ -13,7 +13,7 @@ import { ENodeEnvironment } from '../types'
 /** 处理函数定义节点 */
 class FunctionDeclaration extends BaseHandler {
   /** 处理函数定义节点 */
-  handle(): IFunctionDeclaration {
+  handle(environment: ENodeEnvironment): IFunctionDeclaration {
     const defToken = this.tokens.getToken()
     if (!isToken(defToken, ETokenType.keyword, 'def')) {
       throw new TypeError('handleFunctionDeclaration err: currentToken is not keyword "def"')
@@ -22,7 +22,10 @@ class FunctionDeclaration extends BaseHandler {
     this.tokens.next()
     const id = this.astGenerator.expression.identifier.handle()
     const params = this._handleParams()
-    const body = this.astGenerator.statement.blockStatement.handle(defToken, ENodeEnvironment.functionBody)
+    const body = this.astGenerator.statement.blockStatement.handle(
+      defToken,
+      environment | ENodeEnvironment.functionBody
+    )
 
     const FunctionDeclaration = this.createNode(ENodeType.FunctionDeclaration, {
       id,

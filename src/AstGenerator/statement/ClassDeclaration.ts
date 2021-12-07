@@ -9,10 +9,11 @@ import {
 } from '../../types'
 import { createLoc, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
+import { ENodeEnvironment } from '../types'
 
 /** 类声明 */
 class ClassDeclaration extends BaseHandler {
-  handle(): IClassDeclaration {
+  handle(environment: ENodeEnvironment): IClassDeclaration {
     const classToken = this.tokens.getToken()
     if (!isToken(classToken, ETokenType.keyword, 'class')) {
       throw new TypeError("handleClassDeclaration err: currentToken is not keyword 'class'")
@@ -21,7 +22,7 @@ class ClassDeclaration extends BaseHandler {
     this.tokens.next()
     const id = this.astGenerator.expression.identifier.handle()
     const params = this._handleParams()
-    const body = this.astGenerator.statement.blockStatement.handle(classToken)
+    const body = this.astGenerator.statement.blockStatement.handle(classToken, environment)
 
     const ClassDeclaration = this.createNode(ENodeType.ClassDeclaration, {
       id,

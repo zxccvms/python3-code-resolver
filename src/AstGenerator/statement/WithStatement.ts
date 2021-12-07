@@ -18,6 +18,7 @@ class WithStatement extends BaseHandler {
       checkToken: () => isToken(asToken, ETokenType.keyword, 'as')
     })
 
+    this.tokens.next()
     const right = this._handleRight()
     const body = this.astGenerator.statement.blockStatement.handle(withToken)
 
@@ -44,7 +45,7 @@ class WithStatement extends BaseHandler {
   private _handleRight(): IWithStatement['right'] {
     const { payload } = this.findNodes({
       end: token => isToken(token, ETokenType.punctuation, ':'),
-      step: () => this.astGenerator.expression.handleMaybeIf(),
+      step: () => this.astGenerator.expression.handleMaybeIf(), // todo
       slice: token => isToken(token, ETokenType.punctuation, ',')
     })
 
