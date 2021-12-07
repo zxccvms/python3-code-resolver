@@ -1,3 +1,6 @@
+import { MemberExpression } from '@babel/types'
+import SubscriptExpression from './AstGenerator/expression/SubscriptExpression'
+
 export enum ETokenType {
   /** 关键字 def global pass */
   keyword = 'keyword',
@@ -138,7 +141,9 @@ export const enum ENodeType {
   /** while语句 */
   WhileStatement = 'WhileStatement',
   /** continue语句 */
-  ContinueStatement = 'ContinueStatement'
+  ContinueStatement = 'ContinueStatement',
+  /** with语句 */
+  WithStatement = 'WithStatement'
 }
 
 /** 特殊的节点映射表 */
@@ -200,6 +205,7 @@ export type TStatementNodeMap = {
   [ENodeType.ReturnStatement]: IReturnStatement
   [ENodeType.WhileStatement]: IWhileStatement
   [ENodeType.ContinueStatement]: IContinueStatement
+  [ENodeType.WithStatement]: IWithStatement
 }
 
 export type TStatementNode<T extends keyof TStatementNodeMap = keyof TStatementNodeMap> = TStatementNodeMap[T]
@@ -209,7 +215,7 @@ export type TNodeMap = TSpecialNodeMap & TExpressionNodeMap & TStatementNodeMap
 
 export type TNode<T extends ENodeType = ENodeType> = TNodeMap[T]
 
-export type TBaseNodeAttr = {
+export interface TBaseNodeAttr {
   /** 额外的信息 */
   extra?: {
     /** 是否被小括号包裹 */
@@ -330,30 +336,9 @@ export interface IBinaryExpression extends TBaseNodeAttr {
   right: TExpressionNode
 }
 
-export interface IVariableDeclaration extends TBaseNodeAttr {
-  type: ENodeType.VariableDeclaration
-  kind: string
-  declarations: IIdentifier[]
-}
-
-export interface IReturnStatement extends TBaseNodeAttr {
-  type: ENodeType.ReturnStatement
-  argument: TExpressionNode
-}
-
-export interface IWhileStatement extends TBaseNodeAttr {
-  type: ENodeType.WhileStatement
-  test: TExpressionNode
-  body: IBlockStatement
-}
-
-export interface IContinueStatement extends TBaseNodeAttr {
-  type: ENodeType.ContinueStatement
-}
-
 export interface IAssignmentExpression extends TBaseNodeAttr {
   type: ENodeType.AssignmentExpression
-  targets: (IIdentifier | IMemberExpression | ISubscriptExpression | ITupleExpression)[]
+  targets: (IIdentifier | IMemberExpression | ISubscriptExpression | ITupleExpression | IArrayExpression)[]
   operator: '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//='
   value: TExpressionNode
 }
@@ -444,5 +429,32 @@ export interface IForStatement extends TBaseNodeAttr {
   type: ENodeType.ForStatement
   left: TExpressionNode
   right: TExpressionNode
+  body: IBlockStatement
+}
+
+export interface IVariableDeclaration extends TBaseNodeAttr {
+  type: ENodeType.VariableDeclaration
+  kind: string
+  declarations: IIdentifier[]
+}
+
+export interface IReturnStatement extends TBaseNodeAttr {
+  type: ENodeType.ReturnStatement
+  argument: TExpressionNode
+}
+
+export interface IWhileStatement extends TBaseNodeAttr {
+  type: ENodeType.WhileStatement
+  test: TExpressionNode
+  body: IBlockStatement
+}
+
+export interface IContinueStatement extends TBaseNodeAttr {
+  type: ENodeType.ContinueStatement
+}
+
+export interface IWithStatement extends TBaseNodeAttr {
+  left: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  right: (IIdentifier | MemberExpression | SubscriptExpression | IArrayExpression)[]
   body: IBlockStatement
 }
