@@ -3,7 +3,7 @@ import { expressionNodeTypes, statementNodeTypes } from './const'
 import {
   ENodeType,
   ETokenType,
-  TBaseNodeAttr,
+  IBaseNodeAttr,
   TExpressionNode,
   TLoc,
   TNode,
@@ -27,7 +27,7 @@ export function heavyArray<T>(targetArray: T[]): T[] {
 }
 
 /** 节点添加基础属性 */
-export function addBaseNodeAttr<T extends TNode>(node: T, baseAttr: TBaseNodeAttr): T {
+export function addBaseNodeAttr<T extends TNode>(node: T, baseAttr: IBaseNodeAttr): T {
   return {
     ...node,
     ...baseAttr

@@ -14,6 +14,7 @@ import FunctionDeclaration from './FunctionDeclaration'
 import IfStatement from './IfStatement'
 import ImportFromStatement from './ImportFromStatement'
 import ImportStatement from './ImportStatement'
+import RaiseStatement from './RaiseStatement'
 import ReturnStatement from './ReturnStatement'
 import TryStatement from './TryStatement'
 import VariableDeclaration from './VariableDeclaration'
@@ -37,6 +38,7 @@ class Statement extends BaseHandler {
   breakStatement: BreakStatement
   withStatement: WithStatement
   deleteStatement: DeleteStatement
+  raiseStatement: RaiseStatement
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -57,6 +59,7 @@ class Statement extends BaseHandler {
     this.breakStatement = new BreakStatement(astGenerator)
     this.withStatement = new WithStatement(astGenerator)
     this.deleteStatement = new DeleteStatement(astGenerator)
+    this.raiseStatement = new RaiseStatement(astGenerator)
   }
 
   /** 处理语句 */
@@ -94,6 +97,8 @@ class Statement extends BaseHandler {
         return this.withStatement.handle()
       case 'del':
         return this.deleteStatement.handle()
+      case 'raise':
+        return this.raiseStatement.handle()
     }
   }
 }

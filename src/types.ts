@@ -151,7 +151,9 @@ export const enum ENodeType {
   /** break语句 */
   BreakStatement = 'BreakStatement',
   /** del语句 */
-  DeleteStatement = 'DeleteStatement'
+  DeleteStatement = 'DeleteStatement',
+  /** raise语句 */
+  RaiseStatement = 'RaiseStatement'
 }
 
 /** 特殊的节点映射表 */
@@ -218,6 +220,7 @@ export type TStatementNodeMap = {
   [ENodeType.WithStatement]: IWithStatement
   [ENodeType.BreakStatement]: IBreakStatement
   [ENodeType.DeleteStatement]: IDeleteStatement
+  [ENodeType.RaiseStatement]: IRaiseStatement
 }
 
 export type TStatementNode<T extends keyof TStatementNodeMap = keyof TStatementNodeMap> = TStatementNodeMap[T]
@@ -227,7 +230,7 @@ export type TNodeMap = TSpecialNodeMap & TExpressionNodeMap & TStatementNodeMap
 
 export type TNode<T extends ENodeType = ENodeType> = TNodeMap[T]
 
-export interface TBaseNodeAttr {
+export interface IBaseNodeAttr {
   /** 额外的信息 */
   extra?: {
     /** 是否被小括号包裹 */
@@ -240,36 +243,36 @@ export interface TBaseNodeAttr {
 }
 
 // 特殊节点定义
-export interface IDictionaryProperty extends TBaseNodeAttr {
+export interface IDictionaryProperty extends IBaseNodeAttr {
   type: ENodeType.DictionaryProperty
   key: TExpressionNode
   value: TExpressionNode
 }
 
-export interface IAssignmentParam extends TBaseNodeAttr {
+export interface IAssignmentParam extends IBaseNodeAttr {
   type: ENodeType.AssignmentParam
   name: IIdentifier
   value: TExpressionNode
 }
 
-export interface ITupleParam extends TBaseNodeAttr {
+export interface ITupleParam extends IBaseNodeAttr {
   type: ENodeType.TupleParam
   name: IIdentifier
 }
 
-export interface IDictionaryParam extends TBaseNodeAttr {
+export interface IDictionaryParam extends IBaseNodeAttr {
   type: ENodeType.DictionaryParam
   name: IIdentifier
 }
 
-export interface IExceptHandler extends TBaseNodeAttr {
+export interface IExceptHandler extends IBaseNodeAttr {
   type: ENodeType.ExceptHandler
   errName?: TExpressionNode
   name?: IIdentifier
   body: IBlockStatement
 }
 
-export interface ISliceExpression extends TBaseNodeAttr {
+export interface ISliceExpression extends IBaseNodeAttr {
   type: ENodeType.SliceExpression
   lower: TExpressionNode
   upper: TExpressionNode
@@ -277,127 +280,127 @@ export interface ISliceExpression extends TBaseNodeAttr {
 }
 
 // 表达式节点定义
-export interface INoneLiteral extends TBaseNodeAttr {
+export interface INoneLiteral extends IBaseNodeAttr {
   type: ENodeType.NoneLiteral
 }
 
-export interface IBooleanLiteral extends TBaseNodeAttr {
+export interface IBooleanLiteral extends IBaseNodeAttr {
   type: ENodeType.BooleanLiteral
   value: boolean
 }
 
-export interface INumberLiteral extends TBaseNodeAttr {
+export interface INumberLiteral extends IBaseNodeAttr {
   type: ENodeType.NumberLiteral
   value: number
   raw: string
 }
 
-export interface IStringLiteral extends TBaseNodeAttr {
+export interface IStringLiteral extends IBaseNodeAttr {
   type: ENodeType.StringLiteral
   value: string
   raw: string
   prefix?: 'u' | 'r'
 }
 
-export interface ITemplateLiteral extends TBaseNodeAttr {
+export interface ITemplateLiteral extends IBaseNodeAttr {
   type: ENodeType.TemplateLiteral
   expressions: TExpressionNode[]
 }
 
-export interface IIdentifier extends TBaseNodeAttr {
+export interface IIdentifier extends IBaseNodeAttr {
   type: ENodeType.Identifier
   name: string
 }
 
-export interface IUnaryExpression extends TBaseNodeAttr {
+export interface IUnaryExpression extends IBaseNodeAttr {
   type: ENodeType.UnaryExpression
   operator: '-' | '+' | 'not'
   argument: TExpressionNode
 }
-export interface IIfExpression extends TBaseNodeAttr {
+export interface IIfExpression extends IBaseNodeAttr {
   type: ENodeType.IfExpression
   test: TExpressionNode
   body: TExpressionNode
   alternate: TExpressionNode
 }
 
-export interface ILogicalExpression extends TBaseNodeAttr {
+export interface ILogicalExpression extends IBaseNodeAttr {
   type: ENodeType.LogicalExpression
   operator: 'and' | 'or'
   left: TExpressionNode
   right: TExpressionNode
 }
 
-export interface ISetExpression extends TBaseNodeAttr {
+export interface ISetExpression extends IBaseNodeAttr {
   type: ENodeType.SetExpression
   elements: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
 }
 
-export interface ITupleExpression extends TBaseNodeAttr {
+export interface ITupleExpression extends IBaseNodeAttr {
   type: ENodeType.TupleExpression
   elements: TExpressionNode[]
 }
 
-export interface IArrayExpression extends TBaseNodeAttr {
+export interface IArrayExpression extends IBaseNodeAttr {
   type: ENodeType.ArrayExpression
   elements: TExpressionNode[]
 }
-export interface IDictionaryExpression extends TBaseNodeAttr {
+export interface IDictionaryExpression extends IBaseNodeAttr {
   type: ENodeType.DictionaryExpression
   properties: IDictionaryProperty[]
 }
-export interface IBinaryExpression extends TBaseNodeAttr {
+export interface IBinaryExpression extends IBaseNodeAttr {
   type: ENodeType.BinaryExpression
   operator: '+' | '-' | '*' | '/' | '%' | '//' | '**' | '==' | '!=' | '>=' | '<=' | '<' | '>'
   left: TExpressionNode
   right: TExpressionNode
 }
 
-export interface IAssignmentExpression extends TBaseNodeAttr {
+export interface IAssignmentExpression extends IBaseNodeAttr {
   type: ENodeType.AssignmentExpression
   targets: (IIdentifier | IMemberExpression | ISubscriptExpression | ITupleExpression | IArrayExpression)[]
   operator: '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//='
   value: TExpressionNode
 }
 
-export interface IAliasExpression extends TBaseNodeAttr {
+export interface IAliasExpression extends IBaseNodeAttr {
   type: ENodeType.AliasExpression
   name: string
   asname?: string
 }
 
-export interface IMemberExpression extends TBaseNodeAttr {
+export interface IMemberExpression extends IBaseNodeAttr {
   type: ENodeType.MemberExpression
   object: TExpressionNode
   property: IIdentifier
 }
 
-export interface ISubscriptExpression extends TBaseNodeAttr {
+export interface ISubscriptExpression extends IBaseNodeAttr {
   type: ENodeType.SubscriptExpression
   object: TExpressionNode
   subscript: (TExpressionNode | ISliceExpression)[]
 }
 
-export interface ICallExpression extends TBaseNodeAttr {
+export interface ICallExpression extends IBaseNodeAttr {
   type: ENodeType.CallExpression
   callee: TExpressionNode
   params: TExpressionNode[]
   keywords: IAssignmentParam[]
 }
 
-export interface IImportStatement extends TBaseNodeAttr {
+export interface IImportStatement extends IBaseNodeAttr {
   type: ENodeType.ImportStatement
   names: IAliasExpression[]
 }
 
-export interface IImportFromStatement extends TBaseNodeAttr {
+export interface IImportFromStatement extends IBaseNodeAttr {
   type: ENodeType.ImportFromStatement
   names: IAliasExpression[]
   level: number
   module: IIdentifier | IMemberExpression
 }
 
-export interface ICompareExpression extends TBaseNodeAttr {
+export interface ICompareExpression extends IBaseNodeAttr {
   type: ENodeType.CompareExpression
   left: TExpressionNode
   operator: 'is' | 'in' | 'not in'
@@ -405,37 +408,37 @@ export interface ICompareExpression extends TBaseNodeAttr {
 }
 
 // 语句节点定义
-export interface IFunctionDeclaration extends TBaseNodeAttr {
+export interface IFunctionDeclaration extends IBaseNodeAttr {
   type: ENodeType.FunctionDeclaration
   id: IIdentifier
   params: (IIdentifier | IAssignmentParam | ITupleParam | IDictionaryParam)[]
   body: IBlockStatement
 }
 
-export interface IClassDeclaration extends TBaseNodeAttr {
+export interface IClassDeclaration extends IBaseNodeAttr {
   type: ENodeType.ClassDeclaration
   id: IIdentifier
   params: (IIdentifier | IAssignmentParam | ITupleParam | IDictionaryParam)[]
   body: IBlockStatement
 }
 
-export interface IBlockStatement extends TBaseNodeAttr {
+export interface IBlockStatement extends IBaseNodeAttr {
   type: ENodeType.BlockStatement
   body: (TExpressionNode | TStatementNode)[]
 }
 
-export interface IEmptyStatement extends TBaseNodeAttr {
+export interface IEmptyStatement extends IBaseNodeAttr {
   type: ENodeType.EmptyStatement
 }
 
-export interface IIfStatement extends TBaseNodeAttr {
+export interface IIfStatement extends IBaseNodeAttr {
   type: ENodeType.IfStatement
   test: TExpressionNode
   body: IBlockStatement
   alternate?: IBlockStatement | IIfStatement
 }
 
-export interface ITryStatement extends TBaseNodeAttr {
+export interface ITryStatement extends IBaseNodeAttr {
   type: ENodeType.TryStatement
   body: IBlockStatement
   handlers?: IExceptHandler[]
@@ -443,50 +446,55 @@ export interface ITryStatement extends TBaseNodeAttr {
   finalBody: IBlockStatement
 }
 
-export interface IProgram extends TBaseNodeAttr {
+export interface IProgram extends IBaseNodeAttr {
   type: ENodeType.Program
   body: TNode[]
 }
 
-export interface IForStatement extends TBaseNodeAttr {
+export interface IForStatement extends IBaseNodeAttr {
   type: ENodeType.ForStatement
   left: TExpressionNode
   right: TExpressionNode
   body: IBlockStatement
 }
 
-export interface IVariableDeclaration extends TBaseNodeAttr {
+export interface IVariableDeclaration extends IBaseNodeAttr {
   type: ENodeType.VariableDeclaration
   kind: string
   declarations: IIdentifier[]
 }
 
-export interface IReturnStatement extends TBaseNodeAttr {
+export interface IReturnStatement extends IBaseNodeAttr {
   type: ENodeType.ReturnStatement
   argument: TExpressionNode
 }
 
-export interface IWhileStatement extends TBaseNodeAttr {
+export interface IWhileStatement extends IBaseNodeAttr {
   type: ENodeType.WhileStatement
   test: TExpressionNode
   body: IBlockStatement
 }
 
-export interface IContinueStatement extends TBaseNodeAttr {
+export interface IContinueStatement extends IBaseNodeAttr {
   type: ENodeType.ContinueStatement
 }
 
-export interface IWithStatement extends TBaseNodeAttr {
+export interface IWithStatement extends IBaseNodeAttr {
   left: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
   right: (IIdentifier | MemberExpression | SubscriptExpression | IArrayExpression)[]
   body: IBlockStatement
 }
 
-export interface IBreakStatement extends TBaseNodeAttr {
+export interface IBreakStatement extends IBaseNodeAttr {
   type: ENodeType.BreakStatement
 }
 
-export interface IDeleteStatement extends TBaseNodeAttr {
+export interface IDeleteStatement extends IBaseNodeAttr {
   type: ENodeType.DeleteStatement
   targets: Omit<TExpressionNode, ENodeType.AssignmentExpression | ENodeType.IfExpression>[]
+}
+
+export interface IRaiseStatement extends IBaseNodeAttr {
+  type: ENodeType.RaiseStatement
+  target: Omit<TExpressionNode, ENodeType.AssignmentExpression>
 }

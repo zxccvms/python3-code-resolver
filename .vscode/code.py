@@ -1,104 +1,177 @@
 #!/usr/bin/python3
 # encoding=utf-8
-import queue
+
 import json
-import tornado
-import tornado.httpserver
-import tornado.ioloop
-import tornado.web
-from common.util.log_util import log
+import time
+import uuid
+
+import core.handler.chrome
+from common.util import str_util
 from core import share
-from core.handler import chrome, message
-import asyncio
-from common.util.plugins_util import getPluginsConfig
-from core.ws.ws_util import sendToMessage
-from common.util.DynamicPort_util import get_free_port
-import os
-payload_level = None
+from core.ws import ws_req_manager
 
-def send_queued_msg():
-    global payload_level
 
-    try:
-        payload_level = share.loglevelQueue.get(True,0.1)
-    except queue.Empty:
-        pass
-    try:
-        message = share.websocketSendQueue.get(True, 0.1)
-    except queue.Empty:
-        # Handle empty queue here
-        pass
-    else:
-        try:
-            level = payload_level[0]
-            payload_id = payload_level[1]
-        except Exception:
-            level = -1
-            payload_id = ''
-        if message is None:
-            return
-        ws_type, msg = message
-        if not share.ws_conn[ws_type]:
-            share.websocketSendQueue.put(message)
-            share.loglevelQueue.put(payload_level)
-            return
+def generateRequestId():
+    return str_util.randomString(10)
 
-        # log.info('[%s] queue send -> %s', ws_type, msg)
-        if ws_type in {'message', 'chrome', 'firefox'} and share.ws_conn[ws_type]:
-            if json.loads(msg)['action'] != 'trace_log':
-                share.ws_conn[ws_type].write_message(msg.encode('utf8',errors = 'ignore'))
+
+def build(action, payload={}, requestId=None):
+    package = {}
+    if requestId is None:
+        requestId = str_util.randomString(10)
+    package['requestId'] = requestId
+    package['action'] = action
+    package['payload'] = payload
+    dumps = json.dumps(package, ensure_ascii=False)
+    return dumps
+
+
+if __name__ == '__main__':
+    j = {'a': '{  ControlType: WindowControl    ClassName: Window • - Sublime Text (UNREGISTERED) - 1 个运行窗口'
+         }
+    dumps = json.dumps(j, ensure_ascii=False)
+    # print(dumps)
+
+
+def sendToMessage(action, payload={}, requestId=None):
+    if not share.websocketSendQueue:
+        return
+
+    if action == "trace_log":
+        task_id = str(uuid.uuid1())
+        if payload.get("args", None):
+            count = 20000
+            if payload.get("retData", None):
+                if len(payload["retData"]) > count:
+                    payload["retData"] = payload["retData"][:count] + "..."
+
+            if len(str(payload["args"])) > count:
+                num = 1
+                start_index = 0
+                step = count
+                import copy
+                data = copy.copy(payload["args"])
+                while True:
+                    num_list = task_id.split('-')[:-1]
+                    num_str = str(num).zfill(12)
+                    num_list.append(num_str)
+                    payload["taskNum"] = '-'.join(num_list)
+                    payload["args"] = data[start_index:start_index + step]
+                    if not payload["args"]:
+                        break
+                    start_index += step
+                    num += 1
+                    share.websocketSendQueue.put(('message', build(action, payload, requestId=requestId)))
             else:
-                if level == -2:
-                    pass
-                else:
-                    msg = json.loads(msg)
-                    msg['payload']['id'] = payload_id
-                    share.ws_conn[ws_type].write_message(msg)
-
-
-class RPAServer:
-    def __init__(self, port,factory_name):
-        share.init(factory_name)
-        message.uiInit()
-        # pluginsResult = getPluginsConfig('Z-Factory' if factory_name == 'Z-Factory.exe' else 'Z-Bot')
-        # if pluginsResult:
-        #     sendToMessage('reloadComponent', {
-        #         'code': '0',
-        #         'message': ''
-        #     }, 'XXX')
-        # chrome.uiInit()
-        self.start(port)
-
-    def start(self, port):
-        log.info('ws server started')
-        app = tornado.web.Application([
-            (r"/server", message.serve),
-            (r"/mobile_msg", message.Mobile_Message),
-            (r"/check_connection", message.check_connection)
-        ])
-        http_server = tornado.httpserver.HTTPServer(app)
-        asyncio.set_event_loop(asyncio.new_event_loop())
-
-        if int(port) != 6444:
-            while True:
-                port = get_free_port()
-                log.info('当前空闲为{0}'.format(port))
-                try:
-                    http_server.listen(port)
-                    with open(os.environ["AppData"]+'\\Z-Bot\\Port.json','w') as f:
-                        f.write(json.dumps({'Port':port}))
-                    log.info('Z-Bot端口已确定')
-                    break
-                except Exception as e:
-                    log.error(e)
-                    continue
+                num_list = task_id.split('-')[:-1]
+                num_str = str(1).zfill(12)
+                num_list.append(num_str)
+                payload["taskNum"] = '-'.join(num_list)
+                share.websocketSendQueue.put(('message', build(action, payload, requestId=requestId)))
         else:
-            http_server.listen(port)
-        log.info('服务已正常启动')
-        tornado.ioloop.PeriodicCallback(callback=send_queued_msg, callback_time=1).start()
-        tornado.ioloop.IOLoop.current().start()
+            num_list = task_id.split('-')[:-1]
+            num_str = str(1).zfill(12)
+            num_list.append(num_str)
+            payload["taskNum"] = '-'.join(num_list)
+            share.websocketSendQueue.put(('message', build(action, payload, requestId=requestId)))
+
+    elif action == "log":
+        task_id = str(uuid.uuid1())
+        if payload.get("text", None):
+            count = 20000
+            if len(str(payload["text"])) > count:
+                num = 1
+                start_index = 0
+                step = count
+                import copy
+                data = copy.copy(payload["text"])
+                while True:
+                    num_list = task_id.split('-')[:-1]
+                    num_str = str(num).zfill(12)
+                    num_list.append(num_str)
+                    payload["taskNum"] = '-'.join(num_list)
+                    payload["text"] = data[start_index:start_index+step]
+                    if not payload["text"]:
+                        break
+                    start_index += step
+                    num += 1
+                    share.websocketSendQueue.put(('message', build(action, payload, requestId=requestId)))
+            else:
+                num_list = task_id.split('-')[:-1]
+                num_str = str(1).zfill(12)
+                num_list.append(num_str)
+                payload["taskNum"] = '-'.join(num_list)
+                share.websocketSendQueue.put(('message', build(action, payload, requestId)))
+        else:
+            num_list = task_id.split('-')[:-1]
+            num_str = str(1).zfill(12)
+            num_list.append(num_str)
+            payload["taskNum"] = '-'.join(num_list)
+            share.websocketSendQueue.put(('message', build(action, payload, requestId)))
+
+    else:
+        share.websocketSendQueue.put(('message', build(action, payload, requestId)))
 
 
-def run(port,factory_name):
-    rpaServer = RPAServer(port, factory_name)
+def sendToLogLevel(level):
+    if not share.loglevelQueue:
+        return
 
+    share.loglevelQueue.put(level)
+
+def sendToScreen(record):
+    if not share.screenQueue:
+        return
+
+    share.screenQueue.put(record)
+
+def sendToMobileMessage(record):
+    if not share.MobileMessageQueue:
+        return
+    share.MobileMessageQueue.put(record)
+
+
+
+
+def sendToChrome(action, payload={}, requestId=None):
+    share.websocketSendQueue.put(('chrome', build(action, payload, requestId)))
+
+
+def sendToChromeCommand(name, param, requestId=None):
+    sendToChrome(core.handler.chrome.ACTION_RUN, {'name': name, 'param': param}, requestId)
+
+
+def sendToChromeCommandSync(name, param, requestId=None):
+    if requestId is None:
+        requestId = generateRequestId()
+    ws_req_manager.putSyncRequest(requestId, True)
+    sendToChrome(core.handler.chrome.ACTION_RUN, {'name': name, 'param': param}, requestId)
+    result = ws_req_manager.getSyncRequestResult(requestId)
+    if result is None:
+        return None
+    return result['payload']
+
+
+def sendToChromeCommandSyncWithRetry(checkFunc, name, param, requestId=None, timeout=30.0):
+    start = time.time()
+    while start + timeout > time.time():
+        ret = sendToChromeCommandSync(name, param, requestId)
+        if checkFunc(ret):
+            return ret
+        time.sleep(1.0)
+    if start + timeout <= time.time():
+        raise Exception("execute %s timeout" % name)
+
+
+def sendToFirefox(action, payload={}, requestId=None):
+    share.websocketSendQueue.put(('firefox', build(action, payload, requestId)))
+
+
+def sendToCommanderConnect(record):
+    share.CommanderConnectQueue['url'] = record['url']
+    share.CommanderConnectQueue['token'] = record['token']
+
+
+def sendToUserInfo(record):
+    share.UserInfo['CLIENT-USER'] = record['CLIENT-USER']
+    share.UserInfo['CLIENT-MAC'] = record['CLIENT-MAC']
