@@ -7,9 +7,9 @@ import { ENodeEnvironment } from '../types'
 class BlockStatement extends BaseHandler {
   handle(startToken: TToken, environment: ENodeEnvironment = ENodeEnvironment.normal): IBlockStatement {
     let colonToken = this.tokens.getToken()
-    if (!isToken(colonToken, ETokenType.punctuation, ':')) {
-      throw new TypeError("handleBlockStatement err: currentToken is not operator ':'")
-    }
+    this.check({
+      checkToken: () => isToken(colonToken, ETokenType.punctuation, ':')
+    })
 
     this.tokens.next()
     const body = this._handleBody(startToken, colonToken, environment)

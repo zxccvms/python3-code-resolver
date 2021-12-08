@@ -392,7 +392,7 @@ export interface IImportFromStatement extends TBaseNodeAttr {
 export interface ICompareExpression extends TBaseNodeAttr {
   type: ENodeType.CompareExpression
   left: TExpressionNode
-  operator: 'in' | 'not in'
+  operator: 'is' | 'in' | 'not in'
   right: TExpressionNode
 }
 

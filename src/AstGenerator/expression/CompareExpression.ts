@@ -40,13 +40,13 @@ class CompareExpression extends BaseHandler {
     return CompareExpression
   }
 
-  private _getOperatorToken(environment: ENodeEnvironment): TToken<ETokenType.keyword, 'in' | 'not in'> {
+  private _getOperatorToken(environment: ENodeEnvironment): TToken<ETokenType.keyword, 'is' | 'in' | 'not in'> {
     const currentToken = this.tokens.getToken()
     const nextToken = this.tokens.getToken(1)
 
     if (!this._isConformToken(currentToken, nextToken, environment)) return null
 
-    if (isToken(currentToken, ETokenType.keyword, 'in')) return currentToken
+    if (isToken(currentToken, ETokenType.keyword, ['in', 'is'])) return currentToken
 
     this.tokens.next()
     return {
@@ -57,7 +57,7 @@ class CompareExpression extends BaseHandler {
   }
 
   private _isConformToken(currentToken: TToken, nextToken: TToken, environment: ENodeEnvironment) {
-    if (isToken(currentToken, ETokenType.keyword, 'in')) return true
+    if (isToken(currentToken, ETokenType.keyword, ['in', 'is'])) return true
     else if (
       isToken(currentToken, ETokenType.keyword, 'not') &&
       isToken(nextToken, ETokenType.keyword, 'in') &&
