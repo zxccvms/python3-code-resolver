@@ -12,7 +12,7 @@ class TryStatement extends BaseHandler {
     })
 
     this.tokens.next()
-    const body = this.astGenerator.statement.blockStatement.handle(tryToken)
+    const body = this.astGenerator.statement.blockStatement.handle(tryToken, environment)
     const handlers = this._handleHandlers(environment)
     const elseBody = this._handleElseBody(environment, !!handlers.length)
     const finalBody = this._handleFinalBody(environment)
