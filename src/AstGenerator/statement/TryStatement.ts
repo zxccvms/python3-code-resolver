@@ -6,21 +6,23 @@ import { ENodeEnvironment } from '../types'
 /** try语句 */
 class TryStatement extends BaseHandler {
   handle(environment: ENodeEnvironment): ITryStatement {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.keyword, 'try')) {
-      throw new TypeError("TryStatement err: currentToken is not keyword 'try'")
-    }
+    const tryToken = this.tokens.getToken()
+    this.check({
+      checkToken: () => isToken(tryToken, ETokenType.keyword, 'try')
+    })
 
     this.tokens.next()
-    const body = this.astGenerator.statement.blockStatement.handle(currentToken)
+    const body = this.astGenerator.statement.blockStatement.handle(tryToken)
     const handlers = this._handleHandlers(environment)
+    const elseBody = this._handleElseBody(environment, !!handlers.length)
     const finalBody = this._handleFinalBody(environment)
 
     const TryStatement = this.createNode(ENodeType.TryStatement, {
       body,
       handlers,
+      elseBody,
       finalBody,
-      loc: createLoc(body, finalBody || getLatest(handlers))
+      loc: createLoc(body, finalBody || elseBody || getLatest(handlers))
     })
 
     return TryStatement
@@ -80,6 +82,19 @@ class TryStatement extends BaseHandler {
     const name = this.astGenerator.expression.identifier.handle()
 
     return name
+  }
+
+  private _handleElseBody(environment: ENodeEnvironment, hasHandler: boolean): ITryStatement['elseBody'] {
+    const elseToken = this.tokens.getToken()
+    if (!isToken(elseToken, ETokenType.keyword, 'else')) return null
+    else if (!hasHandler) {
+      throw new SyntaxError('Try statement must have at least one except or finally clause')
+    }
+
+    this.tokens.next()
+    const BlockStatement = this.astGenerator.statement.blockStatement.handle(elseToken, environment)
+
+    return BlockStatement
   }
 
   private _handleFinalBody(environment: ENodeEnvironment): ITryStatement['finalBody'] {

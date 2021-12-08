@@ -78,8 +78,8 @@ class ImportFromStatement extends BaseHandler {
 
     let asname
     const asToken = this.tokens.getToken()
-    this.tokens.next()
     if (isToken(asToken, ETokenType.keyword, 'as')) {
+      this.tokens.next()
       asname = this.astGenerator.expression.identifier.handle()
     }
 

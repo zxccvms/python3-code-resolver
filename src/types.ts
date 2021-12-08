@@ -431,6 +431,7 @@ export interface ITryStatement extends TBaseNodeAttr {
   type: ENodeType.TryStatement
   body: IBlockStatement
   handlers?: IExceptHandler[]
+  elseBody: IBlockStatement
   finalBody: IBlockStatement
 }
 
