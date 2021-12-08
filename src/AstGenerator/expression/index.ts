@@ -22,6 +22,8 @@ import TupleExpression from './TupleExpression'
 import UnaryExpression from './UnaryExpression'
 import SubscriptExpression from './SubscriptExpression'
 import LogicalExpression from './LogicalExpression'
+import SetExpression from './SetExpression'
+import SetOrDictionaryExpression from './SetOrDictionaryExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -37,7 +39,6 @@ class Expression extends BaseHandler {
   ifExpression: IfExpression
   tupleExpression: TupleExpression
   arrayExpression: ArrayExpression
-  dictionaryExpression: DictionaryExpression
   binaryExpression: BinaryExpression
   assignmentExpression: AssignmentExpression
   memberExpression: MemberExpression
@@ -45,6 +46,9 @@ class Expression extends BaseHandler {
   callExpression: CallExpression
   compareExpression: CompareExpression
   logicalExpression: LogicalExpression
+  // dictionaryExpression: DictionaryExpression
+  // setExpression: SetExpression
+  setOrDictionaryExpression: SetOrDictionaryExpression
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -59,7 +63,6 @@ class Expression extends BaseHandler {
     this.ifExpression = new IfExpression(astGenerator)
     this.tupleExpression = new TupleExpression(astGenerator)
     this.arrayExpression = new ArrayExpression(astGenerator)
-    this.dictionaryExpression = new DictionaryExpression(astGenerator)
     this.binaryExpression = new BinaryExpression(astGenerator)
     this.assignmentExpression = new AssignmentExpression(astGenerator)
     this.memberExpression = new MemberExpression(astGenerator)
@@ -67,6 +70,9 @@ class Expression extends BaseHandler {
     this.callExpression = new CallExpression(astGenerator)
     this.compareExpression = new CompareExpression(astGenerator)
     this.logicalExpression = new LogicalExpression(astGenerator)
+    // this.dictionaryExpression = new DictionaryExpression(astGenerator)
+    // this.setExpression = new SetExpression(astGenerator)
+    this.setOrDictionaryExpression = new SetOrDictionaryExpression(astGenerator)
   }
 
   /** 解析表达式 */
@@ -138,7 +144,7 @@ class Expression extends BaseHandler {
     } else if (isToken(currentToken, ETokenType.bracket, '[')) {
       return this.arrayExpression.handle()
     } else if (isToken(currentToken, ETokenType.bracket, '{')) {
-      return this.dictionaryExpression.handle()
+      return this.setOrDictionaryExpression.handle()
     } else if (
       isToken(currentToken, ETokenType.operator, ['+', '-']) ||
       isToken(currentToken, ETokenType.keyword, 'not')

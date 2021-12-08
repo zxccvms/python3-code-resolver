@@ -35,10 +35,10 @@ class ClassDeclaration extends BaseHandler {
   }
 
   private _handleParams(): IFunctionDeclaration['params'] {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.bracket, '(')) {
-      throw new TypeError("handleClassDeclaration err: currentToken is not bracket '('")
-    }
+    const leftBracket = this.tokens.getToken()
+    this.check({
+      checkToken: () => isToken(leftBracket, ETokenType.bracket, '(')
+    })
 
     this.tokens.next()
     const cacheState = { useKeyword: false, dictParamCount: 0 }

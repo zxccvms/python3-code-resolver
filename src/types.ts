@@ -114,6 +114,8 @@ export const enum ENodeType {
   CompareExpression = 'CompareExpression',
   /** 逻辑表达式 a and b */
   LogicalExpression = 'LogicalExpression',
+  /** set表达式 {a, b, c} */
+  SetExpression = 'SetExpression',
 
   // 语句
   /** 导入语句 */
@@ -192,6 +194,7 @@ export type TExpressionNodeMap = {
   [ENodeType.CompareExpression]: ICompareExpression
   [ENodeType.IfExpression]: IIfExpression
   [ENodeType.LogicalExpression]: ILogicalExpression
+  [ENodeType.SetExpression]: ISetExpression
 } & TBasicExpressionNodeMap
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
@@ -323,6 +326,11 @@ export interface ILogicalExpression extends TBaseNodeAttr {
   operator: 'and' | 'or'
   left: TExpressionNode
   right: TExpressionNode
+}
+
+export interface ISetExpression extends TBaseNodeAttr {
+  type: ENodeType.SetExpression
+  elements: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
 }
 
 export interface ITupleExpression extends TBaseNodeAttr {
