@@ -36,9 +36,7 @@ class ClassDeclaration extends BaseHandler {
 
   private _handleParams(): IFunctionDeclaration['params'] {
     const leftBracket = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(leftBracket, ETokenType.bracket, '(')
-    })
+    if (!isToken(leftBracket, ETokenType.bracket, '(')) return []
 
     this.tokens.next()
     const cacheState = { useKeyword: false, dictParamCount: 0 }
