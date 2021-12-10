@@ -5,7 +5,8 @@ import {
   IClassDeclaration,
   IFunctionDeclaration,
   ITupleParam,
-  IDictionaryParam
+  IDictionaryParam,
+  TExpressionNodeInDecorator
 } from '../../types'
 import { createLoc, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
@@ -13,7 +14,7 @@ import { ENodeEnvironment } from '../types'
 
 /** 类声明 */
 class ClassDeclaration extends BaseHandler {
-  handle(environment: ENodeEnvironment): IClassDeclaration {
+  handle(environment: ENodeEnvironment, decorators?: TExpressionNodeInDecorator[]): IClassDeclaration {
     const classToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(classToken, ETokenType.keyword, 'class')
@@ -28,7 +29,8 @@ class ClassDeclaration extends BaseHandler {
       id,
       params,
       body,
-      loc: createLoc(classToken, body)
+      decorators,
+      loc: createLoc(decorators?.[0] || classToken, body)
     })
 
     return ClassDeclaration

@@ -1,4 +1,14 @@
-import { TStatementNode } from 'src/types'
+import {
+  ETokenType,
+  ICallExpression,
+  IClassDeclaration,
+  IFunctionDeclaration,
+  IIdentifier,
+  IMemberExpression,
+  TExpressionNodeInDecorator,
+  TStatementNode
+} from 'src/types'
+import { isToken } from 'src/utils'
 import AstGenerator from '../AstGenerator'
 import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
@@ -68,6 +78,8 @@ class Statement extends BaseHandler {
     switch (currentToken.value) {
       case 'pass':
         return this.emptyStatement.handle()
+      case '@':
+        return this._handleDecoratorsInStatement(environment)
       case 'def':
         return this.functionDeclaration.handle(environment)
       case 'class':
@@ -100,6 +112,46 @@ class Statement extends BaseHandler {
       case 'raise':
         return this.raiseStatement.handle()
     }
+  }
+
+  /** 处理有装饰器的语句 */
+  private _handleDecoratorsInStatement(environment: ENodeEnvironment): IFunctionDeclaration | IClassDeclaration {
+    const decorators = this._handleDecorators(environment)
+
+    const defOrClassToken = this.tokens.getToken()
+    if (isToken(defOrClassToken, ETokenType.keyword, 'def')) {
+      return this.functionDeclaration.handle(environment, decorators)
+    } else if (isToken(defOrClassToken, ETokenType.keyword, 'class')) {
+      return this.classDeclaration.handle(environment, decorators)
+    }
+
+    throw new SyntaxError('Expected function or class declaration after decorator')
+  }
+
+  /** 处理装饰器 */
+  private _handleDecorators(
+    environment: ENodeEnvironment,
+    decorators: TExpressionNodeInDecorator[] = []
+  ): TExpressionNodeInDecorator[] {
+    const currentToken = this.tokens.getToken()
+    this.check({
+      checkToken: () => isToken(currentToken, ETokenType.operator, '@')
+    })
+
+    this.tokens.next()
+    const identifier = this.astGenerator.expression.identifier.handle()
+    const expression = this.astGenerator.expression.handleMaybeMemberOrSubscriptOrCall(
+      ENodeEnvironment.normal,
+      identifier,
+      { memberExpression: true, callExpression: true }
+    ) as IIdentifier | IMemberExpression | ICallExpression
+
+    decorators.push(expression)
+
+    if (isToken(this.tokens.getToken(), ETokenType.operator, '@'))
+      return this._handleDecorators(environment, decorators)
+
+    return decorators
   }
 }
 

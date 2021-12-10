@@ -10,7 +10,7 @@ export enum ETokenType {
   string = 'string',
   /** 数字 1 2 3 */
   number = 'number',
-  /** 运算符 + - * / % ** // < > = <= >= != == += -= *= /= %= **= //= */
+  /** 操作符 + - * / % ** // < > = <= >= != == += -= *= /= %= **= //= @ */
   operator = 'operator',
   /** 括号 () [] {} */
   bracket = 'bracket',
@@ -200,6 +200,8 @@ export type TExpressionNodeMap = {
 } & TBasicExpressionNodeMap
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
+
+export type TExpressionNodeInDecorator = IIdentifier | IMemberExpression | ICallExpression
 
 /** 语句节点映射表 */
 export type TStatementNodeMap = {
@@ -413,6 +415,7 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
   id: IIdentifier
   params: (IIdentifier | IAssignmentParam | ITupleParam | IDictionaryParam)[]
   body: IBlockStatement
+  decorators?: TExpressionNodeInDecorator[]
 }
 
 export interface IClassDeclaration extends IBaseNodeAttr {
@@ -420,6 +423,7 @@ export interface IClassDeclaration extends IBaseNodeAttr {
   id: IIdentifier
   params: (Omit<TExpressionNode, ENodeType.AssignmentExpression> | IAssignmentParam | ITupleParam | IDictionaryParam)[]
   body: IBlockStatement
+  decorators?: TExpressionNodeInDecorator[]
 }
 
 export interface IBlockStatement extends IBaseNodeAttr {

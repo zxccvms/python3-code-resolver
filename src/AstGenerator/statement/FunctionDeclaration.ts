@@ -4,7 +4,8 @@ import {
   IAssignmentParam,
   IDictionaryParam,
   IFunctionDeclaration,
-  ITupleParam
+  ITupleParam,
+  TExpressionNodeInDecorator
 } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
@@ -13,7 +14,7 @@ import { ENodeEnvironment } from '../types'
 /** 处理函数定义节点 */
 class FunctionDeclaration extends BaseHandler {
   /** 处理函数定义节点 */
-  handle(environment: ENodeEnvironment): IFunctionDeclaration {
+  handle(environment: ENodeEnvironment, decorators?: TExpressionNodeInDecorator[]): IFunctionDeclaration {
     const defToken = this.tokens.getToken()
     if (!isToken(defToken, ETokenType.keyword, 'def')) {
       throw new TypeError('handleFunctionDeclaration err: currentToken is not keyword "def"')
@@ -31,7 +32,8 @@ class FunctionDeclaration extends BaseHandler {
       id,
       params,
       body,
-      loc: createLoc(defToken, body)
+      decorators,
+      loc: createLoc(decorators?.[0] || defToken, body)
     })
 
     return FunctionDeclaration

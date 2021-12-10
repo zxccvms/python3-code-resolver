@@ -103,8 +103,12 @@ class CodeScanner {
         value = currentChar + nextChar
         handleCycleParams(1, 0, 1)
       }
+      // 处理装饰操作符
+      else if (/\@/.test(currentChar)) {
+        type = ETokenType.operator
+      }
 
-      // 处理操作符
+      // 处理标点符号
       else if (/[\.|\,|\:]/.test(currentChar)) {
         type = ETokenType.punctuation
       }

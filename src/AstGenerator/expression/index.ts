@@ -119,20 +119,25 @@ class Expression extends BaseHandler {
   /** 处理可能是 MemberExpression or SubscriptExpression or CallExpression */
   handleMaybeMemberOrSubscriptOrCall(
     environment: ENodeEnvironment = ENodeEnvironment.normal,
-    lastNode: TExpressionNode = this.handleFirstExpression(environment)
+    lastNode: TExpressionNode = this.handleFirstExpression(environment),
+    enableMap = { memberExpression: true, subscriptExpression: true, callExpression: true } as {
+      memberExpression?: boolean
+      subscriptExpression?: boolean
+      callExpression?: boolean
+    }
   ): TExpressionNode {
     if (!this.isContinue(environment)) return lastNode
 
     const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.punctuation, '.')) {
+    if (enableMap.memberExpression && isToken(currentToken, ETokenType.punctuation, '.')) {
       const memberExpression = this.memberExpression.handle(lastNode, environment)
-      return this.handleMaybeMemberOrSubscriptOrCall(environment, memberExpression)
-    } else if (isToken(currentToken, ETokenType.bracket, '[')) {
+      return this.handleMaybeMemberOrSubscriptOrCall(environment, memberExpression, enableMap)
+    } else if (enableMap.subscriptExpression && isToken(currentToken, ETokenType.bracket, '[')) {
       const subscriptExpression = this.subscriptExpression.handle(lastNode, environment)
-      return this.handleMaybeMemberOrSubscriptOrCall(environment, subscriptExpression)
-    } else if (isToken(currentToken, ETokenType.bracket, '(')) {
+      return this.handleMaybeMemberOrSubscriptOrCall(environment, subscriptExpression, enableMap)
+    } else if (enableMap.callExpression && isToken(currentToken, ETokenType.bracket, '(')) {
       const callExpression = this.callExpression.handle(lastNode, environment)
-      return this.handleMaybeMemberOrSubscriptOrCall(environment, callExpression)
+      return this.handleMaybeMemberOrSubscriptOrCall(environment, callExpression, enableMap)
     }
     return lastNode
   }
