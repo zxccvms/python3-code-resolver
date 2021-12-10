@@ -34,9 +34,8 @@ class ImportFromStatement extends BaseHandler {
 
   private _handleLevel(): IImportFromStatement['level'] {
     const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.keyword, 'from')) return null
+    if (!isToken(currentToken, ETokenType.punctuation, '.')) return null
 
-    this.tokens.next()
     const { payload: pointTokens } = this.findNodes({
       end: token => !isToken(token, ETokenType.punctuation, '.'),
       step: () => {
