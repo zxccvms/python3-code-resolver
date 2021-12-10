@@ -21,6 +21,19 @@
       "program": "${workspaceRoot}/.vscode/main.py",
       "console": "internalConsole",
       "cwd": "${workspaceRoot}"
+    },
+    {
+      "name": "project",
+      "type": "pwa-node",
+      "request": "launch",
+      "args": [
+        "${workspaceRoot}/node_modules/ts-node/dist/bin.js",
+        "-T",
+        "${workspaceRoot}/.vscode/project.ts" // 入口文件
+      ],
+      "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector"
     }
   ],
   "compounds": [
