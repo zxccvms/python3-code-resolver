@@ -12,10 +12,12 @@ type TFindResult = {
 /** 代码扫描器 */
 class CodeScanner {
   scan(code: string): TToken[] {
-    const result = [] as TToken[]
+    const result: TToken[] = []
     let i = 0
     let line = 1
     let column = 0
+    // 拼接符队列
+    let continuationCharacters: { line: number; column: number }[] = []
 
     /** 处理循环的参数 */
     const handleCycleParams = (sumLength: number, lineNum: number, columnNum: number) => {
@@ -30,7 +32,7 @@ class CodeScanner {
       let type: ETokenType
       let value: string = currentChar
       let extra: TTokenExtra
-      const startPosition = { line, column }
+      const startPosition = continuationCharacters.length ? continuationCharacters[0] : { line, column }
 
       // 处理换行符
       if (currentChar === PYTHON.LINE_BREAK) {
@@ -42,6 +44,15 @@ class CodeScanner {
       else if (currentChar === '#') {
         const { sumLength } = this._findNextString(code.slice(i), PYTHON.LINE_BREAK)
         handleCycleParams(sumLength, 1, 0)
+        continue
+      }
+      // 处理 \ 拼接字符
+      else if (currentChar === '\\') {
+        if (nextChar !== PYTHON.LINE_BREAK) {
+          throw new SyntaxError('unexpected character after line continuation character')
+        }
+        continuationCharacters.push({ line, column })
+
         continue
       }
 
@@ -162,6 +173,8 @@ class CodeScanner {
       column++
 
       if (type) {
+        if (continuationCharacters.length) continuationCharacters = []
+
         const token = this._createToken(type, {
           value,
           loc: createLocByPosition(startPosition, { line, column }),

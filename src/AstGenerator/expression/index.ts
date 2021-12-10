@@ -217,6 +217,11 @@ class Expression extends BaseHandler {
           case 'False':
             return this.booleanLiteral.handle()
         }
+      case ETokenType.punctuation:
+        if (currentToken.value === '\\') {
+          this.tokens.next()
+          return this.handleBasicExpression()
+        }
       default: {
         const position = getPositionInfo(currentToken, 'start')
         throw new TypeError(

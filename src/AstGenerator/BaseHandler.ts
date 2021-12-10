@@ -57,8 +57,11 @@ class BaseHandler {
     if (checkParams.isBefore) {
       const last = this.tokens.getToken(-1 * Number(checkParams.isBefore))
       if (
+        // 不存在
         !last ||
+        // 是 (
         isToken(last, ETokenType.bracket, '(') ||
+        // 没有括号环境 && 不同行
         (!hasBracket && !isSameRank([last, this.tokens.getToken()], 'endAndStartLine'))
       ) {
         throw new SyntaxError('invalid syntax')
@@ -68,8 +71,11 @@ class BaseHandler {
     if (checkParams.isAfter) {
       const next = this.tokens.getToken(Number(checkParams.isAfter))
       if (
+        // 不存在
         !next ||
+        // 是 )
         isToken(next, ETokenType.bracket, ')') ||
+        // 没有括号环境 && 不同行
         (!hasBracket && !isSameRank([this.tokens.getToken(), next], 'endAndStartLine'))
       ) {
         throw new SyntaxError('invalid syntax')

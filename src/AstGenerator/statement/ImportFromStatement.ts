@@ -61,8 +61,13 @@ class ImportFromStatement extends BaseHandler {
     if (isLeftBracket) this.tokens.next()
 
     const { payload: names } = this.findNodes({
-      end: token =>
-        isLeftBracket ? isToken(token, ETokenType.bracket, ')') : !isSameRank([markToken, token], 'endAndStartLine'),
+      end: token => {
+        if (isLeftBracket) return isToken(token, ETokenType.bracket, ')')
+
+        const sameRank = isSameRank([markToken, token], 'endAndStartLine')
+        markToken = token
+        return !sameRank
+      },
       step: () => this._handleAliasExpression(),
       slice: token => isToken(token, ETokenType.punctuation, ',')
     })
