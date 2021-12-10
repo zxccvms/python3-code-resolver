@@ -56,7 +56,12 @@ class ImportFromStatement extends BaseHandler {
   }
 
   private _handleNames(markToken: TToken): IImportFromStatement['names'] {
-    const isLeftBracket = isToken(this.tokens.getToken(), ETokenType.bracket, '(')
+    const currentToken = this.tokens.getToken()
+    if (isToken(currentToken, ETokenType.operator, '*')) {
+      return [this._handleAliasExpression(true)]
+    }
+
+    const isLeftBracket = isToken(currentToken, ETokenType.bracket, '(')
     if (isLeftBracket) this.tokens.next()
 
     const { payload: names } = this.findNodes({
@@ -67,7 +72,7 @@ class ImportFromStatement extends BaseHandler {
         markToken = token
         return !sameRank
       },
-      step: () => this._handleAliasExpression(),
+      step: () => this._handleAliasExpression(false),
       slice: token => isToken(token, ETokenType.punctuation, ',')
     })
 
@@ -77,20 +82,33 @@ class ImportFromStatement extends BaseHandler {
     return names
   }
 
-  private _handleAliasExpression(): IAliasExpression {
-    const name = this.astGenerator.expression.identifier.handle()
+  private _handleAliasExpression(isUnpackOperation: boolean): IAliasExpression {
+    let name: string
+    let asname: string
+    const currentToken = this.tokens.getToken()
+    if (isToken(currentToken, ETokenType.operator, '*')) {
+      if (!isUnpackOperation) {
+        throw new SyntaxError('Unpack operation not allowed in this context')
+      }
 
-    let asname
-    const asToken = this.tokens.getToken()
-    if (isToken(asToken, ETokenType.keyword, 'as')) {
+      name = '*'
       this.tokens.next()
-      asname = this.astGenerator.expression.identifier.handle()
+    } else {
+      name = this.astGenerator.expression.identifier.handle().name
+
+      const asToken = this.tokens.getToken()
+      if (isToken(asToken, ETokenType.keyword, 'as')) {
+        this.tokens.next()
+        asname = this.astGenerator.expression.identifier.handle().name
+      }
     }
 
+    const endToken = this.tokens.getToken(-1)
+
     const AliasExpression = this.createNode(ENodeType.AliasExpression, {
-      name: name.name,
-      asname: asname?.name,
-      loc: createLoc(name, asname || name)
+      name,
+      asname,
+      loc: createLoc(currentToken, endToken)
     })
 
     return AliasExpression
