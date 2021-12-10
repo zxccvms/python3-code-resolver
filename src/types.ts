@@ -252,17 +252,17 @@ export interface IDictionaryProperty extends IBaseNodeAttr {
 export interface IAssignmentParam extends IBaseNodeAttr {
   type: ENodeType.AssignmentParam
   name: IIdentifier
-  value: TExpressionNode
+  value: Omit<TExpressionNode, ENodeType.AssignmentExpression>
 }
 
 export interface ITupleParam extends IBaseNodeAttr {
   type: ENodeType.TupleParam
-  name: IIdentifier
+  name: Omit<TExpressionNode, ENodeType.AssignmentExpression>
 }
 
 export interface IDictionaryParam extends IBaseNodeAttr {
   type: ENodeType.DictionaryParam
-  name: IIdentifier
+  name: Omit<TExpressionNode, ENodeType.AssignmentExpression>
 }
 
 export interface IExceptHandler extends IBaseNodeAttr {
@@ -418,7 +418,7 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
 export interface IClassDeclaration extends IBaseNodeAttr {
   type: ENodeType.ClassDeclaration
   id: IIdentifier
-  params: (IIdentifier | IAssignmentParam | ITupleParam | IDictionaryParam)[]
+  params: (Omit<TExpressionNode, ENodeType.AssignmentExpression> | IAssignmentParam | ITupleParam | IDictionaryParam)[]
   body: IBlockStatement
 }
 

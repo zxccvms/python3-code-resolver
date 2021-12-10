@@ -15,9 +15,9 @@ import { ENodeEnvironment } from '../types'
 class ClassDeclaration extends BaseHandler {
   handle(environment: ENodeEnvironment): IClassDeclaration {
     const classToken = this.tokens.getToken()
-    if (!isToken(classToken, ETokenType.keyword, 'class')) {
-      throw new TypeError("handleClassDeclaration err: currentToken is not keyword 'class'")
-    }
+    this.check({
+      checkToken: () => isToken(classToken, ETokenType.keyword, 'class')
+    })
 
     this.tokens.next()
     const id = this.astGenerator.expression.identifier.handle()
@@ -75,13 +75,7 @@ class ClassDeclaration extends BaseHandler {
       cacheState.useKeyword = true
       param = this._handleAssignmentParam()
     } else {
-      param = this.astGenerator.expression.identifier.handle()
-    }
-
-    if (!isToken(this.tokens.getToken(), [ETokenType.punctuation, ETokenType.bracket], [',', ')'])) {
-      throw new TypeError("handleClassDeclaration err: currentToken is not punctuation ',' or bracket ')'")
-    } else if (cacheState.useKeyword && isNode(param, ENodeType.Identifier)) {
-      throw new TypeError('handleClassDeclaration err: identifier argument cannot appear after keyword arguments')
+      param = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
     }
 
     return param
@@ -106,7 +100,7 @@ class ClassDeclaration extends BaseHandler {
     const currentToken = this.tokens.getToken()
 
     this.tokens.next()
-    const Identifier = this.astGenerator.expression.identifier.handle()
+    const Identifier = this.astGenerator.expression.handleMaybeIf()
 
     const ITupleParam = this.createNode(ENodeType.TupleParam, {
       name: Identifier,
@@ -120,7 +114,7 @@ class ClassDeclaration extends BaseHandler {
     const currentToken = this.tokens.getToken()
 
     this.tokens.next()
-    const Identifier = this.astGenerator.expression.identifier.handle()
+    const Identifier = this.astGenerator.expression.handleMaybeIf()
 
     const IDictionaryParam = this.createNode(ENodeType.DictionaryParam, {
       name: Identifier,
