@@ -1,7 +1,7 @@
 import {
   ENodeType,
   ETokenType,
-  IAssignmentParam,
+  IArgument,
   IClassDeclaration,
   IFunctionDeclaration,
   ITupleParam,
@@ -83,13 +83,13 @@ class ClassDeclaration extends BaseHandler {
     return param
   }
 
-  private _handleAssignmentParam(): IAssignmentParam {
+  private _handleAssignmentParam(): IArgument {
     const name = this.astGenerator.expression.identifier.handle()
 
     this.tokens.next()
     const expression = this.astGenerator.expression.handleMaybeIf()
 
-    const AssignmentParam = this.createNode(ENodeType.AssignmentParam, {
+    const AssignmentParam = this.createNode(ENodeType.Argument, {
       name,
       value: expression,
       loc: createLoc(name, expression)

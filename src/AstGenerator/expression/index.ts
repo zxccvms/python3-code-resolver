@@ -24,6 +24,7 @@ import SubscriptExpression from './SubscriptExpression'
 import LogicalExpression from './LogicalExpression'
 import SetExpression from './SetExpression'
 import SetOrDictionaryExpression from './SetOrDictionaryExpression'
+import LambdaExpression from './LambdaExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -49,6 +50,7 @@ class Expression extends BaseHandler {
   // dictionaryExpression: DictionaryExpression
   // setExpression: SetExpression
   setOrDictionaryExpression: SetOrDictionaryExpression
+  lambdaExpression: LambdaExpression
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -73,6 +75,7 @@ class Expression extends BaseHandler {
     // this.dictionaryExpression = new DictionaryExpression(astGenerator)
     // this.setExpression = new SetExpression(astGenerator)
     this.setOrDictionaryExpression = new SetOrDictionaryExpression(astGenerator)
+    this.lambdaExpression = new LambdaExpression(astGenerator)
   }
 
   /** 解析表达式 */
@@ -88,8 +91,14 @@ class Expression extends BaseHandler {
 
   /** 处理可能是元组表达式 */
   handleMaybeTuple(environment: ENodeEnvironment = ENodeEnvironment.normal) {
-    const lastNode = this.handleMaybeIf(environment)
+    const lastNode = this.handleMaybeLambda(environment)
     return this.tupleExpression.handleMaybe(lastNode, environment)
+  }
+
+  /** 处理可能是lambda表达式 */
+  handleMaybeLambda(environment: ENodeEnvironment = ENodeEnvironment.normal) {
+    const lastNode = this.handleMaybeIf(environment)
+    return this.lambdaExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是条件表达式 */

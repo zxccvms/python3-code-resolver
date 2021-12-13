@@ -3,7 +3,7 @@ import {
   ENodeType,
   IArrayExpression,
   IAssignmentExpression,
-  IAssignmentParam,
+  IArgument,
   IBinaryExpression,
   IBlockStatement,
   IBooleanLiteral,
@@ -45,7 +45,7 @@ class AstToCode {
   private [ENodeType.DictionaryProperty](node: IDictionaryProperty) {
     return PYTHON.INDENT + this.generate(node.key) + ': ' + this.generate(node.value)
   }
-  private [ENodeType.AssignmentParam](node: IAssignmentParam) {
+  private [ENodeType.Argument](node: IArgument) {
     return this.generate(node.name) + ' = ' + this.generate(node.value)
   }
   private [ENodeType.ExceptHandler](node: IExceptHandler) {

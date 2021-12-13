@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, IAssignmentParam, ICallExpression, TExpressionNode } from '../../types'
+import { ENodeType, ETokenType, IArgument, ICallExpression, TExpressionNode } from '../../types'
 import { createLoc, isExpressionNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
@@ -57,7 +57,7 @@ class CallExpression extends BaseHandler {
     return param
   }
 
-  handleKeywords(): IAssignmentParam[] {
+  handleKeywords(): IArgument[] {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.bracket, ')')) return []
 
@@ -74,7 +74,7 @@ class CallExpression extends BaseHandler {
     return payload
   }
 
-  private _handleKeyword(): IAssignmentParam {
+  private _handleKeyword(): IArgument {
     const name = this.astGenerator.expression.identifier.handle()
 
     const equalToken = this.tokens.getToken()
@@ -90,7 +90,7 @@ class CallExpression extends BaseHandler {
       checkToken: () => isToken(this.tokens.getToken(), [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
     })
 
-    const AssignmentParam = this.createNode(ENodeType.AssignmentParam, {
+    const AssignmentParam = this.createNode(ENodeType.Argument, {
       name,
       value,
       loc: createLoc(name, value)

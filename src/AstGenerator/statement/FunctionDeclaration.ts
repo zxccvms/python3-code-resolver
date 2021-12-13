@@ -1,7 +1,7 @@
 import {
   ENodeType,
   ETokenType,
-  IAssignmentParam,
+  IArgument,
   IDictionaryParam,
   IFunctionDeclaration,
   ITupleParam,
@@ -96,7 +96,7 @@ class FunctionDeclaration extends BaseHandler {
     return param
   }
 
-  private _handleAssignmentParam(): IAssignmentParam {
+  private _handleAssignmentParam(): IArgument {
     const name = this.astGenerator.expression.identifier.handle()
 
     this.tokens.next()
@@ -112,7 +112,7 @@ class FunctionDeclaration extends BaseHandler {
     //   throw new TypeError('handleFunctionDictionary err: node is not expression node')
     // }
 
-    const AssignmentParam = this.createNode(ENodeType.AssignmentParam, {
+    const AssignmentParam = this.createNode(ENodeType.Argument, {
       name,
       value,
       loc: createLoc(name, value)

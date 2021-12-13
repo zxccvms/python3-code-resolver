@@ -62,12 +62,10 @@ export const enum ENodeType {
   // 特殊类型 只能在某些类型里使用 不能单独使用
   /** 字典属性 DictionaryExpression内使用 a:1 */
   DictionaryProperty = 'DictionaryProperty',
-  /** 参数赋值 CallExpression FunctionDeclaration ClassDeclaration a=1 */
-  AssignmentParam = 'AssignmentParam',
-  /** 元组参数 FunctionDeclaration ClassDeclaration *a */
-  TupleParam = 'TupleParam',
-  /** 字典参数 FunctionDeclaration ClassDeclaration **a */
-  DictionaryParam = 'DictionaryParam',
+  /** 参数 a a=1 */
+  Argument = 'Argument',
+  /** 关键字 */
+  Keyword = 'Keyword',
   /** Except语句 TryStatement except: */
   ExceptHandler = 'ExceptHandler',
   /** 别名表达式 ImportStatement A as B */
@@ -116,6 +114,8 @@ export const enum ENodeType {
   LogicalExpression = 'LogicalExpression',
   /** set表达式 {a, b, c} */
   SetExpression = 'SetExpression',
+  /** lambda表达式 lambda a : a + 1 */
+  LambdaExpression = 'LambdaExpression',
 
   // 语句
   /** 导入语句 */
@@ -159,9 +159,8 @@ export const enum ENodeType {
 /** 特殊的节点映射表 */
 export type TSpecialNodeMap = {
   [ENodeType.DictionaryProperty]: IDictionaryProperty
-  [ENodeType.AssignmentParam]: IAssignmentParam
-  [ENodeType.TupleParam]: ITupleParam
-  [ENodeType.DictionaryParam]: IDictionaryParam
+  [ENodeType.Argument]: IArgument
+  [ENodeType.Keyword]: IKeyword
   [ENodeType.ExceptHandler]: IExceptHandler
   [ENodeType.SliceExpression]: ISliceExpression
   [ENodeType.AliasExpression]: IAliasExpression
@@ -197,6 +196,7 @@ export type TExpressionNodeMap = {
   [ENodeType.IfExpression]: IIfExpression
   [ENodeType.LogicalExpression]: ILogicalExpression
   [ENodeType.SetExpression]: ISetExpression
+  [ENodeType.LambdaExpression]: ILambdaExpression
 } & TBasicExpressionNodeMap
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
@@ -251,20 +251,16 @@ export interface IDictionaryProperty extends IBaseNodeAttr {
   value: TExpressionNode
 }
 
-export interface IAssignmentParam extends IBaseNodeAttr {
-  type: ENodeType.AssignmentParam
+export interface IArgument extends IBaseNodeAttr {
+  type: ENodeType.Argument
   name: IIdentifier
+  value?: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+}
+
+export interface IKeyword extends IBaseNodeAttr {
+  type: ENodeType.Keyword
+  name: string
   value: Omit<TExpressionNode, ENodeType.AssignmentExpression>
-}
-
-export interface ITupleParam extends IBaseNodeAttr {
-  type: ENodeType.TupleParam
-  name: Omit<TExpressionNode, ENodeType.AssignmentExpression>
-}
-
-export interface IDictionaryParam extends IBaseNodeAttr {
-  type: ENodeType.DictionaryParam
-  name: Omit<TExpressionNode, ENodeType.AssignmentExpression>
 }
 
 export interface IExceptHandler extends IBaseNodeAttr {
@@ -338,6 +334,11 @@ export interface ISetExpression extends IBaseNodeAttr {
   elements: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
 }
 
+export interface ILambdaExpression extends IBaseNodeAttr {
+  left: IArgument[]
+  right: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+}
+
 export interface ITupleExpression extends IBaseNodeAttr {
   type: ENodeType.TupleExpression
   elements: TExpressionNode[]
@@ -387,7 +388,7 @@ export interface ICallExpression extends IBaseNodeAttr {
   type: ENodeType.CallExpression
   callee: TExpressionNode
   params: TExpressionNode[]
-  keywords: IAssignmentParam[]
+  keywords: IArgument[]
 }
 
 export interface IImportStatement extends IBaseNodeAttr {
@@ -413,7 +414,7 @@ export interface ICompareExpression extends IBaseNodeAttr {
 export interface IFunctionDeclaration extends IBaseNodeAttr {
   type: ENodeType.FunctionDeclaration
   id: IIdentifier
-  params: (IIdentifier | IAssignmentParam | ITupleParam | IDictionaryParam)[]
+  params: (IIdentifier | IArgument)[]
   body: IBlockStatement
   decorators?: TExpressionNodeInDecorator[]
 }
@@ -421,7 +422,8 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
 export interface IClassDeclaration extends IBaseNodeAttr {
   type: ENodeType.ClassDeclaration
   id: IIdentifier
-  params: (Omit<TExpressionNode, ENodeType.AssignmentExpression> | IAssignmentParam | ITupleParam | IDictionaryParam)[]
+  bases: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  keywords: IKeyword[]
   body: IBlockStatement
   decorators?: TExpressionNodeInDecorator[]
 }

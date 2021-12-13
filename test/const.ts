@@ -19,7 +19,7 @@ export const dictionaryProperty = nodeGenerator.generate(ENodeType.DictionaryPro
   key: Identifier,
   value: NumberLiteral
 })
-export const AssignmentParam = nodeGenerator.generate(ENodeType.AssignmentParam, {
+export const AssignmentParam = nodeGenerator.generate(ENodeType.Argument, {
   value: Identifier,
   name: Identifier
 })
