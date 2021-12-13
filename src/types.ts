@@ -47,17 +47,6 @@ export type TToken<T extends ETokenType = ETokenType, V extends string = string>
   extra?: T extends keyof TTokenExtraMap ? TTokenExtraMap[T] : never
 }
 
-export type TTokenExtraConfig = {
-  /** 前置表达式 */
-  beforeExpression?: boolean
-  /** 后置表达式 */
-  afterExpression?: boolean
-}
-
-export type TTokenExtraConfigMap = {
-  [tokenValue: string]: TTokenExtraConfig
-}
-
 export const enum ENodeType {
   // 特殊类型 只能在某些类型里使用 不能单独使用
   /** 字典属性 DictionaryExpression内使用 a:1 */
@@ -116,6 +105,8 @@ export const enum ENodeType {
   SetExpression = 'SetExpression',
   /** lambda表达式 lambda a : a + 1 */
   LambdaExpression = 'LambdaExpression',
+  /** yield表达式 */
+  YieldExpression = 'YieldExpression',
 
   // 语句
   /** 导入语句 */
@@ -197,6 +188,7 @@ export type TExpressionNodeMap = {
   [ENodeType.LogicalExpression]: ILogicalExpression
   [ENodeType.SetExpression]: ISetExpression
   [ENodeType.LambdaExpression]: ILambdaExpression
+  [ENodeType.YieldExpression]: IYieldExpression
 } & TBasicExpressionNodeMap
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
@@ -335,8 +327,14 @@ export interface ISetExpression extends IBaseNodeAttr {
 }
 
 export interface ILambdaExpression extends IBaseNodeAttr {
+  type: ENodeType.LambdaExpression
   left: IArgument[]
   right: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+}
+
+export interface IYieldExpression extends IBaseNodeAttr {
+  type: ENodeType.YieldExpression
+  value: Omit<TExpressionNode, ENodeType.AssignmentExpression>
 }
 
 export interface ITupleExpression extends IBaseNodeAttr {
@@ -486,6 +484,7 @@ export interface IContinueStatement extends IBaseNodeAttr {
 }
 
 export interface IWithStatement extends IBaseNodeAttr {
+  type: ENodeType.WithStatement
   left: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
   right: (IIdentifier | MemberExpression | SubscriptExpression | IArrayExpression)[]
   body: IBlockStatement

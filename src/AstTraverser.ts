@@ -21,13 +21,13 @@ class AstTraverser {
       const type = node.type
       const nodePath = { node, parent }
 
-      options.enter?.(nodePath)
-      options[type]?.(nodePath as any)
-
       const returnNode = options.custom?.(nodePath)
       if (returnNode) {
-        this[returnNode.type]?.(returnNode, options)
+        this.traverse(returnNode, options)
       } else {
+        options.enter?.(nodePath)
+        options[type]?.(nodePath as any)
+
         this[type]?.(node, options) // todo 部分token未转成node
       }
     } catch (e) {

@@ -10,7 +10,6 @@ import BinaryExpression from './BinaryExpression'
 import BooleanLiteral from './BooleanLiteral'
 import CallExpression from './CallExpression'
 import CompareExpression from './CompareExpression'
-import DictionaryExpression from './DictionaryExpression'
 import Identifier from './Identifier'
 import IfExpression from './IfExpression'
 import MemberExpression from './MemberExpression'
@@ -22,9 +21,9 @@ import TupleExpression from './TupleExpression'
 import UnaryExpression from './UnaryExpression'
 import SubscriptExpression from './SubscriptExpression'
 import LogicalExpression from './LogicalExpression'
-import SetExpression from './SetExpression'
 import SetOrDictionaryExpression from './SetOrDictionaryExpression'
 import LambdaExpression from './LambdaExpression'
+import YieldExpression from './YieldExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -47,10 +46,9 @@ class Expression extends BaseHandler {
   callExpression: CallExpression
   compareExpression: CompareExpression
   logicalExpression: LogicalExpression
-  // dictionaryExpression: DictionaryExpression
-  // setExpression: SetExpression
   setOrDictionaryExpression: SetOrDictionaryExpression
   lambdaExpression: LambdaExpression
+  yieldExpression: YieldExpression
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -72,10 +70,9 @@ class Expression extends BaseHandler {
     this.callExpression = new CallExpression(astGenerator)
     this.compareExpression = new CompareExpression(astGenerator)
     this.logicalExpression = new LogicalExpression(astGenerator)
-    // this.dictionaryExpression = new DictionaryExpression(astGenerator)
-    // this.setExpression = new SetExpression(astGenerator)
     this.setOrDictionaryExpression = new SetOrDictionaryExpression(astGenerator)
     this.lambdaExpression = new LambdaExpression(astGenerator)
+    this.yieldExpression = new YieldExpression(astGenerator)
   }
 
   /** 解析表达式 */
@@ -88,6 +85,10 @@ class Expression extends BaseHandler {
     const lastNode = this.handleMaybeTuple(environment)
     return this.assignmentExpression.handleMaybe(lastNode, environment)
   }
+
+  // handleMaybeYield() {
+
+  // }
 
   /** 处理可能是元组表达式 */
   handleMaybeTuple(environment: ENodeEnvironment = ENodeEnvironment.normal) {
@@ -164,6 +165,8 @@ class Expression extends BaseHandler {
       isToken(currentToken, ETokenType.keyword, 'not')
     ) {
       return this.unaryExpression.handle(environment)
+    } else if (isToken(currentToken, ETokenType.keyword, 'yield')) {
+      return this.yieldExpression.handle(environment)
     } else {
       return this.handleBasicExpression()
     }
@@ -230,11 +233,6 @@ class Expression extends BaseHandler {
           case 'True':
           case 'False':
             return this.booleanLiteral.handle()
-        }
-      case ETokenType.punctuation:
-        if (currentToken.value === '\\') {
-          this.tokens.next()
-          return this.handleBasicExpression()
         }
       default: {
         const position = getPositionInfo(currentToken, 'start')

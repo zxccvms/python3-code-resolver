@@ -1,2 +1,3 @@
-def c(d, *a, b=1, **c):
-	1
+
+def a():
+ 	yield a,b
