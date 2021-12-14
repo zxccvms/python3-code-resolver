@@ -1,3 +1,1 @@
-
-def a():
- 	yield a,b
+lambda a, b=1, *c, d=1, e, **f : 1

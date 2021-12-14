@@ -51,7 +51,9 @@ export const enum ENodeType {
   // 特殊类型 只能在某些类型里使用 不能单独使用
   /** 字典属性 DictionaryExpression内使用 a:1 */
   DictionaryProperty = 'DictionaryProperty',
-  /** 参数 a a=1 */
+  /** 参数列表 */
+  Arguments = 'Arguments',
+  /** 参数 */
   Argument = 'Argument',
   /** 关键字 */
   Keyword = 'Keyword',
@@ -150,6 +152,7 @@ export const enum ENodeType {
 /** 特殊的节点映射表 */
 export type TSpecialNodeMap = {
   [ENodeType.DictionaryProperty]: IDictionaryProperty
+  [ENodeType.Arguments]: IArguments
   [ENodeType.Argument]: IArgument
   [ENodeType.Keyword]: IKeyword
   [ENodeType.ExceptHandler]: IExceptHandler
@@ -243,9 +246,25 @@ export interface IDictionaryProperty extends IBaseNodeAttr {
   value: TExpressionNode
 }
 
+export interface IArguments {
+  type: ENodeType.Arguments
+  /** 参数名 */
+  args: IArgument[]
+  /** 参数名的默认值 */
+  defaults: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  /** *a参数名 */
+  varArg: IArgument
+  /** *a参数后的参数名 */
+  keywordOnlyArgs: IArgument[]
+  /** *a参数后的参数默认值 */
+  keywordDefaults: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  /** **a参数名 */
+  keywordArg: IArgument
+}
+
 export interface IArgument extends IBaseNodeAttr {
   type: ENodeType.Argument
-  name: IIdentifier
+  name: string
   value?: Omit<TExpressionNode, ENodeType.AssignmentExpression>
 }
 
@@ -328,8 +347,8 @@ export interface ISetExpression extends IBaseNodeAttr {
 
 export interface ILambdaExpression extends IBaseNodeAttr {
   type: ENodeType.LambdaExpression
-  left: IArgument[]
-  right: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+  args: IArguments
+  body: Omit<TExpressionNode, ENodeType.AssignmentExpression>
 }
 
 export interface IYieldExpression extends IBaseNodeAttr {

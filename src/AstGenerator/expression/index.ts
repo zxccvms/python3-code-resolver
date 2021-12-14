@@ -24,6 +24,7 @@ import LogicalExpression from './LogicalExpression'
 import SetOrDictionaryExpression from './SetOrDictionaryExpression'
 import LambdaExpression from './LambdaExpression'
 import YieldExpression from './YieldExpression'
+import ArgumentsExpression from './ArgumentsExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -50,6 +51,9 @@ class Expression extends BaseHandler {
   lambdaExpression: LambdaExpression
   yieldExpression: YieldExpression
 
+  // 特殊表达式
+  argumentsExpression: ArgumentsExpression
+
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
 
@@ -73,6 +77,7 @@ class Expression extends BaseHandler {
     this.setOrDictionaryExpression = new SetOrDictionaryExpression(astGenerator)
     this.lambdaExpression = new LambdaExpression(astGenerator)
     this.yieldExpression = new YieldExpression(astGenerator)
+    this.argumentsExpression = new ArgumentsExpression(astGenerator)
   }
 
   /** 解析表达式 */
@@ -86,20 +91,10 @@ class Expression extends BaseHandler {
     return this.assignmentExpression.handleMaybe(lastNode, environment)
   }
 
-  // handleMaybeYield() {
-
-  // }
-
   /** 处理可能是元组表达式 */
   handleMaybeTuple(environment: ENodeEnvironment = ENodeEnvironment.normal) {
-    const lastNode = this.handleMaybeLambda(environment)
-    return this.tupleExpression.handleMaybe(lastNode, environment)
-  }
-
-  /** 处理可能是lambda表达式 */
-  handleMaybeLambda(environment: ENodeEnvironment = ENodeEnvironment.normal) {
     const lastNode = this.handleMaybeIf(environment)
-    return this.lambdaExpression.handleMaybe(lastNode, environment)
+    return this.tupleExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是条件表达式 */
@@ -167,6 +162,8 @@ class Expression extends BaseHandler {
       return this.unaryExpression.handle(environment)
     } else if (isToken(currentToken, ETokenType.keyword, 'yield')) {
       return this.yieldExpression.handle(environment)
+    } else if (isToken(currentToken, ETokenType.keyword, 'lambda')) {
+      return this.lambdaExpression.handle(environment)
     } else {
       return this.handleBasicExpression()
     }
