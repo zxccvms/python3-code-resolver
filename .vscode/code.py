@@ -1,1 +1,1 @@
-lambda a : (yield a)
+(1 if 2 else 3)(b,c=1

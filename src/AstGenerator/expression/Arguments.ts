@@ -22,7 +22,7 @@ type TState = {
 }
 
 /** 参数列表表达式 */
-class ArgumentsExpression extends BaseHandler {
+class Arguments extends BaseHandler {
   handle(end: (token: TToken) => boolean): IArguments {
     const state: TState = {
       stepState: EStepState.arg,
@@ -162,4 +162,4 @@ class ArgumentsExpression extends BaseHandler {
   }
 }
 
-export default ArgumentsExpression
+export default Arguments

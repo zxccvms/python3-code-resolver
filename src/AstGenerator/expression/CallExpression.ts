@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, IArgument, ICallExpression, TExpressionNode } from '../../types'
+import { ENodeType, ETokenType, ICallExpression, IKeyword, TExpressionNode } from '../../types'
 import { createLoc, isExpressionNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
@@ -17,7 +17,7 @@ class CallExpression extends BaseHandler {
 
     this.tokens.next()
     const params = this._handleParams()
-    const keywords = this.handleKeywords()
+    const keywords = this._handleKeywords()
 
     const rightBracket = this.tokens.getToken()
     const CallExpression = this.createNode(ENodeType.CallExpression, {
@@ -36,7 +36,7 @@ class CallExpression extends BaseHandler {
     const { code, payload } = this.findNodes({
       end: token =>
         isToken(token, ETokenType.bracket, ')') || isToken(this.tokens.getToken(1), ETokenType.operator, '='),
-      step: () => this._handleParam(),
+      step: () => this.astGenerator.expression.handleMaybeIf(),
       slice: token => isToken(token, ETokenType.punctuation, ',')
     })
 
@@ -47,23 +47,13 @@ class CallExpression extends BaseHandler {
     return payload
   }
 
-  private _handleParam(): TExpressionNode {
-    const param = this.astGenerator.expression.handleMaybeIf()
-
-    if (!isToken(this.tokens.getToken(), [ETokenType.punctuation, ETokenType.bracket], [',', ')'])) {
-      throw new SyntaxError("Expected ')'")
-    }
-
-    return param
-  }
-
-  handleKeywords(): IArgument[] {
+  private _handleKeywords(): IKeyword[] {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.bracket, ')')) return []
 
     const { code, payload } = this.findNodes({
       end: token => isToken(token, ETokenType.bracket, ')'),
-      step: () => this._handleKeyword(),
+      step: () => this.astGenerator.expression.keyword.handle(),
       slice: token => isToken(token, ETokenType.punctuation, ',')
     })
 
@@ -72,31 +62,6 @@ class CallExpression extends BaseHandler {
     }
 
     return payload
-  }
-
-  private _handleKeyword(): IArgument {
-    const name = this.astGenerator.expression.identifier.handle()
-
-    const equalToken = this.tokens.getToken()
-
-    this.check({
-      checkToken: () => isToken(equalToken, ETokenType.operator, '=')
-    })
-
-    this.tokens.next()
-    const value = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
-
-    this.check({
-      checkToken: () => isToken(this.tokens.getToken(), [ETokenType.punctuation, ETokenType.bracket], [',', ')'])
-    })
-
-    const AssignmentParam = this.createNode(ENodeType.Argument, {
-      name,
-      value,
-      loc: createLoc(name, value)
-    })
-
-    return AssignmentParam
   }
 }
 

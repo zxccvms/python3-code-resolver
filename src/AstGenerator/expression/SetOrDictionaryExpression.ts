@@ -4,7 +4,7 @@ import {
   IDictionaryExpression,
   IDictionaryProperty,
   ISetExpression,
-  TExpressionNode
+  TNotAssignmentExpressionNode
 } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
@@ -74,7 +74,7 @@ class SetOrDictionaryExpression extends BaseHandler {
   private _handleElementOrProperty(stateCode: {
     element: boolean
     property: boolean
-  }): Omit<TExpressionNode, ENodeType.AssignmentExpression> | IDictionaryProperty {
+  }): TNotAssignmentExpressionNode | IDictionaryProperty {
     const expression = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
 
     const punctuationToken = this.tokens.getToken()

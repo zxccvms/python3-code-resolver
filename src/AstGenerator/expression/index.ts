@@ -1,6 +1,6 @@
 import AstGenerator from 'src/AstGenerator/AstGenerator'
 import { ENodeType, ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
-import { addBaseNodeAttr, createLoc, getPositionInfo, getTokenExtra, hasParenthesized, isToken } from 'src/utils'
+import { addBaseNodeAttr, getPositionInfo, getTokenExtra, hasParenthesized, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
 
@@ -24,7 +24,8 @@ import LogicalExpression from './LogicalExpression'
 import SetOrDictionaryExpression from './SetOrDictionaryExpression'
 import LambdaExpression from './LambdaExpression'
 import YieldExpression from './YieldExpression'
-import ArgumentsExpression from './ArgumentsExpression'
+import Arguments from './Arguments'
+import Keyword from './Keyword'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -52,7 +53,8 @@ class Expression extends BaseHandler {
   yieldExpression: YieldExpression
 
   // 特殊表达式
-  argumentsExpression: ArgumentsExpression
+  arguments: Arguments
+  keyword: Keyword
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -77,7 +79,9 @@ class Expression extends BaseHandler {
     this.setOrDictionaryExpression = new SetOrDictionaryExpression(astGenerator)
     this.lambdaExpression = new LambdaExpression(astGenerator)
     this.yieldExpression = new YieldExpression(astGenerator)
-    this.argumentsExpression = new ArgumentsExpression(astGenerator)
+
+    this.arguments = new Arguments(astGenerator)
+    this.keyword = new Keyword(astGenerator)
   }
 
   /** 解析表达式 */

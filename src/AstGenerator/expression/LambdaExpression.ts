@@ -14,9 +14,7 @@ class LambdaExpression extends BaseHandler {
     })
 
     this.tokens.next()
-    const args = this.astGenerator.expression.argumentsExpression.handle(token =>
-      isToken(token, ETokenType.punctuation, ':')
-    )
+    const args = this.astGenerator.expression.arguments.handle(token => isToken(token, ETokenType.punctuation, ':'))
 
     const colonToken = this.tokens.getToken()
     this.check({

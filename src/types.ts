@@ -196,6 +196,8 @@ export type TExpressionNodeMap = {
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
 
+export type TNotAssignmentExpressionNode = Omit<TExpressionNode, ENodeType.AssignmentExpression>
+
 export type TExpressionNodeInDecorator = IIdentifier | IMemberExpression | ICallExpression
 
 /** 语句节点映射表 */
@@ -251,13 +253,13 @@ export interface IArguments {
   /** 参数名 */
   args: IArgument[]
   /** 参数名的默认值 */
-  defaults: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  defaults: TNotAssignmentExpressionNode[]
   /** *a参数名 */
   varArg: IArgument
   /** *a参数后的参数名 */
   keywordOnlyArgs: IArgument[]
   /** *a参数后的参数默认值 */
-  keywordDefaults: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  keywordDefaults: TNotAssignmentExpressionNode[]
   /** **a参数名 */
   keywordArg: IArgument
 }
@@ -265,13 +267,13 @@ export interface IArguments {
 export interface IArgument extends IBaseNodeAttr {
   type: ENodeType.Argument
   name: string
-  value?: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+  value?: TNotAssignmentExpressionNode
 }
 
 export interface IKeyword extends IBaseNodeAttr {
   type: ENodeType.Keyword
   name: string
-  value: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+  value: TNotAssignmentExpressionNode
 }
 
 export interface IExceptHandler extends IBaseNodeAttr {
@@ -342,18 +344,18 @@ export interface ILogicalExpression extends IBaseNodeAttr {
 
 export interface ISetExpression extends IBaseNodeAttr {
   type: ENodeType.SetExpression
-  elements: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  elements: TNotAssignmentExpressionNode[]
 }
 
 export interface ILambdaExpression extends IBaseNodeAttr {
   type: ENodeType.LambdaExpression
   args: IArguments
-  body: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+  body: TNotAssignmentExpressionNode
 }
 
 export interface IYieldExpression extends IBaseNodeAttr {
   type: ENodeType.YieldExpression
-  value: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+  value: TNotAssignmentExpressionNode
 }
 
 export interface ITupleExpression extends IBaseNodeAttr {
@@ -403,9 +405,9 @@ export interface ISubscriptExpression extends IBaseNodeAttr {
 
 export interface ICallExpression extends IBaseNodeAttr {
   type: ENodeType.CallExpression
-  callee: TExpressionNode
-  params: TExpressionNode[]
-  keywords: IArgument[]
+  callee: TNotAssignmentExpressionNode
+  params: TNotAssignmentExpressionNode[]
+  keywords: IKeyword[]
 }
 
 export interface IImportStatement extends IBaseNodeAttr {
@@ -430,8 +432,8 @@ export interface ICompareExpression extends IBaseNodeAttr {
 // 语句节点定义
 export interface IFunctionDeclaration extends IBaseNodeAttr {
   type: ENodeType.FunctionDeclaration
-  id: IIdentifier
-  params: (IIdentifier | IArgument)[]
+  name: string
+  args: IArguments
   body: IBlockStatement
   decorators?: TExpressionNodeInDecorator[]
 }
@@ -439,7 +441,7 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
 export interface IClassDeclaration extends IBaseNodeAttr {
   type: ENodeType.ClassDeclaration
   id: IIdentifier
-  bases: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  bases: TNotAssignmentExpressionNode[]
   keywords: IKeyword[]
   body: IBlockStatement
   decorators?: TExpressionNodeInDecorator[]
@@ -504,7 +506,7 @@ export interface IContinueStatement extends IBaseNodeAttr {
 
 export interface IWithStatement extends IBaseNodeAttr {
   type: ENodeType.WithStatement
-  left: Omit<TExpressionNode, ENodeType.AssignmentExpression>[]
+  left: TNotAssignmentExpressionNode[]
   right: (IIdentifier | MemberExpression | SubscriptExpression | IArrayExpression)[]
   body: IBlockStatement
 }
@@ -520,5 +522,5 @@ export interface IDeleteStatement extends IBaseNodeAttr {
 
 export interface IRaiseStatement extends IBaseNodeAttr {
   type: ENodeType.RaiseStatement
-  target: Omit<TExpressionNode, ENodeType.AssignmentExpression>
+  target: TNotAssignmentExpressionNode
 }
