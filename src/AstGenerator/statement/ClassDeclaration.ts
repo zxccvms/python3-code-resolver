@@ -4,11 +4,9 @@ import {
   IArgument,
   IClassDeclaration,
   IFunctionDeclaration,
-  ITupleParam,
-  IDictionaryParam,
   TExpressionNodeInDecorator
 } from '../../types'
-import { createLoc, isNode, isToken } from '../../utils'
+import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
 
@@ -21,12 +19,12 @@ class ClassDeclaration extends BaseHandler {
     })
 
     this.tokens.next()
-    const id = this.astGenerator.expression.identifier.handle()
+    const identifier = this.astGenerator.expression.identifier.handle()
     const params = this._handleParams()
     const body = this.astGenerator.statement.blockStatement.handle(classToken, environment)
 
     const ClassDeclaration = this.createNode(ENodeType.ClassDeclaration, {
-      id,
+      name: identifier.name,
       params,
       body,
       decorators,

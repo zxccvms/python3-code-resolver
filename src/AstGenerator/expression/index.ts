@@ -26,6 +26,7 @@ import LambdaExpression from './LambdaExpression'
 import YieldExpression from './YieldExpression'
 import Arguments from './Arguments'
 import Keyword from './Keyword'
+import Starred from './Starred'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -55,6 +56,7 @@ class Expression extends BaseHandler {
   // 特殊表达式
   arguments: Arguments
   keyword: Keyword
+  starred: Starred
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -82,6 +84,7 @@ class Expression extends BaseHandler {
 
     this.arguments = new Arguments(astGenerator)
     this.keyword = new Keyword(astGenerator)
+    this.starred = new Starred(astGenerator)
   }
 
   /** 解析表达式 */

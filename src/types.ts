@@ -57,6 +57,8 @@ export const enum ENodeType {
   Argument = 'Argument',
   /** 关键字 */
   Keyword = 'Keyword',
+  /** a(*b) or class a(*b) 的*b */
+  Starred = 'Starred',
   /** Except语句 TryStatement except: */
   ExceptHandler = 'ExceptHandler',
   /** 别名表达式 ImportStatement A as B */
@@ -155,6 +157,7 @@ export type TSpecialNodeMap = {
   [ENodeType.Arguments]: IArguments
   [ENodeType.Argument]: IArgument
   [ENodeType.Keyword]: IKeyword
+  [ENodeType.Starred]: IStarred
   [ENodeType.ExceptHandler]: IExceptHandler
   [ENodeType.SliceExpression]: ISliceExpression
   [ENodeType.AliasExpression]: IAliasExpression
@@ -273,6 +276,11 @@ export interface IArgument extends IBaseNodeAttr {
 export interface IKeyword extends IBaseNodeAttr {
   type: ENodeType.Keyword
   name: string
+  value: TNotAssignmentExpressionNode
+}
+
+export interface IStarred extends IBaseNodeAttr {
+  type: ENodeType.Starred
   value: TNotAssignmentExpressionNode
 }
 
@@ -406,7 +414,7 @@ export interface ISubscriptExpression extends IBaseNodeAttr {
 export interface ICallExpression extends IBaseNodeAttr {
   type: ENodeType.CallExpression
   callee: TNotAssignmentExpressionNode
-  params: TNotAssignmentExpressionNode[]
+  args: (TNotAssignmentExpressionNode | IStarred)[]
   keywords: IKeyword[]
 }
 
@@ -440,7 +448,7 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
 
 export interface IClassDeclaration extends IBaseNodeAttr {
   type: ENodeType.ClassDeclaration
-  id: IIdentifier
+  name: string
   bases: TNotAssignmentExpressionNode[]
   keywords: IKeyword[]
   body: IBlockStatement

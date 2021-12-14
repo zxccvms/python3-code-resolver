@@ -1,4 +1,12 @@
-import { ENodeType, ETokenType, ICallExpression, IKeyword, TExpressionNode } from '../../types'
+import {
+  ENodeType,
+  ETokenType,
+  ICallExpression,
+  IKeyword,
+  IStarred,
+  TExpressionNode,
+  TNotAssignmentExpressionNode
+} from '../../types'
 import { createLoc, isExpressionNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
@@ -16,13 +24,12 @@ class CallExpression extends BaseHandler {
     })
 
     this.tokens.next()
-    const params = this._handleParams()
-    const keywords = this._handleKeywords()
+    const { args, keywords } = this._handleArgsAndKeywords()
 
     const rightBracket = this.tokens.getToken()
     const CallExpression = this.createNode(ENodeType.CallExpression, {
       callee: lastNode,
-      params,
+      args,
       keywords,
       loc: createLoc(lastNode, rightBracket)
     })
@@ -32,28 +39,11 @@ class CallExpression extends BaseHandler {
     return CallExpression
   }
 
-  private _handleParams(): ICallExpression['params'] {
-    const { code, payload } = this.findNodes({
-      end: token =>
-        isToken(token, ETokenType.bracket, ')') || isToken(this.tokens.getToken(1), ETokenType.operator, '='),
-      step: () => this.astGenerator.expression.handleMaybeIf(),
-      slice: token => isToken(token, ETokenType.punctuation, ',')
-    })
-
-    if (code === 1) {
-      throw new SyntaxError("Expected ')'")
-    }
-
-    return payload
-  }
-
-  private _handleKeywords(): IKeyword[] {
-    const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.bracket, ')')) return []
-
+  private _handleArgsAndKeywords(): { args: ICallExpression['args']; keywords: ICallExpression['keywords'] } {
+    const state = { enableExpression: true, enableStarred: true }
     const { code, payload } = this.findNodes({
       end: token => isToken(token, ETokenType.bracket, ')'),
-      step: () => this.astGenerator.expression.keyword.handle(),
+      step: () => this._handleCurrentStep(state),
       slice: token => isToken(token, ETokenType.punctuation, ',')
     })
 
@@ -61,7 +51,44 @@ class CallExpression extends BaseHandler {
       throw new SyntaxError("Expected ')'")
     }
 
-    return payload
+    const args: ICallExpression['args'] = []
+    const keywords: ICallExpression['keywords'] = []
+    for (const node of payload) {
+      if (node.type === ENodeType.Keyword) keywords.push(node)
+      else args.push(node)
+    }
+
+    return { args, keywords }
+  }
+
+  private _handleCurrentStep(state: {
+    enableExpression: boolean
+    enableStarred: boolean
+  }): TNotAssignmentExpressionNode | IStarred | IKeyword {
+    const currentToken = this.tokens.getToken()
+    if (isToken(currentToken, ETokenType.operator, '*')) {
+      if (!state.enableStarred) {
+        throw new SyntaxError('Iterable argument unpacking follows keyword argument unpacking')
+      }
+
+      return this.astGenerator.expression.starred.handle()
+    } else if (isToken(currentToken, ETokenType.operator, '**')) {
+      state.enableExpression = false
+      state.enableStarred = false
+      return this.astGenerator.expression.keyword.handle()
+    } else if (
+      isToken(currentToken, ETokenType.identifier) &&
+      isToken(this.tokens.getToken(1), ETokenType.operator, '=')
+    ) {
+      state.enableExpression = false
+      return this.astGenerator.expression.keyword.handle()
+    } else {
+      if (!state.enableExpression) {
+        throw new SyntaxError('Positional argument cannot appear after keyword arguments')
+      }
+
+      return this.astGenerator.expression.handleMaybeIf()
+    }
   }
 }
 
