@@ -33,7 +33,7 @@ class ForStatement extends BaseHandler {
   private _handleLeft(): IForStatement['left'] {
     const token = this.tokens.getToken()
     if (isToken(token, ETokenType.bracket, '(')) {
-      return this.astGenerator.expression.handleSmallBracket(() =>
+      return this.astGenerator.expression.handleSmallBracket(ENodeEnvironment.normal, () =>
         this._handleMaybeIdentifierAndTuple(ENodeEnvironment.bracket)
       )
     } else {

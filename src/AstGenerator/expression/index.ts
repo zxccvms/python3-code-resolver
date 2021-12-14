@@ -150,7 +150,7 @@ class Expression extends BaseHandler {
   handleFirstExpression(environment: ENodeEnvironment = ENodeEnvironment.normal): TExpressionNode {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.bracket, '(')) {
-      return this.handleSmallBracket()
+      return this.handleSmallBracket(environment)
     } else if (isToken(currentToken, ETokenType.bracket, '[')) {
       return this.arrayExpression.handle()
     } else if (isToken(currentToken, ETokenType.bracket, '{')) {
@@ -170,7 +170,10 @@ class Expression extends BaseHandler {
   }
 
   /** 处理小括号token */
-  handleSmallBracket(handleExpressionCb = () => this.handleMaybeTuple(ENodeEnvironment.bracket)): TExpressionNode {
+  handleSmallBracket(
+    environment: ENodeEnvironment,
+    handleExpressionCb = () => this.handleMaybeTuple(environment | ENodeEnvironment.bracket)
+  ): TExpressionNode {
     const leftBracket = this.tokens.getToken()
     if (!isToken(leftBracket, ETokenType.bracket, '(')) {
       throw new TypeError("handleSmallBracket err: current token is not bracket '('")

@@ -1,1 +1,1 @@
-lambda a, b=1, *c, d=1, e, **f : 1
+lambda a : (yield a)
