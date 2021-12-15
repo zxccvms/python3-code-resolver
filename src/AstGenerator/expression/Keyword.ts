@@ -5,7 +5,7 @@ import { ENodeEnvironment } from '../types'
 
 /** 赋值的参数 */
 class Keyword extends BaseHandler {
-  handle(): IKeyword {
+  handle(environment: ENodeEnvironment): IKeyword {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () =>
@@ -21,7 +21,7 @@ class Keyword extends BaseHandler {
       this.tokens.next()
     }
 
-    const value = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+    const value = this.astGenerator.expression.handleMaybeIf(environment)
 
     const Keyword = this.createNode(ENodeType.Keyword, {
       name,

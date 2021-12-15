@@ -3,11 +3,11 @@ import {
   ETokenType,
   ICallExpression,
   IKeyword,
-  IStarred,
+  IStarredExpression,
   TExpressionNode,
   TNotAssignmentExpressionNode
 } from '../../types'
-import { createLoc, isExpressionNode, isToken } from '../../utils'
+import { createLoc, isExpressionNode, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { ENodeEnvironment } from '../types'
 
@@ -64,30 +64,30 @@ class CallExpression extends BaseHandler {
   private _handleCurrentStep(state: {
     enableExpression: boolean
     enableStarred: boolean
-  }): TNotAssignmentExpressionNode | IStarred | IKeyword {
+  }): TNotAssignmentExpressionNode | IStarredExpression | IKeyword {
     const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.operator, '*')) {
-      if (!state.enableStarred) {
-        throw new SyntaxError('Iterable argument unpacking follows keyword argument unpacking')
-      }
-
-      return this.astGenerator.expression.starred.handle()
-    } else if (isToken(currentToken, ETokenType.operator, '**')) {
+    if (isToken(currentToken, ETokenType.operator, '**')) {
       state.enableExpression = false
       state.enableStarred = false
-      return this.astGenerator.expression.keyword.handle()
+      return this.astGenerator.expression.keyword.handle(ENodeEnvironment.bracket)
     } else if (
       isToken(currentToken, ETokenType.identifier) &&
       isToken(this.tokens.getToken(1), ETokenType.operator, '=')
     ) {
       state.enableExpression = false
-      return this.astGenerator.expression.keyword.handle()
+      return this.astGenerator.expression.keyword.handle(ENodeEnvironment.bracket)
     } else {
       if (!state.enableExpression) {
         throw new SyntaxError('Positional argument cannot appear after keyword arguments')
       }
 
-      return this.astGenerator.expression.handleMaybeIf()
+      const expression = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+
+      if (!state.enableStarred && isNode(expression, ENodeType.StarredExpression)) {
+        throw new SyntaxError('Iterable argument unpacking follows keyword argument unpacking')
+      }
+
+      return
     }
   }
 }

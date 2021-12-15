@@ -26,7 +26,7 @@ import LambdaExpression from './LambdaExpression'
 import YieldExpression from './YieldExpression'
 import Arguments from './Arguments'
 import Keyword from './Keyword'
-import Starred from './Starred'
+import StarredExpression from './StarredExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -52,11 +52,11 @@ class Expression extends BaseHandler {
   setOrDictionaryExpression: SetOrDictionaryExpression
   lambdaExpression: LambdaExpression
   yieldExpression: YieldExpression
+  starredExpression: StarredExpression
 
   // 特殊表达式
   arguments: Arguments
   keyword: Keyword
-  starred: Starred
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -81,10 +81,10 @@ class Expression extends BaseHandler {
     this.setOrDictionaryExpression = new SetOrDictionaryExpression(astGenerator)
     this.lambdaExpression = new LambdaExpression(astGenerator)
     this.yieldExpression = new YieldExpression(astGenerator)
+    this.starredExpression = new StarredExpression(astGenerator)
 
     this.arguments = new Arguments(astGenerator)
     this.keyword = new Keyword(astGenerator)
-    this.starred = new Starred(astGenerator)
   }
 
   /** 解析表达式 */
@@ -167,6 +167,8 @@ class Expression extends BaseHandler {
       isToken(currentToken, ETokenType.keyword, 'not')
     ) {
       return this.unaryExpression.handle(environment)
+    } else if (isToken(currentToken, ETokenType.operator, '*')) {
+      return this.starredExpression.handle(environment)
     } else if (isToken(currentToken, ETokenType.keyword, 'yield')) {
       return this.yieldExpression.handle(environment)
     } else if (isToken(currentToken, ETokenType.keyword, 'lambda')) {
