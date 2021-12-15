@@ -1,6 +1,6 @@
 import AstGenerator from 'src/AstGenerator/AstGenerator'
-import { ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
-import { getPositionInfo, getTokenExtra, isToken } from 'src/utils'
+import { ENodeType, ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
+import { getPositionInfo, getTokenExtra, isSameRank, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -201,12 +201,27 @@ class Expression extends BaseHandler {
             return this.booleanLiteral.handle(environment)
         }
       default: {
-        const position = getPositionInfo(currentToken, 'start')
-        throw new TypeError(
-          `Unexpected token: value: ${currentToken.value} line: ${position.line} column: ${position.column}`
-        )
+        // const position = getPositionInfo(currentToken, 'start')
+        // throw new TypeError(
+        //   `Unexpected token: value: ${currentToken.value} line: ${position.line} column: ${position.column}`
+        // )
+        return this.handleTokens()
       }
     }
+  }
+
+  handleTokens() {
+    const tokens = []
+    do {
+      tokens.push(this.tokens.getToken())
+      this.tokens.next()
+    } while (isSameRank([tokens[tokens.length - 1], this.tokens.getToken()], 'endAndStartLine'))
+
+    const Tokens = this.createNode(ENodeType.tokens, {
+      tokens
+    })
+
+    return Tokens as any
   }
 }
 

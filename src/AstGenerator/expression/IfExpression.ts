@@ -20,7 +20,6 @@ class IfExpression extends BaseHandler {
     const ifToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(ifToken, ETokenType.keyword, 'if'),
-      extraCheck: () => isExpressionNode(lastNode),
       environment,
       isAfter: true,
       isBefore: true

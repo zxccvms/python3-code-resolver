@@ -6,9 +6,9 @@ import { EEnvironment } from '../types'
 /** yield表达式 yield a */ // todo 只能当作开头
 class YieldExpression extends BaseHandler {
   handle(environment: EEnvironment): IYieldExpression {
-    if (!checkBit(environment, EEnvironment.functionBody | EEnvironment.lambda)) {
-      throw new SyntaxError('"yield" not allowed outside of a function or lambda')
-    }
+    // if (!checkBit(environment, EEnvironment.functionBody | EEnvironment.lambda)) {
+    //   throw new SyntaxError('"yield" not allowed outside of a function or lambda')
+    // }
 
     const yieldToken = this.tokens.getToken()
     this.check({

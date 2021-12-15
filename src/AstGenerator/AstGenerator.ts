@@ -1,6 +1,6 @@
 import NodeGenerator from 'src/NodeGenerator'
-import { getColumn, isSameRank } from 'src/utils'
-import { ENodeType, IProgram, TExpressionNode, TNode, TStatementNode, TToken } from '../types'
+import { getColumn, isSameRank, isToken } from 'src/utils'
+import { ENodeType, ETokenType, IProgram, TExpressionNode, TNode, TStatementNode, TToken } from '../types'
 import Expression from './expression'
 import Statement from './statement'
 import { EEnvironment } from './types'
@@ -41,17 +41,21 @@ class AstGenerator {
     environment: EEnvironment = EEnvironment.normal,
     indentCount: number = 0
   ): TExpressionNode | TStatementNode {
-    const lastToken = this.tokens.getToken(-1)
+    // const lastToken = this.tokens.getToken(-1)
     const token = this.tokens.getToken()
-    const column = getColumn(token, 'start')
-    if (lastToken && isSameRank([lastToken, token], 'endAndStartLine')) {
-      throw new SyntaxError('Statements must be separated by newlines or semicolons')
-    } else if (indentCount !== column) {
-      throw new SyntaxError('unexpected indent')
+    // const column = getColumn(token, 'start')
+    // if (lastToken && isSameRank([lastToken, token], 'endAndStartLine')) {
+    //   throw new SyntaxError('Statements must be separated by newlines or semicolons')
+    // } else if (indentCount !== column) {
+    //   throw new SyntaxError('unexpected indent')
+    // }
+
+    // return this.statement.handle(environment) || this.expression.handle(environment)
+    if (isToken(token, ETokenType.keyword, 'if')) {
+      return this.expression.handleTokens()
     }
 
-    // todo Statements must be separated by newlines or semicolons
-    return this.statement.handle(environment) || this.expression.handle(environment)
+    return this.expression.handle(environment)
   }
 }
 

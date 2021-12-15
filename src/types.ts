@@ -65,6 +65,8 @@ export const enum ENodeType {
   SliceExpression = 'SliceExpression',
   /** 解析 */
   Comprehension = 'Comprehension',
+  /** token类型 处理不了的token丢入这个类型中 临时 */
+  tokens = 'tokens',
 
   //基础表达式
   /** None */
@@ -171,6 +173,7 @@ export type TSpecialNodeMap = {
   [ENodeType.SliceExpression]: ISliceExpression
   [ENodeType.AliasExpression]: IAliasExpression
   [ENodeType.Comprehension]: IComprehension
+  [ENodeType.tokens]: ITokens
 }
 
 export type TSpecialNode<T extends keyof TSpecialNodeMap = keyof TSpecialNodeMap> = TSpecialNodeMap[T]
@@ -447,6 +450,10 @@ export interface IComprehension extends IBaseNodeAttr {
   ifs: TNotAssignmentExpressionNode[]
   iterable: TNotAssignmentExpressionNode
   target: TAssignableExpressionNode
+}
+export interface ITokens extends IBaseNodeAttr {
+  type: ENodeType.tokens
+  tokens: TToken[]
 }
 
 export interface IMemberExpression extends IBaseNodeAttr {
