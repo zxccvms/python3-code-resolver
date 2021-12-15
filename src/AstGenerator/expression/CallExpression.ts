@@ -3,7 +3,6 @@ import {
   ETokenType,
   ICallExpression,
   IKeyword,
-  IStarredExpression,
   TExpressionNode,
   TNotAssignmentExpressionNode
 } from '../../types'
@@ -24,9 +23,9 @@ class CallExpression extends BaseHandler {
     })
 
     this.tokens.next()
-    const { args, keywords } = this._handleArgsAndKeywords()
+    const { args, keywords } = this.handleArgsAndKeywords()
 
-    const rightBracket = this.tokens.getToken()
+    const rightBracket = this.tokens.getToken(-1)
     const CallExpression = this.createNode(ENodeType.CallExpression, {
       callee: lastNode,
       args,
@@ -34,12 +33,10 @@ class CallExpression extends BaseHandler {
       loc: createLoc(lastNode, rightBracket)
     })
 
-    this.tokens.next()
-
     return CallExpression
   }
 
-  private _handleArgsAndKeywords(): { args: ICallExpression['args']; keywords: ICallExpression['keywords'] } {
+  handleArgsAndKeywords(): { args: TNotAssignmentExpressionNode[]; keywords: IKeyword[] } {
     const state = { enableExpression: true, enableStarred: true }
     const { code, payload } = this.findNodes({
       end: token => isToken(token, ETokenType.bracket, ')'),
@@ -51,8 +48,10 @@ class CallExpression extends BaseHandler {
       throw new SyntaxError("Expected ')'")
     }
 
-    const args: ICallExpression['args'] = []
-    const keywords: ICallExpression['keywords'] = []
+    this.tokens.next()
+
+    const args: TNotAssignmentExpressionNode[] = []
+    const keywords: IKeyword[] = []
     for (const node of payload) {
       if (node.type === ENodeType.Keyword) keywords.push(node)
       else args.push(node)
@@ -64,7 +63,7 @@ class CallExpression extends BaseHandler {
   private _handleCurrentStep(state: {
     enableExpression: boolean
     enableStarred: boolean
-  }): TNotAssignmentExpressionNode | IStarredExpression | IKeyword {
+  }): TNotAssignmentExpressionNode | IKeyword {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.operator, '**')) {
       state.enableExpression = false
@@ -87,7 +86,7 @@ class CallExpression extends BaseHandler {
         throw new SyntaxError('Iterable argument unpacking follows keyword argument unpacking')
       }
 
-      return
+      return expression
     }
   }
 }

@@ -414,7 +414,7 @@ export interface ISubscriptExpression extends IBaseNodeAttr {
 export interface ICallExpression extends IBaseNodeAttr {
   type: ENodeType.CallExpression
   callee: TNotAssignmentExpressionNode
-  args: (TNotAssignmentExpressionNode | IStarredExpression)[]
+  args: TNotAssignmentExpressionNode[]
   keywords: IKeyword[]
 }
 
