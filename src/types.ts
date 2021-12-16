@@ -10,7 +10,7 @@ export enum ETokenType {
   string = 'string',
   /** 数字 1 2 3 */
   number = 'number',
-  /** 操作符 + - * / % ** // < > = <= >= != == += -= *= /= %= **= //= @ */
+  /** 操作符 + - * / % ** // < > = <= >= != == += -= *= /= %= **= //= @ | & */
   operator = 'operator',
   /** 括号 () [] {} */
   bracket = 'bracket',
@@ -403,7 +403,7 @@ export interface IDictionaryExpression extends IBaseNodeAttr {
 }
 export interface IBinaryExpression extends IBaseNodeAttr {
   type: ENodeType.BinaryExpression
-  operator: '+' | '-' | '*' | '/' | '%' | '//' | '**' | '==' | '!=' | '>=' | '<=' | '<' | '>'
+  operator: '+' | '-' | '*' | '/' | '%' | '//' | '**' | '==' | '!=' | '>=' | '<=' | '<' | '>' | '|' | '&'
   left: TExpressionNode
   right: TExpressionNode
 }

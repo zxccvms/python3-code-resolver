@@ -21,6 +21,17 @@ class ArrayOrArrayComprehensionExpression extends BaseHandler {
     })
     this.tokens.next()
 
+    const rightBracketToken = this.tokens.getToken()
+    if (isToken(rightBracketToken, ETokenType.bracket, ']')) {
+      this.tokens.next()
+      const ArrayExpression = this.createNode(ENodeType.ArrayExpression, {
+        elements: [],
+        loc: createLoc(leftBracket, rightBracketToken)
+      })
+
+      return ArrayExpression
+    }
+
     const element = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
 
     const currentToken = this.tokens.getToken()

@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, IUnaryExpression } from '../../types'
+import { ENodeType, ETokenType, IUnaryExpression, TToken } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
@@ -23,6 +23,10 @@ class UnaryExpression extends BaseHandler {
     })
 
     return UnaryExpression
+  }
+
+  isConformToken(token: TToken) {
+    return isToken(token, ETokenType.operator, ['+', '-', '~']) || isToken(token, ETokenType.keyword, 'not')
   }
 }
 

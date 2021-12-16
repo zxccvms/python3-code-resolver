@@ -29,7 +29,22 @@ class BinaryExpression extends BaseHandler {
     const rightNode = this.astGenerator.expression.handleMaybeMemberOrSubscriptOrCall()
 
     const BinaryExpression = this.createNode(ENodeType.BinaryExpression, {
-      operator: currentToken.value as '+' | '-' | '*' | '/' | '%' | '//' | '**' | '==' | '!=' | '>=' | '<=' | '<' | '>',
+      operator: currentToken.value as
+        | '+'
+        | '-'
+        | '*'
+        | '/'
+        | '%'
+        | '//'
+        | '**'
+        | '=='
+        | '!='
+        | '>='
+        | '<='
+        | '<'
+        | '>'
+        | '|'
+        | '&',
       left: lastNode,
       right: rightNode,
       loc: createLoc(lastNode, rightNode)
@@ -39,7 +54,23 @@ class BinaryExpression extends BaseHandler {
   }
 
   private _isConformToken(token: TToken) {
-    return isToken(token, ETokenType.operator, ['+', '-', '*', '/', '%', '//', '**', '==', '!=', '>=', '<=', '<', '>'])
+    return isToken(token, ETokenType.operator, [
+      '+',
+      '-',
+      '*',
+      '/',
+      '%',
+      '//',
+      '**',
+      '==',
+      '!=',
+      '>=',
+      '<=',
+      '<',
+      '>',
+      '|',
+      '&'
+    ])
   }
 }
 

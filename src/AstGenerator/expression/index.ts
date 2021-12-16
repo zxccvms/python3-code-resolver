@@ -157,10 +157,7 @@ class Expression extends BaseHandler {
       return this.arrayOrArrayComprehensionExpression.handle(environment)
     } else if (isToken(currentToken, ETokenType.bracket, '{')) {
       return this.setOrDictionaryExpression.handle(environment)
-    } else if (
-      isToken(currentToken, ETokenType.operator, ['+', '-']) ||
-      isToken(currentToken, ETokenType.keyword, 'not')
-    ) {
+    } else if (this.unaryExpression.isConformToken(currentToken)) {
       return this.unaryExpression.handle(environment)
     } else if (isToken(currentToken, ETokenType.operator, '*')) {
       return this.starredExpression.handle(environment)
@@ -196,7 +193,7 @@ class Expression extends BaseHandler {
         }
       })
     } else {
-      const handleEnvironment = deleteBit(environment, EEnvironment.ignoreInToken) | EEnvironment.bracket
+      const handleEnvironment = environment | EEnvironment.bracket
 
       expression = handleExpressionCb?.(handleEnvironment) || this.handleMaybeTuple(handleEnvironment)
 
