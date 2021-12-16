@@ -1,4 +1,4 @@
-import { ENodeEnvironment } from './AstGenerator/types'
+import { EEnvironment } from './AstGenerator/types'
 import { expressionNodeTypes, statementNodeTypes } from './const'
 import {
   ENodeType,
@@ -155,12 +155,31 @@ export function getColumn(tokenOrNode: TToken | TNode, startOrEnd: 'start' | 'en
   return getPositionInfo(tokenOrNode, startOrEnd).column
 }
 
+/** 得到闭合的括号 */
+export function getRightBracket(leftBracket: '(' | '[' | '{') {
+  switch (leftBracket) {
+    case '(':
+      return ')'
+    case '[':
+      return ']'
+    case '{':
+      return '}'
+    default:
+      throw new TypeError('getRightBracket param is not "(" or "[" or "{"')
+  }
+}
+
 /** 是否被括号包围 */
 export function hasParenthesized(node: TNode): boolean {
   return Boolean(node.extra?.parenthesized)
 }
 
-/** 是否有此环境 */
-export function hasEnvironment(environment: ENodeEnvironment, targetEnvironment: ENodeEnvironment) {
-  return Boolean(environment & targetEnvironment)
+/** 校验位 */
+export function checkBit(num: number, targetNum: number) {
+  return Boolean(num & targetNum)
+}
+
+/** 去除位 */
+export function deleteBit(num: number, targetNum: number) {
+  return num & ~targetNum
 }

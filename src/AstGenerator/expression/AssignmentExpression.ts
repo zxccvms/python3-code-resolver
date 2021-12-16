@@ -13,10 +13,10 @@ import {
 } from '../../types'
 import { createLoc, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 class AssignmentExpression extends BaseHandler {
-  handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment): TExpressionNode {
+  handleMaybe(lastNode: TExpressionNode, environment: EEnvironment): TExpressionNode {
     const currentToken = this.tokens.getToken()
     if (this._isConformToken(currentToken)) {
       return this.handle(lastNode, environment)
@@ -25,7 +25,7 @@ class AssignmentExpression extends BaseHandler {
     return lastNode
   }
 
-  handle(lastNode: TExpressionNode, environment: ENodeEnvironment): IAssignmentExpression {
+  handle(lastNode: TExpressionNode, environment: EEnvironment): IAssignmentExpression {
     const currentToken = this.tokens.getToken()
 
     this.check({

@@ -1,7 +1,7 @@
 import { ENodeType, ETokenType, IDictionaryExpression, IDictionaryProperty } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 class DictionaryExpression extends BaseHandler {
   handle(): IDictionaryExpression {
@@ -39,7 +39,7 @@ class DictionaryExpression extends BaseHandler {
   }
 
   private _handleDictionaryProperty(): IDictionaryProperty {
-    const key = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+    const key = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
 
     const colonToken = this.tokens.getToken()
     this.check({
@@ -47,7 +47,7 @@ class DictionaryExpression extends BaseHandler {
     })
 
     this.tokens.next()
-    const value = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+    const value = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
 
     const endToken = this.tokens.getToken()
     this.check({

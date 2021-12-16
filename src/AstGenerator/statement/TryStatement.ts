@@ -1,11 +1,11 @@
 import { ENodeType, ETokenType, IExceptHandler, ITryStatement } from '../../types'
 import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** try语句 */
 class TryStatement extends BaseHandler {
-  handle(environment: ENodeEnvironment): ITryStatement {
+  handle(environment: EEnvironment): ITryStatement {
     const tryToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(tryToken, ETokenType.keyword, 'try')
@@ -28,7 +28,7 @@ class TryStatement extends BaseHandler {
     return TryStatement
   }
 
-  private _handleHandlers(environment: ENodeEnvironment): ITryStatement['handlers'] {
+  private _handleHandlers(environment: EEnvironment): ITryStatement['handlers'] {
     const markToken = this.tokens.getToken()
 
     const { payload: handlers } = this.findNodes({
@@ -39,7 +39,7 @@ class TryStatement extends BaseHandler {
     return handlers
   }
 
-  private _handleExceptHandler(environment: ENodeEnvironment): IExceptHandler {
+  private _handleExceptHandler(environment: EEnvironment): IExceptHandler {
     const exceptToken = this.tokens.getToken()
     if (!isToken(exceptToken, ETokenType.keyword, 'except')) {
       throw new TypeError("ExceptHandler err: currentToken is not keyword 'except'")
@@ -84,7 +84,7 @@ class TryStatement extends BaseHandler {
     return name
   }
 
-  private _handleElseBody(environment: ENodeEnvironment, hasHandler: boolean): ITryStatement['elseBody'] {
+  private _handleElseBody(environment: EEnvironment, hasHandler: boolean): ITryStatement['elseBody'] {
     const elseToken = this.tokens.getToken()
     if (!isToken(elseToken, ETokenType.keyword, 'else')) return null
     else if (!hasHandler) {
@@ -97,7 +97,7 @@ class TryStatement extends BaseHandler {
     return BlockStatement
   }
 
-  private _handleFinalBody(environment: ENodeEnvironment): ITryStatement['finalBody'] {
+  private _handleFinalBody(environment: EEnvironment): ITryStatement['finalBody'] {
     const finallyToken = this.tokens.getToken()
     if (!isToken(finallyToken, ETokenType.keyword, 'finally')) return null
 

@@ -1,69 +1,64 @@
 import { ENodeType, ETokenType, ITupleExpression, TExpressionNode, TNode, TToken } from '../../types'
-import { createLoc, getLatest, hasEnvironment, isExpressionNode, isSameRank, isToken } from '../../utils'
+import { createLoc, checkBit, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
-
-type THandleTupleOptions = {
-  handleExpression?: () => TExpressionNode
-  extraEndCb?: (token: TToken) => boolean
-}
+import { EEnvironment } from '../types'
 
 /** 处理元组 */
 class TupleExpression extends BaseHandler {
-  handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment, options?: THandleTupleOptions) {
+  handleMaybe(lastNode: TExpressionNode, environment: EEnvironment) {
     if (isToken(this.tokens.getToken(), ETokenType.punctuation, ',') && this.isContinue(environment)) {
-      return this.handle(lastNode, environment, options)
+      return this.handle(lastNode, environment)
     }
 
     return lastNode
   }
 
-  handle(lastNode: TExpressionNode, environment: ENodeEnvironment, options?: THandleTupleOptions): ITupleExpression {
+  handle(lastNode: TExpressionNode, environment: EEnvironment): ITupleExpression {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.punctuation, ','),
-      extraCheck: () => isExpressionNode(lastNode),
       environment,
-      isBefore: true
+      isBefore: true,
+      isAssignableExpression: true
     })
 
-    this.tokens.next()
-    const elements = this._handleElements(lastNode, environment, options)
+    const elements = [lastNode, ...this._handleElements(environment)]
 
     const TupleExpression = this.createNode(ENodeType.TupleExpression, {
       elements,
-      loc: createLoc(elements[0], getLatest(elements))
+      loc: createLoc(lastNode, this.tokens.getToken(-1))
     })
 
     return TupleExpression
   }
 
-  private _handleElements(
-    lastNode: TExpressionNode,
-    environment: ENodeEnvironment,
-    options: THandleTupleOptions
-  ): ITupleExpression['elements'] {
-    const { handleExpression = () => this.astGenerator.expression.handleMaybeIf(), extraEndCb } = options || {}
+  private _handleElements(environment: EEnvironment, elementStack: TExpressionNode[] = []): TExpressionNode[] {
+    const commaToken = this.tokens.getToken()
+    if (!isToken(commaToken, ETokenType.punctuation, ',')) return elementStack
+    else if (
+      !checkBit(environment, EEnvironment.bracket) &&
+      !isSameRank([commaToken, this.tokens.getToken(1)], 'endAndStartLine')
+    )
+      return elementStack
 
-    const { payload: _elements } = this.findNodes({
-      end: token => !this._isConformToken(token, lastNode, environment) || extraEndCb?.(token),
-      step: handleExpression,
-      slice: token => isToken(token, ETokenType.punctuation, ',')
-    })
+    this.tokens.next()
+    const expression = this.astGenerator.expression.handleMaybeIf(environment)
 
-    const elements = [lastNode, ..._elements]
+    elementStack.push(expression)
 
-    return elements
+    return this._handleElements(environment, elementStack)
   }
 
-  private _isConformToken(token: TToken, lastNode: TNode, environment: ENodeEnvironment) {
+  private _isConformToken(token: TToken, lastNode: TNode, environment: EEnvironment) {
     let isEndToken = isToken(token, [ETokenType.bracket, ETokenType.operator], [')', '='])
 
     if (isEndToken) return false
-    else if (!hasEnvironment(environment, ENodeEnvironment.bracket)) {
+    else if (!checkBit(environment, EEnvironment.bracket)) {
       return isSameRank([lastNode, token], 'endAndStartLine')
     } else return true
   }
+
+  private _isEndToken(currentToken: TToken) {}
 }
 
 export default TupleExpression

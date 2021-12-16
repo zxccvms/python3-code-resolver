@@ -3,16 +3,16 @@ import {
   ETokenType,
   IClassDeclaration,
   IKeyword,
-  TExpressionNodeInDecorator,
+  TDecorativeExpressionNode,
   TNotAssignmentExpressionNode
 } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** 类声明 */
 class ClassDeclaration extends BaseHandler {
-  handle(environment: ENodeEnvironment, decorators?: TExpressionNodeInDecorator[]): IClassDeclaration {
+  handle(environment: EEnvironment, decorators?: TDecorativeExpressionNode[]): IClassDeclaration {
     const classToken = this.tokens.getToken()
     const identifierToken = this.tokens.getToken(1)
     this.check({

@@ -8,13 +8,14 @@ import {
 } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 class SetOrDictionaryExpression extends BaseHandler {
-  handle(): ISetExpression | IDictionaryExpression {
+  handle(environment: EEnvironment = EEnvironment.normal): ISetExpression | IDictionaryExpression {
     const leftBigBracket = this.tokens.getToken()
     this.check({
-      checkToken: () => isToken(leftBigBracket, ETokenType.bracket, '{')
+      checkToken: () => isToken(leftBigBracket, ETokenType.bracket, '{'),
+      environment
     })
 
     this.tokens.next()
@@ -75,7 +76,7 @@ class SetOrDictionaryExpression extends BaseHandler {
     element: boolean
     property: boolean
   }): TNotAssignmentExpressionNode | IDictionaryProperty {
-    const expression = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+    const expression = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
 
     const punctuationToken = this.tokens.getToken()
     if (isToken(punctuationToken, [ETokenType.punctuation, ETokenType.bracket], [',', '}'])) {
@@ -90,7 +91,7 @@ class SetOrDictionaryExpression extends BaseHandler {
       }
       stateCode.element = false
       this.tokens.next()
-      const value = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+      const value = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
 
       const endToken = this.tokens.getToken()
       this.check({

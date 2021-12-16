@@ -1,11 +1,11 @@
 import { ENodeType, ETokenType, IIfStatement } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** if语句 */
 class IfStatement extends BaseHandler {
-  handle(environment: ENodeEnvironment, keyword: 'if' | 'elif' = 'if'): IIfStatement {
+  handle(environment: EEnvironment, keyword: 'if' | 'elif' = 'if'): IIfStatement {
     const currentToken = this.tokens.getToken()
     if (!isToken(currentToken, ETokenType.keyword, keyword)) {
       throw new TypeError(`handleIfStatement err: currentToken is not keyword '${keyword}'`)
@@ -26,7 +26,7 @@ class IfStatement extends BaseHandler {
     return IfStatement
   }
 
-  private _handleAlternate(environment: ENodeEnvironment): IIfStatement['alternate'] {
+  private _handleAlternate(environment: EEnvironment): IIfStatement['alternate'] {
     const currentToken = this.tokens.getToken()
 
     if (isToken(currentToken, ETokenType.keyword, 'else')) {

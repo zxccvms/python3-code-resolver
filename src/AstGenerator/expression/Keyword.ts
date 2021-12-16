@@ -1,11 +1,11 @@
 import { ENodeType, ETokenType, IKeyword, TNotAssignmentExpressionNode } from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** 赋值的参数 */
 class Keyword extends BaseHandler {
-  handle(environment: ENodeEnvironment): IKeyword {
+  handle(environment: EEnvironment): IKeyword {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () =>

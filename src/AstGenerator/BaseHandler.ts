@@ -1,8 +1,8 @@
 import NodeGenerator from '../NodeGenerator'
-import { ETokenType } from '../types'
+import { ETokenType, TToken } from '../types'
 import TokenArray from './utils/TokenArray'
-import { ENodeEnvironment, ICheckParams, IFindNodesParams } from './types'
-import { hasEnvironment, isSameRank, isToken } from 'src/utils'
+import { EEnvironment, ICheckParams, IFindNodesParams } from './types'
+import { checkBit, getRightBracket, isSameRank, isToken } from 'src/utils'
 import AstGenerator from './AstGenerator'
 
 /** 节点基础的处理者 */
@@ -15,6 +15,31 @@ class BaseHandler {
     this.tokens = astGenerator.tokens
     this.createNode = astGenerator.createNode
     this.astGenerator = astGenerator
+  }
+
+  /** 通过 符合的token 和 步进函数 得到期间的token */
+  findTokens(end: (token: TToken) => boolean): TStateResponse<TToken[]> {
+    const result: TToken[] = []
+
+    let currentToken: TToken
+    while ((currentToken = this.tokens.getToken()) && !end(currentToken)) {
+      this.tokens.next()
+      result.push(currentToken)
+
+      if (isToken(currentToken, ETokenType.bracket, ['(', '[', '{'])) {
+        const rightBracket = getRightBracket(currentToken.value as '(' | '[' | '{')
+
+        const { code, payload } = this.findTokens(token => isToken(token, ETokenType.bracket, rightBracket))
+        if (code === 1) throw new SyntaxError(`Expected '${rightBracket}'`)
+
+        const rightBracketToken = this.tokens.getToken()
+        this.tokens.next()
+
+        result.push(...payload, rightBracketToken)
+      }
+    }
+
+    return { code: currentToken ? 0 : 1, payload: result }
   }
 
   /** 通过 符合的token 和 步进函数 得到期间生成的节点 */
@@ -34,8 +59,8 @@ class BaseHandler {
   }
 
   /** 是否继续执行 */
-  isContinue(environment: ENodeEnvironment) {
-    if (environment === ENodeEnvironment.bracket) return true
+  isContinue(environment: EEnvironment) {
+    if (environment === EEnvironment.bracket) return true
 
     const lastToken = this.tokens.getToken(-1)
     const currentToken = this.tokens.getToken()
@@ -44,7 +69,7 @@ class BaseHandler {
 
   /** 检查 */
   check(checkParams: ICheckParams) {
-    if (!checkParams.checkToken()) {
+    if (checkParams.extraCheck && !checkParams.checkToken()) {
       throw new TypeError('Unexpected token')
     }
 
@@ -52,7 +77,15 @@ class BaseHandler {
       throw new TypeError('Extra check the failure')
     }
 
-    const hasBracket = hasEnvironment(checkParams.environment, ENodeEnvironment.bracket)
+    if (checkBit(checkParams.environment, EEnvironment.assign) && !checkParams.isAssignableExpression) {
+      throw new TypeError('Expression cannot be assignment target')
+    }
+
+    if (checkBit(checkParams.environment, EEnvironment.decorative) && !checkParams.isDecorativeExpression) {
+      throw new TypeError('Expression form not supported for decorator prior to Python 3.9')
+    }
+
+    const hasBracket = checkBit(checkParams.environment, EEnvironment.bracket)
 
     if (checkParams.isBefore) {
       const last = this.tokens.getToken(-1 * Number(checkParams.isBefore))

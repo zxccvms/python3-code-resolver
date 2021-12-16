@@ -1,12 +1,12 @@
 import { ENodeType, ETokenType, IMemberExpression, TExpressionNode } from '../../types'
 import { createLoc, isExpressionNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 class MemberExpression extends BaseHandler {
   handleMaybe<T extends TExpressionNode>(
     lastNode: T,
-    environment: ENodeEnvironment = ENodeEnvironment.normal
+    environment: EEnvironment = EEnvironment.normal
   ): T | IMemberExpression {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.punctuation, '.')) {
@@ -18,14 +18,16 @@ class MemberExpression extends BaseHandler {
   }
 
   /** 处理对象调用属性节点 */
-  handle(lastNode: TExpressionNode, environment: ENodeEnvironment): IMemberExpression {
+  handle(lastNode: TExpressionNode, environment: EEnvironment): IMemberExpression {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.punctuation, '.'),
       extraCheck: () => isExpressionNode(lastNode),
       environment,
       isBefore: true,
-      isAfter: true
+      isAfter: true,
+      isAssignableExpression: true,
+      isDecorativeExpression: true
     })
 
     this.tokens.next()

@@ -1,12 +1,12 @@
-import { ENodeType, ETokenType, IFunctionDeclaration, TExpressionNodeInDecorator } from '../../types'
+import { ENodeType, ETokenType, IFunctionDeclaration, TDecorativeExpressionNode } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** 处理函数定义节点 */
 class FunctionDeclaration extends BaseHandler {
   /** 处理函数定义节点 */
-  handle(environment: ENodeEnvironment, decorators?: TExpressionNodeInDecorator[]): IFunctionDeclaration {
+  handle(environment: EEnvironment, decorators?: TDecorativeExpressionNode[]): IFunctionDeclaration {
     const defToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(defToken, ETokenType.keyword, 'def'),
@@ -25,10 +25,7 @@ class FunctionDeclaration extends BaseHandler {
     const args = this.astGenerator.expression.arguments.handle(token => isToken(token, ETokenType.bracket, ')'))
 
     this.tokens.next()
-    const body = this.astGenerator.statement.blockStatement.handle(
-      defToken,
-      environment | ENodeEnvironment.functionBody
-    )
+    const body = this.astGenerator.statement.blockStatement.handle(defToken, environment | EEnvironment.functionBody)
 
     const FunctionDeclaration = this.createNode(ENodeType.FunctionDeclaration, {
       name: identifier.name,

@@ -1,18 +1,19 @@
 import { ENodeType, ETokenType, ISubscriptExpression, TExpressionNode } from 'src/types'
-import { createLoc, isExpressionNode, isNode, isToken } from 'src/utils'
+import { createLoc, isExpressionNode, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** 下标表达式 */
 class SubscriptExpression extends BaseHandler {
-  handle(lastNode: TExpressionNode, environment: ENodeEnvironment): ISubscriptExpression {
+  handle(lastNode: TExpressionNode, environment: EEnvironment): ISubscriptExpression {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.bracket, '['),
       extraCheck: () => isExpressionNode(lastNode),
       environment,
       isBefore: true,
-      isAfter: true
+      isAfter: true,
+      isAssignableExpression: true
     })
 
     this.tokens.next()
@@ -55,7 +56,7 @@ class SubscriptExpression extends BaseHandler {
           this.tokens.next()
           return undefined
         } else {
-          return this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+          return this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
         }
       }
     })

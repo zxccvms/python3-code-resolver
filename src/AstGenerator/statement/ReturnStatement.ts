@@ -1,11 +1,11 @@
 import { ENodeType, ETokenType, IReturnStatement } from 'src/types'
-import { createLoc, hasEnvironment, isSameRank, isToken } from 'src/utils'
+import { createLoc, checkBit, isSameRank, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 class ReturnStatement extends BaseHandler {
-  handle(environment: ENodeEnvironment): IReturnStatement {
-    if (!hasEnvironment(environment, ENodeEnvironment.functionBody)) {
+  handle(environment: EEnvironment): IReturnStatement {
+    if (!checkBit(environment, EEnvironment.functionBody)) {
       throw new SyntaxError('"return" can be used only within a function')
     }
 

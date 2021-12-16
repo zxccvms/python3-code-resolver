@@ -1,11 +1,11 @@
 import { ENodeType, ETokenType, IBinaryExpression, TExpressionNode, TToken } from '../../types'
 import { createLoc, isExpressionNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** 二进制表达式 */
 class BinaryExpression extends BaseHandler {
-  handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment): TExpressionNode {
+  handleMaybe(lastNode: TExpressionNode, environment: EEnvironment): TExpressionNode {
     const currentToken = this.tokens.getToken()
     if (this._isConformToken(currentToken) && this.isContinue(environment)) {
       const binaryExpression = this.handle(lastNode, environment)
@@ -15,7 +15,7 @@ class BinaryExpression extends BaseHandler {
     return lastNode
   }
 
-  handle(lastNode: TExpressionNode, environment: ENodeEnvironment): IBinaryExpression {
+  handle(lastNode: TExpressionNode, environment: EEnvironment): IBinaryExpression {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () => this._isConformToken(currentToken),

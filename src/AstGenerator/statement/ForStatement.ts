@@ -1,66 +1,43 @@
-import { ENodeType, ETokenType, IForStatement } from 'src/types'
+import AstGenerator from '../AstGenerator'
+import { ENodeType, ETokenType, IForStatement, TAssignableExpressionNode } from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** for 语句 */
 class ForStatement extends BaseHandler {
-  handle(environment: ENodeEnvironment): IForStatement {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.keyword, 'for')) {
-      throw new TypeError("handleForStatement err: currentToken is not keyword 'for'")
-    }
+  handle(environment: EEnvironment): IForStatement {
+    const forToken = this.tokens.getToken()
+    this.check({
+      checkToken: () => isToken(forToken, ETokenType.keyword, 'for')
+    })
 
     this.tokens.next()
-    const left = this._handleLeft()
-    const right = this._handleRight()
-    const body = this.astGenerator.statement.blockStatement.handle(
-      currentToken,
-      environment | ENodeEnvironment.loopBody
-    )
+    const target = this._handleTarget()
+
+    this.tokens.next()
+    const iterable = this.astGenerator.expression.handleMaybeTuple()
+
+    const body = this.astGenerator.statement.blockStatement.handle(forToken, environment | EEnvironment.loopBody)
 
     const ForStatement = this.createNode(ENodeType.ForStatement, {
-      left,
-      right,
+      target,
+      iterable,
       body,
-      loc: createLoc(currentToken, body)
+      loc: createLoc(forToken, body)
     })
 
     return ForStatement
   }
 
-  // todo 与py ast报错不一致
-  private _handleLeft(): IForStatement['left'] {
-    const token = this.tokens.getToken()
-    if (isToken(token, ETokenType.bracket, '(')) {
-      return this.astGenerator.expression.handleSmallBracket(ENodeEnvironment.normal, () =>
-        this._handleMaybeIdentifierAndTuple(ENodeEnvironment.bracket)
-      )
-    } else {
-      return this._handleMaybeIdentifierAndTuple()
-    }
-  }
+  private _handleTarget(): TAssignableExpressionNode {
+    const { code, payload: tokens } = this.findTokens(token => isToken(token, ETokenType.keyword, 'in'))
+    if (code === 1) throw new SyntaxError("Expected 'in'")
 
-  private _handleMaybeIdentifierAndTuple(environment: ENodeEnvironment = ENodeEnvironment.normal) {
-    const identifier = this.astGenerator.expression.identifier.handle()
-    const left = this.astGenerator.expression.tupleExpression.handleMaybe(identifier, environment, {
-      handleExpression: () => this.astGenerator.expression.identifier.handle(),
-      extraEndCb: token => isToken(token, ETokenType.keyword, 'in')
-    })
+    const astGenerator = new AstGenerator(tokens)
+    const target = astGenerator.expression.handleMaybeTuple(EEnvironment.assign) as TAssignableExpressionNode
 
-    return left
-  }
-
-  private _handleRight(): IForStatement['right'] {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.keyword, 'in')) {
-      throw new TypeError("handleForStatement err: currentToken is not keyword 'in'")
-    }
-
-    this.tokens.next()
-    const right = this.astGenerator.expression.handleMaybeTuple()
-
-    return right
+    return target
   }
 }
 

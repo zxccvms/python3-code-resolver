@@ -1,7 +1,7 @@
 import { ENodeType, ETokenType, ISetExpression } from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** set表达式 */
 class SetExpression extends BaseHandler {
@@ -30,7 +30,7 @@ class SetExpression extends BaseHandler {
   private _handleElements(): ISetExpression['elements'] {
     const { payload } = this.findNodes({
       end: token => isToken(token, ETokenType.bracket, '}'),
-      step: () => this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket),
+      step: () => this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket),
       slice: token => isToken(token, ETokenType.punctuation, ',')
     })
 

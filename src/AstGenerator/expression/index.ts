@@ -1,10 +1,9 @@
 import AstGenerator from 'src/AstGenerator/AstGenerator'
 import { ENodeType, ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
-import { addBaseNodeAttr, getPositionInfo, getTokenExtra, hasParenthesized, isToken } from 'src/utils'
+import { addBaseNodeAttr, deleteBit, getPositionInfo, getTokenExtra, hasParenthesized, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
-import ArrayExpression from './ArrayExpression'
 import AssignmentExpression from './AssignmentExpression'
 import BinaryExpression from './BinaryExpression'
 import BooleanLiteral from './BooleanLiteral'
@@ -27,6 +26,7 @@ import YieldExpression from './YieldExpression'
 import Arguments from './Arguments'
 import Keyword from './Keyword'
 import StarredExpression from './StarredExpression'
+import ArrayOrArrayComprehensionExpression from './ArrayOrArrayComprehensionExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -41,7 +41,7 @@ class Expression extends BaseHandler {
   unaryExpression: UnaryExpression
   ifExpression: IfExpression
   tupleExpression: TupleExpression
-  arrayExpression: ArrayExpression
+  arrayOrArrayComprehensionExpression: ArrayOrArrayComprehensionExpression
   binaryExpression: BinaryExpression
   assignmentExpression: AssignmentExpression
   memberExpression: MemberExpression
@@ -70,7 +70,7 @@ class Expression extends BaseHandler {
     this.unaryExpression = new UnaryExpression(astGenerator)
     this.ifExpression = new IfExpression(astGenerator)
     this.tupleExpression = new TupleExpression(astGenerator)
-    this.arrayExpression = new ArrayExpression(astGenerator)
+    this.arrayOrArrayComprehensionExpression = new ArrayOrArrayComprehensionExpression(astGenerator)
     this.binaryExpression = new BinaryExpression(astGenerator)
     this.assignmentExpression = new AssignmentExpression(astGenerator)
     this.memberExpression = new MemberExpression(astGenerator)
@@ -88,80 +88,75 @@ class Expression extends BaseHandler {
   }
 
   /** 解析表达式 */
-  handle(environment: ENodeEnvironment = ENodeEnvironment.normal): TExpressionNode {
+  handle(environment: EEnvironment = EEnvironment.normal): TExpressionNode {
     return this.handleMaybeAssignment(environment)
   }
 
   /** 处理可能是赋值表达式 */
-  handleMaybeAssignment(environment: ENodeEnvironment = ENodeEnvironment.normal) {
+  handleMaybeAssignment(environment: EEnvironment = EEnvironment.normal) {
     const lastNode = this.handleMaybeTuple(environment)
     return this.assignmentExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是元组表达式 */
-  handleMaybeTuple(environment: ENodeEnvironment = ENodeEnvironment.normal) {
+  handleMaybeTuple(environment: EEnvironment = EEnvironment.normal) {
     const lastNode = this.handleMaybeIf(environment)
     return this.tupleExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是条件表达式 */
-  handleMaybeIf(environment: ENodeEnvironment = ENodeEnvironment.normal) {
+  handleMaybeIf(environment: EEnvironment = EEnvironment.normal) {
     const lastNode = this.handleMaybeLogical(environment)
     return this.ifExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是逻辑表达式 */
-  handleMaybeLogical(environment: ENodeEnvironment = ENodeEnvironment.normal, disableOr: boolean = false) {
+  handleMaybeLogical(environment: EEnvironment = EEnvironment.normal, disableOr: boolean = false) {
     const lastNode = this.handleMaybeCompare(environment)
     return this.logicalExpression.handleMaybe(lastNode, environment, disableOr)
   }
 
   /** 处理可能是比较表达式 */
-  handleMaybeCompare(environment: ENodeEnvironment = ENodeEnvironment.normal) {
+  handleMaybeCompare(environment: EEnvironment = EEnvironment.normal) {
     const lastNode = this.handleMaybeBinary(environment)
     return this.compareExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是二元表达式 */
-  handleMaybeBinary(environment: ENodeEnvironment = ENodeEnvironment.normal) {
+  handleMaybeBinary(environment: EEnvironment = EEnvironment.normal) {
     const lastNode = this.handleMaybeMemberOrSubscriptOrCall(environment)
     return this.binaryExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是 MemberExpression or SubscriptExpression or CallExpression */
   handleMaybeMemberOrSubscriptOrCall(
-    environment: ENodeEnvironment = ENodeEnvironment.normal,
-    lastNode: TExpressionNode = this.handleFirstExpression(environment),
-    enableMap = { memberExpression: true, subscriptExpression: true, callExpression: true } as {
-      memberExpression?: boolean
-      subscriptExpression?: boolean
-      callExpression?: boolean
-    }
+    environment: EEnvironment = EEnvironment.normal,
+    lastNode: TExpressionNode = this.handleFirstExpression(environment)
   ): TExpressionNode {
     if (!this.isContinue(environment)) return lastNode
 
     const currentToken = this.tokens.getToken()
-    if (enableMap.memberExpression && isToken(currentToken, ETokenType.punctuation, '.')) {
+    if (isToken(currentToken, ETokenType.punctuation, '.')) {
       const memberExpression = this.memberExpression.handle(lastNode, environment)
-      return this.handleMaybeMemberOrSubscriptOrCall(environment, memberExpression, enableMap)
-    } else if (enableMap.subscriptExpression && isToken(currentToken, ETokenType.bracket, '[')) {
+      return this.handleMaybeMemberOrSubscriptOrCall(environment, memberExpression)
+    } else if (isToken(currentToken, ETokenType.bracket, '[')) {
       const subscriptExpression = this.subscriptExpression.handle(lastNode, environment)
-      return this.handleMaybeMemberOrSubscriptOrCall(environment, subscriptExpression, enableMap)
-    } else if (enableMap.callExpression && isToken(currentToken, ETokenType.bracket, '(')) {
+      return this.handleMaybeMemberOrSubscriptOrCall(environment, subscriptExpression)
+    } else if (isToken(currentToken, ETokenType.bracket, '(')) {
       const callExpression = this.callExpression.handle(lastNode, environment)
-      return this.handleMaybeMemberOrSubscriptOrCall(environment, callExpression, enableMap)
+      return this.handleMaybeMemberOrSubscriptOrCall(environment, callExpression)
     }
     return lastNode
   }
 
-  handleFirstExpression(environment: ENodeEnvironment = ENodeEnvironment.normal): TExpressionNode {
+  handleFirstExpression(environment: EEnvironment = EEnvironment.normal): TExpressionNode {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.bracket, '(')) {
       return this.handleSmallBracket(environment)
     } else if (isToken(currentToken, ETokenType.bracket, '[')) {
-      return this.arrayExpression.handle()
+      return this.arrayOrArrayComprehensionExpression.handle(environment)
     } else if (isToken(currentToken, ETokenType.bracket, '{')) {
-      return this.setOrDictionaryExpression.handle()
+      return this.setOrDictionaryExpression.handle(environment)
     } else if (
       isToken(currentToken, ETokenType.operator, ['+', '-']) ||
       isToken(currentToken, ETokenType.keyword, 'not')
@@ -174,14 +169,14 @@ class Expression extends BaseHandler {
     } else if (isToken(currentToken, ETokenType.keyword, 'lambda')) {
       return this.lambdaExpression.handle(environment)
     } else {
-      return this.handleBasicExpression()
+      return this.handleBasicExpression(environment)
     }
   }
 
   /** 处理小括号token */
   handleSmallBracket(
-    environment: ENodeEnvironment,
-    handleExpressionCb = () => this.handleMaybeTuple(environment | ENodeEnvironment.bracket)
+    environment: EEnvironment,
+    handleExpressionCb?: (environment: EEnvironment) => TExpressionNode
   ): TExpressionNode {
     const leftBracket = this.tokens.getToken()
     if (!isToken(leftBracket, ETokenType.bracket, '(')) {
@@ -201,7 +196,10 @@ class Expression extends BaseHandler {
         }
       })
     } else {
-      expression = handleExpressionCb()
+      const handleEnvironment = deleteBit(environment, EEnvironment.ignoreInToken) | EEnvironment.bracket
+
+      expression = handleExpressionCb?.(handleEnvironment) || this.handleMaybeTuple(handleEnvironment)
+
       if (!isToken(this.tokens.getToken(), ETokenType.bracket, ')')) {
         throw new TypeError("handleSmallBracket err: current token is not bracket ')'")
       }
@@ -221,27 +219,27 @@ class Expression extends BaseHandler {
   }
 
   /** 基础基础表达式 */
-  handleBasicExpression(): TBasicExpressionNode {
+  handleBasicExpression(environment: EEnvironment = EEnvironment.normal): TBasicExpressionNode {
     const currentToken = this.tokens.getToken()
     switch (currentToken.type) {
       case ETokenType.string: {
         if (getTokenExtra(currentToken).prefix === 'f') {
-          return this.templateLiteral.handle()
+          return this.templateLiteral.handle(environment)
         } else {
-          return this.stringLiteral.handle()
+          return this.stringLiteral.handle(environment)
         }
       }
       case ETokenType.identifier:
-        return this.identifier.handle()
+        return this.identifier.handle(environment)
       case ETokenType.number:
-        return this.numberLiteral.handle()
+        return this.numberLiteral.handle(environment)
       case ETokenType.keyword:
         switch (currentToken.value) {
           case 'None':
-            return this.noneLiteral.handle()
+            return this.noneLiteral.handle(environment)
           case 'True':
           case 'False':
-            return this.booleanLiteral.handle()
+            return this.booleanLiteral.handle(environment)
         }
       default: {
         const position = getPositionInfo(currentToken, 'start')

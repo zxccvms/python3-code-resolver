@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IUnaryExpression } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 class UnaryExpression extends BaseHandler {
-  handle(environment: ENodeEnvironment): IUnaryExpression {
+  handle(environment: EEnvironment): IUnaryExpression {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () =>

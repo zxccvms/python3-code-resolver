@@ -1,11 +1,11 @@
 import { ENodeType, ETokenType, IBlockStatement, TToken } from '../../types'
 import { createLoc, getColumn, getLatest, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** 块声明 */
 class BlockStatement extends BaseHandler {
-  handle(startToken: TToken, environment: ENodeEnvironment = ENodeEnvironment.normal): IBlockStatement {
+  handle(startToken: TToken, environment: EEnvironment = EEnvironment.normal): IBlockStatement {
     let colonToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(colonToken, ETokenType.punctuation, ':')
@@ -22,7 +22,7 @@ class BlockStatement extends BaseHandler {
     return BlockStatement
   }
 
-  private _handleBody(startToken: TToken, colonToken: TToken, environment: ENodeEnvironment): IBlockStatement['body'] {
+  private _handleBody(startToken: TToken, colonToken: TToken, environment: EEnvironment): IBlockStatement['body'] {
     const markToken = this.tokens.getToken()
     if (!markToken) {
       throw new TypeError('handleBlockStatement err: markToken is not exist')

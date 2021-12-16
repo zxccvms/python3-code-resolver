@@ -8,18 +8,19 @@ import {
 } from '../../types'
 import { createLoc, isExpressionNode, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** 函数调用表达式 */
 class CallExpression extends BaseHandler {
-  handle(lastNode: TExpressionNode, environment: ENodeEnvironment): ICallExpression {
+  handle(lastNode: TExpressionNode, environment: EEnvironment): ICallExpression {
     const leftBracket = this.tokens.getToken()
 
     this.check({
       checkToken: () => isToken(leftBracket, ETokenType.bracket, '('),
       extraCheck: () => isExpressionNode(lastNode),
       environment,
-      isBefore: true
+      isBefore: true,
+      isDecorativeExpression: true
     })
 
     this.tokens.next()
@@ -68,19 +69,19 @@ class CallExpression extends BaseHandler {
     if (isToken(currentToken, ETokenType.operator, '**')) {
       state.enableExpression = false
       state.enableStarred = false
-      return this.astGenerator.expression.keyword.handle(ENodeEnvironment.bracket)
+      return this.astGenerator.expression.keyword.handle(EEnvironment.bracket)
     } else if (
       isToken(currentToken, ETokenType.identifier) &&
       isToken(this.tokens.getToken(1), ETokenType.operator, '=')
     ) {
       state.enableExpression = false
-      return this.astGenerator.expression.keyword.handle(ENodeEnvironment.bracket)
+      return this.astGenerator.expression.keyword.handle(EEnvironment.bracket)
     } else {
       if (!state.enableExpression) {
         throw new SyntaxError('Positional argument cannot appear after keyword arguments')
       }
 
-      const expression = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+      const expression = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
 
       if (!state.enableStarred && isNode(expression, ENodeType.StarredExpression)) {
         throw new SyntaxError('Iterable argument unpacking follows keyword argument unpacking')

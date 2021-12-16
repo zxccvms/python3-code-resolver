@@ -1,7 +1,7 @@
 import { ENodeType, ETokenType, IArrayExpression, TExpressionNode } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** 数组表达式 */
 class ArrayExpression extends BaseHandler {
@@ -42,7 +42,7 @@ class ArrayExpression extends BaseHandler {
   }
 
   private _handleElement(): TExpressionNode {
-    const expression = this.astGenerator.expression.handleMaybeIf(ENodeEnvironment.bracket)
+    const expression = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
 
     if (!isToken(this.tokens.getToken(), [ETokenType.punctuation, ETokenType.bracket], [',', ']'])) {
       throw new SyntaxError("Expected ']'")

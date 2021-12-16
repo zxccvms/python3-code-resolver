@@ -1,38 +1,47 @@
 import { ENodeType, ETokenType, ICompareExpression, TExpressionNode, TToken } from 'src/types'
-import { createLoc, hasEnvironment, isExpressionNode, isSameRank, isToken } from 'src/utils'
+import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 /** todo  比较表达式 a in b */
 class CompareExpression extends BaseHandler {
-  handleMaybe(lastNode: TExpressionNode, environment: ENodeEnvironment) {
+  handleMaybe(lastNode: TExpressionNode, environment: EEnvironment) {
     const currentToken = this.tokens.getToken()
-    const nextToken = this.tokens.getToken(1)
 
-    if (this._isConformToken(currentToken, nextToken, environment) && this.isContinue(environment)) {
-      return this.handle(lastNode, environment)
-    }
+    if (!this.isContinue(environment)) return lastNode
+    else if (!this._isConformToken(currentToken)) return lastNode
 
-    return lastNode
+    return this.handle(lastNode, environment)
   }
 
-  handle(lastNode: TExpressionNode, environment: ENodeEnvironment): ICompareExpression {
-    let operatorToken = this._getOperatorToken(environment)
-
+  handle(lastNode: TExpressionNode, environment: EEnvironment): ICompareExpression {
+    const operatorToken = this.tokens.getToken()
     this.check({
-      checkToken: () => !!operatorToken,
-      extraCheck: () => isExpressionNode(lastNode),
+      checkToken: () => this._isConformToken(operatorToken),
       environment,
-      isBefore: operatorToken.value === 'not in' ? 2 : 1,
+      isBefore: true,
       isAfter: true
     })
 
     this.tokens.next()
+
+    let operator = operatorToken.value as 'in' | 'is' | 'not in'
+    if (isToken(operatorToken, ETokenType.keyword, 'not')) {
+      const inToken = this.tokens.getToken()
+      this.check({
+        checkToken: () => isToken(inToken, ETokenType.keyword, 'in'),
+        isAfter: true
+      })
+
+      this.tokens.next()
+      operator += inToken.value
+    }
+
     const right = this.astGenerator.expression.handleMaybeCompare(environment)
 
     const CompareExpression = this.createNode(ENodeType.CompareExpression, {
       left: lastNode,
-      operator: operatorToken.value,
+      operator,
       right,
       loc: createLoc(lastNode, right)
     })
@@ -40,33 +49,8 @@ class CompareExpression extends BaseHandler {
     return CompareExpression
   }
 
-  private _getOperatorToken(environment: ENodeEnvironment): TToken<ETokenType.keyword, 'is' | 'in' | 'not in'> {
-    const currentToken = this.tokens.getToken()
-    const nextToken = this.tokens.getToken(1)
-
-    if (!this._isConformToken(currentToken, nextToken, environment)) return null
-
-    if (isToken(currentToken, ETokenType.keyword, ['in', 'is'])) return currentToken
-
-    this.tokens.next()
-    return {
-      type: ETokenType.keyword,
-      value: 'not in',
-      loc: createLoc(currentToken, nextToken)
-    }
-  }
-
-  private _isConformToken(currentToken: TToken, nextToken: TToken, environment: ENodeEnvironment) {
-    if (isToken(currentToken, ETokenType.keyword, ['in', 'is'])) return true
-    else if (
-      isToken(currentToken, ETokenType.keyword, 'not') &&
-      isToken(nextToken, ETokenType.keyword, 'in') &&
-      (hasEnvironment(environment, ENodeEnvironment.bracket) ||
-        isSameRank([currentToken, nextToken], 'endAndStartLine'))
-    )
-      return true
-
-    return false
+  private _isConformToken(currentToken: TToken) {
+    return isToken(currentToken, ETokenType.keyword, ['in', 'is', 'not'])
   }
 }
 

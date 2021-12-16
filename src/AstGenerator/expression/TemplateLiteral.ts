@@ -2,15 +2,17 @@ import { ENodeType, ETokenType, ITemplateLiteral, TToken } from 'src/types'
 import { createLoc, getTokenExtra, isExpressionNodes, isToken } from 'src/utils'
 import AstGenerator from '../AstGenerator'
 import BaseHandler from '../BaseHandler'
+import { EEnvironment } from '../types'
 
 /** 模版字符串 */
 class TemplateLiteral extends BaseHandler {
-  handle(): ITemplateLiteral {
+  handle(environment: EEnvironment = EEnvironment.normal): ITemplateLiteral {
     const currentToken = this.tokens.getToken()
     const extra = getTokenExtra(currentToken)
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.string),
-      extraCheck: () => extra.prefix === 'f'
+      extraCheck: () => extra.prefix === 'f',
+      environment
     })
 
     const expressions = this._handleExpressions(extra.tokensFragment)

@@ -5,13 +5,13 @@ import {
   IFunctionDeclaration,
   IIdentifier,
   IMemberExpression,
-  TExpressionNodeInDecorator,
+  TDecorativeExpressionNode,
   TStatementNode
 } from 'src/types'
 import { isToken } from 'src/utils'
 import AstGenerator from '../AstGenerator'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnableCode, EEnvironment } from '../types'
 
 import BlockStatement from './BlockStatement'
 import BreakStatement from './BreakStatement'
@@ -73,7 +73,7 @@ class Statement extends BaseHandler {
   }
 
   /** 处理语句 */
-  handle(environment: ENodeEnvironment): TStatementNode {
+  handle(environment: EEnvironment): TStatementNode {
     const currentToken = this.tokens.getToken()
     switch (currentToken.value) {
       case 'pass':
@@ -115,7 +115,7 @@ class Statement extends BaseHandler {
   }
 
   /** 处理有装饰器的语句 */
-  private _handleDecoratorsInStatement(environment: ENodeEnvironment): IFunctionDeclaration | IClassDeclaration {
+  private _handleDecoratorsInStatement(environment: EEnvironment): IFunctionDeclaration | IClassDeclaration {
     const decorators = this._handleDecorators(environment)
 
     const defOrClassToken = this.tokens.getToken()
@@ -130,21 +130,18 @@ class Statement extends BaseHandler {
 
   /** 处理装饰器 */
   private _handleDecorators(
-    environment: ENodeEnvironment,
-    decorators: TExpressionNodeInDecorator[] = []
-  ): TExpressionNodeInDecorator[] {
+    environment: EEnvironment,
+    decorators: TDecorativeExpressionNode[] = []
+  ): TDecorativeExpressionNode[] {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.operator, '@')
     })
 
     this.tokens.next()
-    const identifier = this.astGenerator.expression.identifier.handle()
     const expression = this.astGenerator.expression.handleMaybeMemberOrSubscriptOrCall(
-      ENodeEnvironment.normal,
-      identifier,
-      { memberExpression: true, callExpression: true }
-    ) as IIdentifier | IMemberExpression | ICallExpression
+      EEnvironment.decorative
+    ) as TDecorativeExpressionNode
 
     decorators.push(expression)
 

@@ -1,7 +1,7 @@
 import { TExpressionNode, TToken } from 'src/types'
 
 /** 节点所处环境 */
-export enum ENodeEnvironment {
+export enum EEnvironment {
   /** 正常环境 */
   normal = 0b0,
   /** 括号环境 */
@@ -11,7 +11,11 @@ export enum ENodeEnvironment {
   /** 函数体内 */
   functionBody = 0b100,
   /** lambda环境 */
-  lambda = 0b1000
+  lambda = 0b1000,
+  /** 赋值环境 */
+  assign = 0b10000,
+  /** 装饰器环境 */
+  decorative = 0b100000
 }
 
 export interface IFindNodesParams<T> {
@@ -21,16 +25,16 @@ export interface IFindNodesParams<T> {
 }
 
 export interface ICheckParams {
-  checkToken: () => boolean
-  environment?: ENodeEnvironment
+  checkToken?: () => boolean
+  extraCheck?: () => boolean
+  environment?: EEnvironment
   isBefore?: boolean | number
   isAfter?: boolean | number
-  extraCheck?: () => boolean
+  isAssignableExpression?: boolean
+  isDecorativeExpression?: boolean
 }
 
 export interface IExpressionHandler<T extends TExpressionNode = TExpressionNode> {
-  handle(lastNode: TExpressionNode, environment: ENodeEnvironment): T
-  handleMaybe?(lastNode: TExpressionNode, environment: ENodeEnvironment): TExpressionNode
+  handle(lastNode: TExpressionNode, environment: EEnvironment): T
+  handleMaybe?(lastNode: TExpressionNode, environment: EEnvironment): TExpressionNode
 }
-
-export interface IStatementHandler {}

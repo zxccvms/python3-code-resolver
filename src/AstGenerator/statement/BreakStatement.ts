@@ -1,11 +1,11 @@
 import { ENodeType, ETokenType } from 'src/types'
-import { createLoc, hasEnvironment, isToken } from 'src/utils'
+import { createLoc, checkBit, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
-import { ENodeEnvironment } from '../types'
+import { EEnvironment } from '../types'
 
 class BreakStatement extends BaseHandler {
-  handle(environment: ENodeEnvironment) {
-    if (!hasEnvironment(environment, ENodeEnvironment.loopBody)) {
+  handle(environment: EEnvironment) {
+    if (!checkBit(environment, EEnvironment.loopBody)) {
       throw new SyntaxError('"break" can be used only within a loop')
     }
 

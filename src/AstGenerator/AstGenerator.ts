@@ -3,7 +3,7 @@ import { getColumn } from 'src/utils'
 import { ENodeType, IProgram, TExpressionNode, TNode, TStatementNode, TToken } from '../types'
 import Expression from './expression'
 import Statement from './statement'
-import { ENodeEnvironment } from './types'
+import { EEnvironment } from './types'
 import TokenArray from './utils/TokenArray'
 
 /** AST生成器 */
@@ -38,7 +38,7 @@ class AstGenerator {
   }
 
   handleNode(
-    environment: ENodeEnvironment = ENodeEnvironment.normal,
+    environment: EEnvironment = EEnvironment.normal,
     indentCount: number = 0
   ): TExpressionNode | TStatementNode {
     const token = this.tokens.getToken()

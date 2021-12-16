@@ -57,14 +57,14 @@ export const enum ENodeType {
   Argument = 'Argument',
   /** 关键字 */
   Keyword = 'Keyword',
-  /** a(*b) or class a(*b) 的*b */
-  StarredExpression = 'StarredExpression',
   /** Except语句 TryStatement except: */
   ExceptHandler = 'ExceptHandler',
   /** 别名表达式 ImportStatement A as B */
   AliasExpression = 'AliasExpression',
   /** 数组切割表达式 1: 1:1:1 */
   SliceExpression = 'SliceExpression',
+  /**  */
+  Comprehension = 'Comprehension',
 
   //基础表达式
   /** None */
@@ -89,6 +89,8 @@ export const enum ENodeType {
   TupleExpression = 'TupleExpression',
   /** 数组表达式 [1,2] */
   ArrayExpression = 'ArrayExpression',
+  /** 数组解析表达式 [1 for 2 in 3] */
+  ArrayComprehensionExpression = 'ArrayComprehensionExpression',
   /** 字典表达式 {a:1} */
   DictionaryExpression = 'DictionaryExpression',
   /** 运算表达式 a + b   a == b  a > b */
@@ -111,6 +113,8 @@ export const enum ENodeType {
   LambdaExpression = 'LambdaExpression',
   /** yield表达式 */
   YieldExpression = 'YieldExpression',
+  /** a(*b) or class a(*b) 的*b */
+  StarredExpression = 'StarredExpression',
 
   // 语句
   /** 导入语句 */
@@ -160,6 +164,7 @@ export type TSpecialNodeMap = {
   [ENodeType.ExceptHandler]: IExceptHandler
   [ENodeType.SliceExpression]: ISliceExpression
   [ENodeType.AliasExpression]: IAliasExpression
+  [ENodeType.Comprehension]: IComprehension
 }
 
 export type TSpecialNode<T extends keyof TSpecialNodeMap = keyof TSpecialNodeMap> = TSpecialNodeMap[T]
@@ -181,6 +186,7 @@ export type TBasicExpressionNode<T extends keyof TBasicExpressionNodeMap = keyof
 export type TExpressionNodeMap = {
   [ENodeType.UnaryExpression]: IUnaryExpression
   [ENodeType.ArrayExpression]: IArrayExpression
+  [ENodeType.ArrayComprehensionExpression]: IArrayComprehensionExpression
   [ENodeType.DictionaryExpression]: IDictionaryExpression
   [ENodeType.BinaryExpression]: IBinaryExpression
   [ENodeType.AssignmentExpression]: IAssignmentExpression
@@ -199,9 +205,19 @@ export type TExpressionNodeMap = {
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
 
+/** 没有AssignmentExpression的表达式 */
 export type TNotAssignmentExpressionNode = Omit<TExpressionNode, ENodeType.AssignmentExpression>
 
-export type TExpressionNodeInDecorator = IIdentifier | IMemberExpression | ICallExpression
+/** 可赋值的表达式 */
+export type TAssignableExpressionNode =
+  | IIdentifier
+  | IMemberExpression
+  | ISubscriptExpression
+  | IArrayExpression
+  | ITupleExpression
+
+/** 装饰的表达式 */
+export type TDecorativeExpressionNode = IIdentifier | IMemberExpression | ICallExpression
 
 /** 语句节点映射表 */
 export type TStatementNodeMap = {
@@ -368,12 +384,18 @@ export interface IYieldExpression extends IBaseNodeAttr {
 
 export interface ITupleExpression extends IBaseNodeAttr {
   type: ENodeType.TupleExpression
-  elements: TExpressionNode[]
+  elements: TNotAssignmentExpressionNode[]
 }
 
 export interface IArrayExpression extends IBaseNodeAttr {
   type: ENodeType.ArrayExpression
-  elements: TExpressionNode[]
+  elements: TNotAssignmentExpressionNode[]
+}
+
+export interface IArrayComprehensionExpression extends IBaseNodeAttr {
+  type: ENodeType.ArrayComprehensionExpression
+  element: TNotAssignmentExpressionNode
+  generators: IComprehension[]
 }
 export interface IDictionaryExpression extends IBaseNodeAttr {
   type: ENodeType.DictionaryExpression
@@ -397,6 +419,14 @@ export interface IAliasExpression extends IBaseNodeAttr {
   type: ENodeType.AliasExpression
   name: string
   asname?: string
+}
+
+export interface IComprehension extends IBaseNodeAttr {
+  type: ENodeType.Comprehension
+  /** 未知 */
+  ifs: TNotAssignmentExpressionNode[]
+  iterable: TNotAssignmentExpressionNode
+  target: TAssignableExpressionNode
 }
 
 export interface IMemberExpression extends IBaseNodeAttr {
@@ -443,7 +473,7 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
   name: string
   args: IArguments
   body: IBlockStatement
-  decorators?: TExpressionNodeInDecorator[]
+  decorators?: TDecorativeExpressionNode[]
 }
 
 export interface IClassDeclaration extends IBaseNodeAttr {
@@ -452,7 +482,7 @@ export interface IClassDeclaration extends IBaseNodeAttr {
   bases: TNotAssignmentExpressionNode[]
   keywords: IKeyword[]
   body: IBlockStatement
-  decorators?: TExpressionNodeInDecorator[]
+  decorators?: TDecorativeExpressionNode[]
 }
 
 export interface IBlockStatement extends IBaseNodeAttr {
@@ -486,8 +516,8 @@ export interface IProgram extends IBaseNodeAttr {
 
 export interface IForStatement extends IBaseNodeAttr {
   type: ENodeType.ForStatement
-  left: TExpressionNode
-  right: TExpressionNode
+  target: TAssignableExpressionNode
+  iterable: TNotAssignmentExpressionNode
   body: IBlockStatement
 }
 
