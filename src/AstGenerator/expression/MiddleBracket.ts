@@ -14,9 +14,8 @@ class MiddleBracket extends BaseHandler {
   handle(environment: EEnvironment = EEnvironment.normal): IArrayExpression | IArrayComprehensionExpression {
     const leftBracket = this.output(ETokenType.bracket, '[')
 
-    const rightBracketToken = this.tokens.getToken()
-    if (isToken(rightBracketToken, ETokenType.bracket, ']')) {
-      this.tokens.next()
+    let rightBracketToken = this.eat(ETokenType.bracket, ']')
+    if (rightBracketToken) {
       const ArrayExpression = this.createNode(ENodeType.ArrayExpression, {
         elements: [],
         loc: createLoc(leftBracket, rightBracketToken)
@@ -49,10 +48,10 @@ class MiddleBracket extends BaseHandler {
       })
     }
 
-    const rightBracket = this.output(ETokenType.bracket, ']')
+    rightBracketToken = this.output(ETokenType.bracket, ']')
 
     return addBaseNodeAttr(Node, {
-      loc: createLoc(leftBracket, rightBracket)
+      loc: createLoc(leftBracket, rightBracketToken)
     })
   }
 

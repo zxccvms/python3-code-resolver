@@ -5,6 +5,7 @@ import {
   IDictionaryProperty,
   ISetComprehensionExpression,
   ISetExpression,
+  TExpressionNode,
   TNotAssignmentExpressionNode
 } from '../../types'
 import { addBaseNodeAttr, createLoc, isToken } from '../../utils'
@@ -18,9 +19,19 @@ class BigBracket extends BaseHandler {
     const leftBigBracket = this.output(ETokenType.bracket, '{')
     this.check({ environment })
 
+    let Node: ISetExpression | ISetComprehensionExpression | IDictionaryExpression
+
+    let rightBigBracket = this.eat(ETokenType.bracket, '}')
+    if (rightBigBracket) {
+      const DictionaryExpression = this.createNode(ENodeType.DictionaryExpression, {
+        properties: [],
+        loc: createLoc(leftBigBracket, rightBigBracket)
+      })
+      return DictionaryExpression
+    }
+
     const expression = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
 
-    let Node: ISetExpression | ISetComprehensionExpression | IDictionaryExpression
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.punctuation, ':')) {
       const properties = this._handleProperties(expression)
@@ -43,14 +54,14 @@ class BigBracket extends BaseHandler {
       })
     }
 
-    const rightBigBracket = this.output(ETokenType.bracket, '}')
+    rightBigBracket = this.output(ETokenType.bracket, '}')
 
     return addBaseNodeAttr(Node, {
       loc: createLoc(leftBigBracket, rightBigBracket)
     })
   }
 
-  private _handleProperties(keyNode: TNotAssignmentExpressionNode): IDictionaryProperty[] {
+  private _handleProperties(keyNode: TExpressionNode): IDictionaryProperty[] {
     const { payload } = this.findNodes({
       end: token => isToken(token, ETokenType.bracket, '}'),
       step: () => this._handleProperty(keyNode),
@@ -61,7 +72,7 @@ class BigBracket extends BaseHandler {
   }
 
   private _handleProperty(
-    keyNode: TNotAssignmentExpressionNode = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
+    keyNode: TExpressionNode = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
   ): IDictionaryProperty {
     this.output(ETokenType.punctuation, ':')
 
