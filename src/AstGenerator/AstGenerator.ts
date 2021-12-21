@@ -1,5 +1,5 @@
 import NodeGenerator from 'src/NodeGenerator'
-import { getColumn } from 'src/utils'
+import { getColumn, isSameRank } from 'src/utils'
 import { ENodeType, IProgram, TExpressionNode, TNode, TStatementNode, TToken } from '../types'
 import Expression from './expression'
 import Statement from './statement'
@@ -41,9 +41,12 @@ class AstGenerator {
     environment: EEnvironment = EEnvironment.normal,
     indentCount: number = 0
   ): TExpressionNode | TStatementNode {
+    const lastToken = this.tokens.getToken(-1)
     const token = this.tokens.getToken()
     const column = getColumn(token, 'start')
-    if (indentCount !== column) {
+    if (lastToken && isSameRank([lastToken, token], 'endAndStartLine')) {
+      throw new SyntaxError('Statements must be separated by newlines or semicolons')
+    } else if (indentCount !== column) {
       throw new SyntaxError('unexpected indent')
     }
 

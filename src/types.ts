@@ -156,7 +156,9 @@ export const enum ENodeType {
   /** del语句 */
   DeleteStatement = 'DeleteStatement',
   /** raise语句 */
-  RaiseStatement = 'RaiseStatement'
+  RaiseStatement = 'RaiseStatement',
+  /** assert语句 */
+  AssertStatement = 'AssertStatement'
 }
 
 /** 特殊的节点映射表 */
@@ -245,6 +247,7 @@ export type TStatementNodeMap = {
   [ENodeType.BreakStatement]: IBreakStatement
   [ENodeType.DeleteStatement]: IDeleteStatement
   [ENodeType.RaiseStatement]: IRaiseStatement
+  [ENodeType.AssertStatement]: IAssertStatement
 }
 
 export type TStatementNode<T extends keyof TStatementNodeMap = keyof TStatementNodeMap> = TStatementNodeMap[T]
@@ -578,4 +581,10 @@ export interface IDeleteStatement extends IBaseNodeAttr {
 export interface IRaiseStatement extends IBaseNodeAttr {
   type: ENodeType.RaiseStatement
   target: TNotAssignmentExpressionNode
+}
+
+export interface IAssertStatement extends IBaseNodeAttr {
+  type: ENodeType.AssertStatement
+  msg?: TNotAssignmentExpressionNode
+  test: TNotAssignmentExpressionNode
 }

@@ -12,6 +12,7 @@ import { isToken } from 'src/utils'
 import AstGenerator from '../AstGenerator'
 import BaseHandler from '../BaseHandler'
 import { EEnableCode, EEnvironment } from '../types'
+import AssertStatement from './AssertStatement'
 
 import BlockStatement from './BlockStatement'
 import BreakStatement from './BreakStatement'
@@ -49,6 +50,7 @@ class Statement extends BaseHandler {
   withStatement: WithStatement
   deleteStatement: DeleteStatement
   raiseStatement: RaiseStatement
+  assertStatement: AssertStatement
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -70,6 +72,7 @@ class Statement extends BaseHandler {
     this.withStatement = new WithStatement(astGenerator)
     this.deleteStatement = new DeleteStatement(astGenerator)
     this.raiseStatement = new RaiseStatement(astGenerator)
+    this.assertStatement = new AssertStatement(astGenerator)
   }
 
   /** 处理语句 */
@@ -111,6 +114,8 @@ class Statement extends BaseHandler {
         return this.deleteStatement.handle()
       case 'raise':
         return this.raiseStatement.handle()
+      case 'assert':
+        return this.assertStatement.handle()
     }
   }
 
