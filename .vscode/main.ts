@@ -3,7 +3,7 @@ import { AstGenerator, CodeScanner } from 'src'
 import path from 'path'
 import fs from 'fs'
 
-new Promise(() => {
+new Promise(async () => {
   const codeScanner = new CodeScanner()
   const customFilePath = path.join(__dirname, 'code.py')
 

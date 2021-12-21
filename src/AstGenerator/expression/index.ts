@@ -1,6 +1,6 @@
 import AstGenerator from 'src/AstGenerator/AstGenerator'
-import { ENodeType, ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
-import { addBaseNodeAttr, deleteBit, getPositionInfo, getTokenExtra, hasParenthesized, isToken } from 'src/utils'
+import { ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
+import { getPositionInfo, getTokenExtra, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -20,13 +20,15 @@ import TupleExpression from './TupleExpression'
 import UnaryExpression from './UnaryExpression'
 import SubscriptExpression from './SubscriptExpression'
 import LogicalExpression from './LogicalExpression'
-import SetOrDictionaryExpression from './SetOrDictionaryExpression'
 import LambdaExpression from './LambdaExpression'
 import YieldExpression from './YieldExpression'
 import Arguments from './Arguments'
 import Keyword from './Keyword'
 import StarredExpression from './StarredExpression'
-import ArrayOrArrayComprehensionExpression from './ArrayOrArrayComprehensionExpression'
+import MiddleBracket from './MiddleBracket'
+import Comprehension from './Comprehension'
+import SmallBracket from './SmallBracket'
+import BigBracket from './BigBracket'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -38,10 +40,12 @@ class Expression extends BaseHandler {
   identifier: Identifier
 
   // 表达式
+  smallBracket: SmallBracket
+  middleBracket: MiddleBracket
+  bigBracket: BigBracket
   unaryExpression: UnaryExpression
   ifExpression: IfExpression
   tupleExpression: TupleExpression
-  arrayOrArrayComprehensionExpression: ArrayOrArrayComprehensionExpression
   binaryExpression: BinaryExpression
   assignmentExpression: AssignmentExpression
   memberExpression: MemberExpression
@@ -49,7 +53,6 @@ class Expression extends BaseHandler {
   callExpression: CallExpression
   compareExpression: CompareExpression
   logicalExpression: LogicalExpression
-  setOrDictionaryExpression: SetOrDictionaryExpression
   lambdaExpression: LambdaExpression
   yieldExpression: YieldExpression
   starredExpression: StarredExpression
@@ -57,6 +60,7 @@ class Expression extends BaseHandler {
   // 特殊表达式
   arguments: Arguments
   keyword: Keyword
+  comprehension: Comprehension
 
   constructor(astGenerator: AstGenerator) {
     super(astGenerator)
@@ -67,10 +71,13 @@ class Expression extends BaseHandler {
     this.stringLiteral = new StringLiteral(astGenerator)
     this.templateLiteral = new TemplateLiteral(astGenerator)
     this.identifier = new Identifier(astGenerator)
+
+    this.smallBracket = new SmallBracket(astGenerator)
+    this.middleBracket = new MiddleBracket(astGenerator)
+    this.bigBracket = new BigBracket(astGenerator)
     this.unaryExpression = new UnaryExpression(astGenerator)
     this.ifExpression = new IfExpression(astGenerator)
     this.tupleExpression = new TupleExpression(astGenerator)
-    this.arrayOrArrayComprehensionExpression = new ArrayOrArrayComprehensionExpression(astGenerator)
     this.binaryExpression = new BinaryExpression(astGenerator)
     this.assignmentExpression = new AssignmentExpression(astGenerator)
     this.memberExpression = new MemberExpression(astGenerator)
@@ -78,13 +85,13 @@ class Expression extends BaseHandler {
     this.callExpression = new CallExpression(astGenerator)
     this.compareExpression = new CompareExpression(astGenerator)
     this.logicalExpression = new LogicalExpression(astGenerator)
-    this.setOrDictionaryExpression = new SetOrDictionaryExpression(astGenerator)
     this.lambdaExpression = new LambdaExpression(astGenerator)
     this.yieldExpression = new YieldExpression(astGenerator)
     this.starredExpression = new StarredExpression(astGenerator)
 
     this.arguments = new Arguments(astGenerator)
     this.keyword = new Keyword(astGenerator)
+    this.comprehension = new Comprehension(astGenerator)
   }
 
   /** 解析表达式 */
@@ -152,11 +159,11 @@ class Expression extends BaseHandler {
   handleFirstExpression(environment: EEnvironment = EEnvironment.normal): TExpressionNode {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.bracket, '(')) {
-      return this.handleSmallBracket(environment)
+      return this.smallBracket.handle(environment)
     } else if (isToken(currentToken, ETokenType.bracket, '[')) {
-      return this.arrayOrArrayComprehensionExpression.handle(environment)
+      return this.middleBracket.handle(environment)
     } else if (isToken(currentToken, ETokenType.bracket, '{')) {
-      return this.setOrDictionaryExpression.handle(environment)
+      return this.bigBracket.handle(environment)
     } else if (this.unaryExpression.isConformToken(currentToken)) {
       return this.unaryExpression.handle(environment)
     } else if (isToken(currentToken, ETokenType.operator, '*')) {
@@ -168,51 +175,6 @@ class Expression extends BaseHandler {
     } else {
       return this.handleBasicExpression(environment)
     }
-  }
-
-  /** 处理小括号token */
-  handleSmallBracket(
-    environment: EEnvironment,
-    handleExpressionCb?: (environment: EEnvironment) => TExpressionNode
-  ): TExpressionNode {
-    const leftBracket = this.tokens.getToken()
-    if (!isToken(leftBracket, ETokenType.bracket, '(')) {
-      throw new TypeError("handleSmallBracket err: current token is not bracket '('")
-    }
-
-    this.tokens.next()
-
-    let expression: TExpressionNode
-    const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.bracket, ')')) {
-      expression = this.createNode(ENodeType.TupleExpression, {
-        elements: [],
-        loc: {
-          start: getPositionInfo(currentToken, 'start'),
-          end: getPositionInfo(currentToken, 'start')
-        }
-      })
-    } else {
-      const handleEnvironment = environment | EEnvironment.bracket
-
-      expression = handleExpressionCb?.(handleEnvironment) || this.handleMaybeTuple(handleEnvironment)
-
-      if (!isToken(this.tokens.getToken(), ETokenType.bracket, ')')) {
-        throw new TypeError("handleSmallBracket err: current token is not bracket ')'")
-      }
-    }
-
-    this.tokens.next()
-
-    return hasParenthesized(expression)
-      ? expression
-      : addBaseNodeAttr(expression, {
-          // loc: createLoc(leftBracket, this.tokens.getToken()),
-          extra: {
-            parenthesized: true,
-            parentStart: getPositionInfo(leftBracket, 'start')
-          }
-        })
   }
 
   /** 基础基础表达式 */

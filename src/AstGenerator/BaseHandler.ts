@@ -43,12 +43,12 @@ class BaseHandler {
   }
 
   /** 通过 符合的token 和 步进函数 得到期间生成的节点 */
-  findNodes<T>({ end, slice, step }: IFindNodesParams<T>): TStateResponse<T[]> {
+  findNodes<T>({ end, step, isSlice = false }: IFindNodesParams<T>): TStateResponse<T[]> {
     const result = []
 
     let currentToken
     while ((currentToken = this.tokens.getToken()) && !end(currentToken)) {
-      if (slice?.(currentToken)) {
+      if (isSlice && isToken(currentToken, ETokenType.punctuation, ',')) {
         this.tokens.next()
         continue
       }
@@ -65,6 +65,26 @@ class BaseHandler {
     const lastToken = this.tokens.getToken(-1)
     const currentToken = this.tokens.getToken()
     return isSameRank([lastToken, currentToken], 'endAndStartLine')
+  }
+
+  /** 如果当前token符合 则输出当前token && 索引指向下一个token */
+  eat<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
+    const token = this.tokens.getToken()
+    if (!isToken(token, types, value)) return
+
+    this.tokens.next()
+    return token
+  }
+
+  /** 判断当前token && 将索引指向下一个token */
+  output<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
+    const token = this.tokens.getToken()
+    if (!isToken(token, types, value)) {
+      throw new TypeError('Unexpected token')
+    }
+
+    this.tokens.next()
+    return token
   }
 
   /** 检查 */

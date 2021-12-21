@@ -63,7 +63,7 @@ export const enum ENodeType {
   AliasExpression = 'AliasExpression',
   /** 数组切割表达式 1: 1:1:1 */
   SliceExpression = 'SliceExpression',
-  /**  */
+  /** 解析 */
   Comprehension = 'Comprehension',
 
   //基础表达式
@@ -109,12 +109,16 @@ export const enum ENodeType {
   LogicalExpression = 'LogicalExpression',
   /** set表达式 {a, b, c} */
   SetExpression = 'SetExpression',
+  /** set解析表达式 */
+  SetComprehensionExpression = 'SetComprehensionExpression',
   /** lambda表达式 lambda a : a + 1 */
   LambdaExpression = 'LambdaExpression',
   /** yield表达式 */
   YieldExpression = 'YieldExpression',
   /** a(*b) or class a(*b) 的*b */
   StarredExpression = 'StarredExpression',
+  /** 生成器表达式 必须要有bracket环境 (1 for a in 2) */
+  GeneratorExpression = 'GeneratorExpression',
 
   // 语句
   /** 导入语句 */
@@ -198,9 +202,11 @@ export type TExpressionNodeMap = {
   [ENodeType.IfExpression]: IIfExpression
   [ENodeType.LogicalExpression]: ILogicalExpression
   [ENodeType.SetExpression]: ISetExpression
+  [ENodeType.SetComprehensionExpression]: ISetComprehensionExpression
   [ENodeType.LambdaExpression]: ILambdaExpression
   [ENodeType.YieldExpression]: IYieldExpression
   [ENodeType.StarredExpression]: IStarredExpression
+  [ENodeType.GeneratorExpression]: IGeneratorExpression
 } & TBasicExpressionNodeMap
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
@@ -254,7 +260,7 @@ export interface IBaseNodeAttr {
     /** 是否被小括号包裹 */
     parenthesized?: boolean
     /** 小括号的开始定位信息 */
-    parentStart?: TPositionInfo
+    parentLoc?: TLoc
   }
   /** 定位信息 */
   loc?: TLoc
@@ -263,8 +269,8 @@ export interface IBaseNodeAttr {
 // 特殊节点定义
 export interface IDictionaryProperty extends IBaseNodeAttr {
   type: ENodeType.DictionaryProperty
-  key: TExpressionNode
-  value: TExpressionNode
+  key: TNotAssignmentExpressionNode
+  value: TNotAssignmentExpressionNode
 }
 
 export interface IArguments {
@@ -298,6 +304,12 @@ export interface IKeyword extends IBaseNodeAttr {
 export interface IStarredExpression extends IBaseNodeAttr {
   type: ENodeType.StarredExpression
   value: TNotAssignmentExpressionNode
+}
+
+export interface IGeneratorExpression extends IBaseNodeAttr {
+  type: ENodeType.GeneratorExpression
+  element: TNotAssignmentExpressionNode
+  generators: IComprehension[]
 }
 
 export interface IExceptHandler extends IBaseNodeAttr {
@@ -371,6 +383,12 @@ export interface ISetExpression extends IBaseNodeAttr {
   elements: TNotAssignmentExpressionNode[]
 }
 
+export interface ISetComprehensionExpression extends IBaseNodeAttr {
+  type: ENodeType.SetExpression
+  element: TNotAssignmentExpressionNode
+  generators: IComprehension[]
+}
+
 export interface ILambdaExpression extends IBaseNodeAttr {
   type: ENodeType.LambdaExpression
   args: IArguments
@@ -423,7 +441,6 @@ export interface IAliasExpression extends IBaseNodeAttr {
 
 export interface IComprehension extends IBaseNodeAttr {
   type: ENodeType.Comprehension
-  /** 未知 */
   ifs: TNotAssignmentExpressionNode[]
   iterable: TNotAssignmentExpressionNode
   target: TAssignableExpressionNode
@@ -448,6 +465,14 @@ export interface ICallExpression extends IBaseNodeAttr {
   keywords: IKeyword[]
 }
 
+export interface ICompareExpression extends IBaseNodeAttr {
+  type: ENodeType.CompareExpression
+  left: TExpressionNode
+  operator: 'is' | 'in' | 'not in'
+  right: TExpressionNode
+}
+
+// 语句节点定义
 export interface IImportStatement extends IBaseNodeAttr {
   type: ENodeType.ImportStatement
   names: IAliasExpression[]
@@ -460,14 +485,6 @@ export interface IImportFromStatement extends IBaseNodeAttr {
   module: IIdentifier | IMemberExpression
 }
 
-export interface ICompareExpression extends IBaseNodeAttr {
-  type: ENodeType.CompareExpression
-  left: TExpressionNode
-  operator: 'is' | 'in' | 'not in'
-  right: TExpressionNode
-}
-
-// 语句节点定义
 export interface IFunctionDeclaration extends IBaseNodeAttr {
   type: ENodeType.FunctionDeclaration
   name: string

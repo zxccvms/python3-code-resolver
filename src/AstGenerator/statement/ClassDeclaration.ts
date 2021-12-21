@@ -28,10 +28,11 @@ class ClassDeclaration extends BaseHandler {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.bracket, '(')) {
       this.tokens.next()
-      const hResult = this.astGenerator.expression.callExpression.handleArgsAndKeywords()
+      const hResult = this.astGenerator.expression.callExpression.handleArgsAndKeywords(false)
 
       bases = hResult.args
       keywords = hResult.keywords
+      this.output(ETokenType.bracket, ')')
     }
 
     const body = this.astGenerator.statement.blockStatement.handle(classToken, environment)

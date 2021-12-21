@@ -1,4 +1,12 @@
-import { ENodeType, ETokenType, TToken, IArguments, IArgument, TExpressionNode } from 'src/types'
+import {
+  ENodeType,
+  ETokenType,
+  TToken,
+  IArguments,
+  IArgument,
+  TExpressionNode,
+  TNotAssignmentExpressionNode
+} from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 
@@ -30,12 +38,11 @@ class Arguments extends BaseHandler {
       enableKeywordArg: true
     }
 
-    const { payload = [] } =
-      this.findNodes({
-        end,
-        step: () => this._handleCurrentStep(state),
-        slice: token => isToken(token, ETokenType.punctuation, ',')
-      }) || {}
+    const { payload = [] } = this.findNodes({
+      end,
+      step: () => this._handleCurrentStep(state),
+      isSlice: true
+    })
 
     const { args, defaults, varArg, keywordOnlyArgs, keywordDefaults, keywordArg } = this._filtrate(payload)
 
@@ -120,12 +127,8 @@ class Arguments extends BaseHandler {
   }
 
   private _handleArgument(): IArgument {
-    const identifierToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(identifierToken, ETokenType.identifier)
-    })
+    const identifierToken = this.output(ETokenType.identifier)
 
-    this.tokens.next()
     const Argument = this.createNode(ENodeType.Argument, {
       name: identifierToken.value,
       loc: createLoc(identifierToken)

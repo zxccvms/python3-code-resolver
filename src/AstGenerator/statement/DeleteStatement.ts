@@ -25,7 +25,7 @@ class DeleteStatement extends BaseHandler {
     const { payload } = this.findNodes({
       end: token => !isSameRank([markToken, token], 'endAndStartLine'),
       step: () => this.astGenerator.expression.handleMaybeBinary(),
-      slice: token => isToken(token, ETokenType.punctuation, ',')
+      isSlice: true
     })
 
     return payload

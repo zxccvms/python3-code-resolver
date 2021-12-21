@@ -21,7 +21,7 @@ export enum EEnvironment {
 export interface IFindNodesParams<T> {
   end: (token: TToken) => boolean
   step: () => T
-  slice?: (token: TToken) => boolean
+  isSlice?: boolean
 }
 
 export interface ICheckParams {

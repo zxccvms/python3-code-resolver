@@ -35,7 +35,7 @@ class SubscriptExpression extends BaseHandler {
     const { payload: subscript } = this.findNodes({
       end: token => isToken(token, ETokenType.bracket, ']'),
       step: () => this._handleSubscriptItem(),
-      slice: token => isToken(token, ETokenType.punctuation, ',')
+      isSlice: true
     })
 
     return subscript

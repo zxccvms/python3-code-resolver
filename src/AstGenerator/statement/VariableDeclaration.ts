@@ -26,7 +26,7 @@ class VariableDeclaration extends BaseHandler {
     const { payload: declarations } = this.findNodes({
       end: token => !isSameRank([currentToken, token], 'endAndStartLine'),
       step: () => this.astGenerator.expression.identifier.handle(),
-      slice: token => isToken(token, ETokenType.punctuation, ',')
+      isSlice: true
     })
 
     if (declarations.length === 0) {

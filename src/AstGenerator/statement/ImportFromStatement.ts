@@ -73,7 +73,7 @@ class ImportFromStatement extends BaseHandler {
         return !sameRank
       },
       step: () => this._handleAliasExpression(false),
-      slice: token => isToken(token, ETokenType.punctuation, ',')
+      isSlice: true
     })
 
     const isRightBracket = isToken(this.tokens.getToken(), ETokenType.bracket, ')')

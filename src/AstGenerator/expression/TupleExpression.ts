@@ -35,30 +35,19 @@ class TupleExpression extends BaseHandler {
   private _handleElements(environment: EEnvironment, elementStack: TExpressionNode[] = []): TExpressionNode[] {
     const commaToken = this.tokens.getToken()
     if (!isToken(commaToken, ETokenType.punctuation, ',')) return elementStack
-    else if (
-      !checkBit(environment, EEnvironment.bracket) &&
-      !isSameRank([commaToken, this.tokens.getToken(1)], 'endAndStartLine')
-    )
-      return elementStack
 
     this.tokens.next()
+    const currentToken = this.tokens.getToken()
+    if (isToken(currentToken, ETokenType.bracket, ')')) return elementStack
+    else if (!checkBit(environment, EEnvironment.bracket) && !isSameRank([commaToken, currentToken], 'endAndStartLine'))
+      return elementStack
+
     const expression = this.astGenerator.expression.handleMaybeIf(environment)
 
     elementStack.push(expression)
 
     return this._handleElements(environment, elementStack)
   }
-
-  private _isConformToken(token: TToken, lastNode: TNode, environment: EEnvironment) {
-    let isEndToken = isToken(token, [ETokenType.bracket, ETokenType.operator], [')', '='])
-
-    if (isEndToken) return false
-    else if (!checkBit(environment, EEnvironment.bracket)) {
-      return isSameRank([lastNode, token], 'endAndStartLine')
-    } else return true
-  }
-
-  private _isEndToken(currentToken: TToken) {}
 }
 
 export default TupleExpression

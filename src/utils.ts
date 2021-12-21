@@ -27,7 +27,7 @@ export function heavyArray<T>(targetArray: T[]): T[] {
 }
 
 /** 节点添加基础属性 */
-export function addBaseNodeAttr<T extends TNode>(node: T, baseAttr: IBaseNodeAttr): T {
+export function addBaseNodeAttr<T extends ENodeType>(node: TNode<T>, baseAttr: IBaseNodeAttr): TNode<T> {
   return {
     ...node,
     ...baseAttr

@@ -36,7 +36,7 @@ class WithStatement extends BaseHandler {
     const { payload } = this.findNodes({
       end: token => isToken(token, ETokenType.keyword, 'as'),
       step: () => this.astGenerator.expression.handleMaybeIf(),
-      slice: token => isToken(token, ETokenType.punctuation, ',')
+      isSlice: true
     })
 
     return payload
@@ -46,7 +46,7 @@ class WithStatement extends BaseHandler {
     const { payload } = this.findNodes({
       end: token => isToken(token, ETokenType.punctuation, ':'),
       step: () => this.astGenerator.expression.handleMaybeIf(), // todo
-      slice: token => isToken(token, ETokenType.punctuation, ',')
+      isSlice: true
     })
 
     return payload

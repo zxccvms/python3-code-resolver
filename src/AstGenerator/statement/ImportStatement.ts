@@ -26,7 +26,7 @@ class ImportStatement extends BaseHandler {
     const { payload } = this.findNodes({
       end: token => !isSameRank([markToken, token], 'endAndStartLine'),
       step: () => this._handleAliasExpression(),
-      slice: token => isToken(token, ETokenType.punctuation, ',')
+      isSlice: true
     })
 
     return payload

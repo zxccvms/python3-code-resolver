@@ -1,32 +1,21 @@
-import { ENodeType, ETokenType, IKeyword, TNotAssignmentExpressionNode } from 'src/types'
+import { ENodeType, ETokenType, IKeyword, TNode, TNotAssignmentExpressionNode } from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
 /** 赋值的参数 */
 class Keyword extends BaseHandler {
-  handle(environment: EEnvironment): IKeyword {
-    const currentToken = this.tokens.getToken()
-    this.check({
-      checkToken: () =>
-        (isToken(currentToken, ETokenType.identifier) && isToken(this.tokens.getToken(1), ETokenType.operator, '=')) ||
-        isToken(currentToken, ETokenType.operator, '**')
-    })
+  handle(environment: EEnvironment, lastNode?: TNode<ENodeType.Identifier>): IKeyword {
+    const operatorToken = this.output(ETokenType.operator, ['=', '**'])
 
-    let name: string = null
-    if (isToken(currentToken, ETokenType.identifier)) {
-      name = currentToken.value
-      this.tokens.next(2)
-    } else {
-      this.tokens.next()
-    }
+    let name: string = lastNode?.name || null
 
     const value = this.astGenerator.expression.handleMaybeIf(environment)
 
     const Keyword = this.createNode(ENodeType.Keyword, {
       name,
       value,
-      loc: createLoc(currentToken, value)
+      loc: createLoc(lastNode || operatorToken, value)
     })
 
     return Keyword
