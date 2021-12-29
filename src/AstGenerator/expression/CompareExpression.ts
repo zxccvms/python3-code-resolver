@@ -27,14 +27,13 @@ class CompareExpression extends BaseHandler {
 
     let operator = operatorToken.value as 'in' | 'is' | 'not in'
     if (isToken(operatorToken, ETokenType.keyword, 'not')) {
-      const inToken = this.tokens.getToken()
       this.check({
-        checkToken: () => isToken(inToken, ETokenType.keyword, 'in'),
+        environment,
         isAfter: true
       })
+      const inToken = this.output(ETokenType.keyword, 'in')
 
-      this.tokens.next()
-      operator += inToken.value
+      operator += ` ${inToken.value}`
     }
 
     const right = this.astGenerator.expression.handleMaybeCompare(environment)

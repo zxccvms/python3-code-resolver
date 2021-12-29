@@ -1,28 +1,33 @@
-import { ENodeType, ETokenType, ITupleExpression, TExpressionNode, TNode, TToken } from '../../types'
-import { createLoc, checkBit, isSameRank, isToken } from '../../utils'
+import { ENodeType, ETokenType, ITupleExpression, TExpressionNode } from '../../types'
+import { createLoc, checkBit, isSameRank, isToken, getLatest } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
 /** 处理元组 */
 class TupleExpression extends BaseHandler {
-  handleMaybe(lastNode: TExpressionNode, environment: EEnvironment) {
-    if (isToken(this.tokens.getToken(), ETokenType.punctuation, ',') && this.isContinue(environment)) {
-      return this.handle(lastNode, environment)
-    }
+  handleMaybe(
+    lastNode: TExpressionNode,
+    environment: EEnvironment,
+    handleExpression?: (environment: EEnvironment) => TExpressionNode
+  ) {
+    if (!this.isToken(ETokenType.punctuation, ',')) return lastNode
+    else if (!this.isContinue(environment)) return lastNode
 
-    return lastNode
+    return this.handle(lastNode, environment, handleExpression)
   }
 
-  handle(lastNode: TExpressionNode, environment: EEnvironment): ITupleExpression {
-    const currentToken = this.tokens.getToken()
+  handle(
+    lastNode: TExpressionNode,
+    environment: EEnvironment,
+    handleExpression?: (environment: EEnvironment) => TExpressionNode
+  ): ITupleExpression {
     this.check({
-      checkToken: () => isToken(currentToken, ETokenType.punctuation, ','),
+      checkToken: () => this.isToken(ETokenType.punctuation, ','),
       environment,
-      isBefore: true,
-      isAssignableExpression: true
+      isBefore: true
     })
 
-    const elements = [lastNode, ...this._handleElements(environment)]
+    const elements = this._handleElements(environment, [lastNode], handleExpression)
 
     const TupleExpression = this.createNode(ENodeType.TupleExpression, {
       elements,
@@ -32,18 +37,17 @@ class TupleExpression extends BaseHandler {
     return TupleExpression
   }
 
-  private _handleElements(environment: EEnvironment, elementStack: TExpressionNode[] = []): TExpressionNode[] {
-    const commaToken = this.tokens.getToken()
-    if (!isToken(commaToken, ETokenType.punctuation, ',')) return elementStack
+  private _handleElements(
+    environment: EEnvironment,
+    elementStack: TExpressionNode[],
+    handleExpression = (environment: EEnvironment) => this.astGenerator.expression.handleMaybeIf(environment)
+  ): TExpressionNode[] {
+    if (!this.eat(ETokenType.punctuation, ',')) return elementStack
+    else if (this.isToken(ETokenType.bracket, ')')) return elementStack
+    else if (this.astGenerator.expression.assignmentExpression.isAssignmentToken()) return elementStack
+    else if (!this.isContinue(environment)) return elementStack
 
-    this.tokens.next()
-    const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.bracket, ')')) return elementStack
-    else if (!checkBit(environment, EEnvironment.bracket) && !isSameRank([commaToken, currentToken], 'endAndStartLine'))
-      return elementStack
-
-    const expression = this.astGenerator.expression.handleMaybeIf(environment)
-
+    const expression = handleExpression(environment)
     elementStack.push(expression)
 
     return this._handleElements(environment, elementStack)

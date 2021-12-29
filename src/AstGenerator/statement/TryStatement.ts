@@ -6,12 +6,8 @@ import { EEnvironment } from '../types'
 /** try语句 */
 class TryStatement extends BaseHandler {
   handle(environment: EEnvironment): ITryStatement {
-    const tryToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(tryToken, ETokenType.keyword, 'try')
-    })
+    const tryToken = this.output(ETokenType.keyword, 'try')
 
-    this.tokens.next()
     const body = this.astGenerator.statement.blockStatement.handle(tryToken, environment)
     const handlers = this._handleHandlers(environment)
     const elseBody = this._handleElseBody(environment, !!handlers.length)
@@ -51,7 +47,7 @@ class TryStatement extends BaseHandler {
       throw new TypeError("ExceptHandler err: nextToken is not punctuation ':' or identifier")
     }
 
-    const errName = this._handleErrName()
+    const errName = this._handleErrName(environment)
     const name = this._handleName()
     const body = this.astGenerator.statement.blockStatement.handle(exceptToken, environment)
 
@@ -65,23 +61,19 @@ class TryStatement extends BaseHandler {
     return ExceptHandlerStatement
   }
 
-  private _handleErrName(): IExceptHandler['errName'] {
+  private _handleErrName(environment: EEnvironment): IExceptHandler['errName'] {
     const currentToken = this.tokens.getToken()
     if (!isToken(currentToken, ETokenType.identifier)) return null
 
-    const errName = this.astGenerator.expression.handleMaybeIf()
+    const errName = this.astGenerator.expression.handleMaybeIf(environment)
 
     return errName
   }
 
   private _handleName(): IExceptHandler['name'] {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.keyword, 'as')) return null
+    if (!this.eat(ETokenType.keyword, 'as')) return null
 
-    this.tokens.next()
-    const name = this.astGenerator.expression.identifier.handle()
-
-    return name
+    return this.astGenerator.expression.identifier.handle(EEnvironment.normal)
   }
 
   private _handleElseBody(environment: EEnvironment, hasHandler: boolean): ITryStatement['elseBody'] {

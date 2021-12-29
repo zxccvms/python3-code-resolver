@@ -1,1 +1,1 @@
-[a,b for i in [1]]
+lambda k=20, a=1: 1

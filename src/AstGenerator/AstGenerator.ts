@@ -46,7 +46,8 @@ class AstGenerator {
     // const column = getColumn(token, 'start')
     // if (lastToken && isSameRank([lastToken, token], 'endAndStartLine')) {
     //   throw new SyntaxError('Statements must be separated by newlines or semicolons')
-    // } else if (indentCount !== column) {
+    // }
+    // else if (indentCount !== column) {
     //   throw new SyntaxError('unexpected indent')
     // }
 

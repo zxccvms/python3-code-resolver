@@ -30,7 +30,9 @@ class BaseHandler {
         const rightBracket = getRightBracket(currentToken.value as '(' | '[' | '{')
 
         const { code, payload } = this.findTokens(token => isToken(token, ETokenType.bracket, rightBracket))
-        if (code === 1) throw new SyntaxError(`Expected '${rightBracket}'`)
+        if (code === 1) {
+          throw new SyntaxError(`Expected '${rightBracket}'`)
+        }
 
         const rightBracketToken = this.tokens.getToken()
         this.tokens.next()
@@ -59,12 +61,21 @@ class BaseHandler {
   }
 
   /** 是否继续执行 */
-  isContinue(environment: EEnvironment) {
-    if (environment === EEnvironment.bracket) return true
-
-    const lastToken = this.tokens.getToken(-1)
+  isContinue(environment: EEnvironment, mode: 'before' | 'after' = 'before') {
     const currentToken = this.tokens.getToken()
-    return isSameRank([lastToken, currentToken], 'endAndStartLine')
+    if (!currentToken) return false
+    if (checkBit(environment, EEnvironment.bracket)) return true
+
+    return isSameRank([this.tokens.getToken(mode === 'before' ? -1 : 1), currentToken], 'endAndStartLine')
+  }
+
+  isToken(types: ETokenType | ETokenType[], value?: string | string[]): boolean {
+    const token = this.tokens.getToken()
+    return isToken(token, types, value)
+  }
+
+  isTokens(...tokens: [ETokenType | ETokenType[], string | string[]][]) {
+    return tokens.every(([types, value], index) => isToken(this.tokens.getToken(index), types, value))
   }
 
   /** 如果当前token符合 则输出当前token && 索引指向下一个token */
@@ -89,16 +100,12 @@ class BaseHandler {
 
   /** 检查 */
   check(checkParams: ICheckParams) {
-    if (checkParams.extraCheck && !checkParams.checkToken()) {
+    if (checkParams.checkToken && !checkParams.checkToken()) {
       throw new TypeError('Unexpected token')
     }
 
     if (checkParams.extraCheck && !checkParams.extraCheck()) {
       throw new TypeError('Extra check the failure')
-    }
-
-    if (checkBit(checkParams.environment, EEnvironment.assign) && !checkParams.isAssignableExpression) {
-      throw new TypeError('Expression cannot be assignment target')
     }
 
     if (checkBit(checkParams.environment, EEnvironment.decorative) && !checkParams.isDecorativeExpression) {

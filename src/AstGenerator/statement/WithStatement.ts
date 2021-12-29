@@ -1,25 +1,19 @@
 import { ENodeType, ETokenType, IWithStatement } from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
+import { EEnvironment } from '../types'
 
 /** with语句 */
 class WithStatement extends BaseHandler {
-  handle(): IWithStatement {
-    const withToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(withToken, ETokenType.keyword, 'with')
-    })
+  handle(environment: EEnvironment): IWithStatement {
+    const withToken = this.output(ETokenType.keyword, 'with')
 
-    this.tokens.next()
-    const left = this._handleLeft()
+    const left = this._handleLeft(environment)
 
-    const asToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(asToken, ETokenType.keyword, 'as')
-    })
+    this.output(ETokenType.keyword, 'as')
 
-    this.tokens.next()
-    const right = this._handleRight()
+    const right = this._handleRight(environment)
+
     const body = this.astGenerator.statement.blockStatement.handle(withToken)
 
     const WithStatement = this.createNode(ENodeType.WithStatement, {
@@ -32,20 +26,20 @@ class WithStatement extends BaseHandler {
     return WithStatement
   }
 
-  private _handleLeft(): IWithStatement['left'] {
+  private _handleLeft(environment: EEnvironment): IWithStatement['left'] {
     const { payload } = this.findNodes({
       end: token => isToken(token, ETokenType.keyword, 'as'),
-      step: () => this.astGenerator.expression.handleMaybeIf(),
+      step: () => this.astGenerator.expression.handleMaybeIf(environment),
       isSlice: true
     })
 
     return payload
   }
 
-  private _handleRight(): IWithStatement['right'] {
+  private _handleRight(environment: EEnvironment): IWithStatement['right'] {
     const { payload } = this.findNodes({
       end: token => isToken(token, ETokenType.punctuation, ':'),
-      step: () => this.astGenerator.expression.handleMaybeIf(), // todo
+      step: () => this.astGenerator.expression.handleMaybeIf(environment), // todo
       isSlice: true
     })
 

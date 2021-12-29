@@ -7,16 +7,13 @@ import { EEnvironment } from '../types'
 /** for 语句 */
 class ForStatement extends BaseHandler {
   handle(environment: EEnvironment): IForStatement {
-    const forToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(forToken, ETokenType.keyword, 'for')
-    })
+    const forToken = this.output(ETokenType.keyword, 'for')
 
-    this.tokens.next()
-    const target = this._handleTarget()
+    const target = this._handleTarget(environment)
 
-    this.tokens.next()
-    const iterable = this.astGenerator.expression.handleMaybeTuple()
+    this.output(ETokenType.keyword, 'in')
+
+    const iterable = this.astGenerator.expression.handleMaybeTuple(environment)
 
     const body = this.astGenerator.statement.blockStatement.handle(forToken, environment | EEnvironment.loopBody)
 
@@ -30,12 +27,16 @@ class ForStatement extends BaseHandler {
     return ForStatement
   }
 
-  private _handleTarget(): TAssignableExpressionNode {
+  private _handleTarget(environment: EEnvironment): TAssignableExpressionNode {
     const { code, payload: tokens } = this.findTokens(token => isToken(token, ETokenType.keyword, 'in'))
     if (code === 1) throw new SyntaxError("Expected 'in'")
 
     const astGenerator = new AstGenerator(tokens)
-    const target = astGenerator.expression.handleMaybeTuple(EEnvironment.assign) as TAssignableExpressionNode
+    const target = astGenerator.expression.handleMaybeTuple(environment)
+
+    if (!this.astGenerator.expression.assignmentExpression.isConformNode(target)) {
+      throw new TypeError('Expression cannot be assignment target')
+    }
 
     return target
   }

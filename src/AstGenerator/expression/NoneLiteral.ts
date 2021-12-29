@@ -4,7 +4,7 @@ import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
 class NoneLiteral extends BaseHandler {
-  handle(environment: EEnvironment = EEnvironment.normal): INoneLiteral {
+  handle(environment: EEnvironment): INoneLiteral {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.keyword, 'None'),

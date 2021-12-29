@@ -1,9 +1,9 @@
 import { ENodeType, ETokenType, IStarredExpression } from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { createLoc } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
-/** 解压表达式 */
+/** 解压表达式 *a */
 class StarredExpression extends BaseHandler {
   handle(environment: EEnvironment): IStarredExpression {
     // todo
@@ -11,15 +11,11 @@ class StarredExpression extends BaseHandler {
     // 	throw new SyntaxError('Unpack operation not allowed in this context')
     // }
 
-    const xToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(xToken, ETokenType.operator, '*'),
-      environment,
-      isAfter: true
-    })
+    this.check({ environment, isAfter: true })
 
-    this.tokens.next()
-    const value = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
+    const xToken = this.output(ETokenType.operator, '*')
+
+    const value = this.astGenerator.expression.handleMaybeIf(environment)
 
     const Starred = this.createNode(ENodeType.StarredExpression, {
       value,

@@ -4,7 +4,7 @@ import {
   IClassDeclaration,
   IKeyword,
   TDecorativeExpressionNode,
-  TNotAssignmentExpressionNode
+  TExpressionNode
 } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
@@ -13,22 +13,17 @@ import { EEnvironment } from '../types'
 /** 类声明 */
 class ClassDeclaration extends BaseHandler {
   handle(environment: EEnvironment, decorators?: TDecorativeExpressionNode[]): IClassDeclaration {
-    const classToken = this.tokens.getToken()
-    const identifierToken = this.tokens.getToken(1)
-    this.check({
-      checkToken: () =>
-        isToken(classToken, ETokenType.keyword, 'class') && isToken(identifierToken, ETokenType.identifier),
-      isAfter: 2
-    })
+    const classToken = this.output(ETokenType.keyword, 'class')
+    this.check({ isBefore: true, isAfter: true })
+    const identifierToken = this.output(ETokenType.identifier)
 
-    let bases: TNotAssignmentExpressionNode[] = []
+    let bases: TExpressionNode[] = []
     let keywords: IKeyword[] = []
 
-    this.tokens.next(2)
-    const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.bracket, '(')) {
-      this.tokens.next()
-      const hResult = this.astGenerator.expression.callExpression.handleArgsAndKeywords(false)
+    if (this.isToken(ETokenType.bracket, '(')) {
+      const hResult = this.astGenerator.expression.callExpression.handleArgsAndKeywords(EEnvironment.bracket, {
+        enableGeneratorExpression: false
+      })
 
       bases = hResult.args
       keywords = hResult.keywords

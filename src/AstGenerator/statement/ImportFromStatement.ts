@@ -1,6 +1,7 @@
 import { ENodeType, ETokenType, IAliasExpression, IImportFromStatement, TToken } from '../../types'
 import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
+import { EEnvironment } from '../types'
 
 /** 导入语句 */
 class ImportFromStatement extends BaseHandler {
@@ -49,7 +50,7 @@ class ImportFromStatement extends BaseHandler {
   }
 
   private _handleModule(): IImportFromStatement['module'] {
-    const identifier = this.astGenerator.expression.identifier.handle()
+    const identifier = this.astGenerator.expression.identifier.handle(EEnvironment.normal)
     const maybeMemberExpression = this.astGenerator.expression.memberExpression.handleMaybe(identifier)
 
     return maybeMemberExpression
@@ -94,12 +95,12 @@ class ImportFromStatement extends BaseHandler {
       name = '*'
       this.tokens.next()
     } else {
-      name = this.astGenerator.expression.identifier.handle().name
+      name = this.astGenerator.expression.identifier.handle(EEnvironment.normal).name
 
       const asToken = this.tokens.getToken()
       if (isToken(asToken, ETokenType.keyword, 'as')) {
         this.tokens.next()
-        asname = this.astGenerator.expression.identifier.handle().name
+        asname = this.astGenerator.expression.identifier.handle(EEnvironment.normal).name
       }
     }
 

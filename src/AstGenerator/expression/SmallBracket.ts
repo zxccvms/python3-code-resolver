@@ -1,15 +1,16 @@
-import { ENodeType, ETokenType, IGeneratorExpression, TExpressionNode, TNotAssignmentExpressionNode } from '../../types'
-import { createLoc, getPositionInfo, isToken, hasParenthesized, addBaseNodeAttr, getLatest } from '../../utils'
+import { ENodeType, ETokenType, IGeneratorExpression, TExpressionNode } from '../../types'
+import { createLoc, getPositionInfo, hasParenthesized, addBaseNodeAttr, getLatest } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
 class SmallBracket extends BaseHandler {
-  handle(environment: EEnvironment): TNotAssignmentExpressionNode {
+  handle(environment: EEnvironment): TExpressionNode {
     const leftBracket = this.output(ETokenType.bracket, '(')
+    environment = environment | EEnvironment.bracket
 
     let expression: TExpressionNode
-    let rightBracketToken = this.tokens.getToken()
-    if (isToken(rightBracketToken, ETokenType.bracket, ')')) {
+    let rightBracketToken = this.eat(ETokenType.bracket, ')')
+    if (rightBracketToken) {
       expression = this.createNode(ENodeType.TupleExpression, {
         elements: [],
         loc: {
@@ -18,22 +19,18 @@ class SmallBracket extends BaseHandler {
         }
       })
     } else {
-      const handleEnvironment = environment | EEnvironment.bracket
+      expression = this._handleExpression(environment)
 
-      expression = this.astGenerator.expression.handleMaybeTuple(handleEnvironment)
-
-      const currentToken = this.tokens.getToken()
-      if (isToken(currentToken, ETokenType.keyword, 'for')) {
-        expression = this.handleGeneratorExpression(expression)
+      if (this.astGenerator.expression.comprehension.isConformToken(environment)) {
+        expression = this.handleGeneratorExpression(expression, environment)
+      } else {
+        expression = this.astGenerator.expression.tupleExpression.handleMaybe(expression, environment, environment =>
+          this._handleExpression(environment)
+        )
       }
 
-      rightBracketToken = this.tokens.getToken()
-      if (!isToken(rightBracketToken, ETokenType.bracket, ')')) {
-        throw new SyntaxError("Expected ')'")
-      }
+      rightBracketToken = this.output(ETokenType.bracket, ')')
     }
-
-    this.tokens.next()
 
     return hasParenthesized(expression)
       ? expression
@@ -45,8 +42,8 @@ class SmallBracket extends BaseHandler {
         })
   }
 
-  handleGeneratorExpression(element: TExpressionNode): IGeneratorExpression {
-    const generators = this.astGenerator.expression.comprehension.handleComprehensions(element)
+  handleGeneratorExpression(element: TExpressionNode, environment: EEnvironment): IGeneratorExpression {
+    const generators = this.astGenerator.expression.comprehension.handleComprehensions(element, environment)
 
     const GeneratorExpression = this.createNode(ENodeType.GeneratorExpression, {
       element,
@@ -55,6 +52,11 @@ class SmallBracket extends BaseHandler {
     })
 
     return GeneratorExpression
+  }
+
+  private _handleExpression(environment: EEnvironment) {
+    let expression = this.astGenerator.expression.handleMaybeIf(environment)
+    return this.astGenerator.expression.namedExpression.handleMaybe(expression, environment)
   }
 }
 

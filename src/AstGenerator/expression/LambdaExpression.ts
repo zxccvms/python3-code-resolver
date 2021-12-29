@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, ILambdaExpression, TExpressionNode } from 'src/types'
+import { ENodeType, ETokenType, ILambdaExpression } from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
@@ -6,25 +6,24 @@ import { EEnvironment } from '../types'
 /** lambda表达式 lambda a: a + 1 */
 class LambdaExpression extends BaseHandler {
   handle(environment: EEnvironment): ILambdaExpression {
-    const lambdaToken = this.tokens.getToken()
     this.check({
-      checkToken: () => isToken(lambdaToken, ETokenType.keyword, 'lambda'),
       environment,
       isAfter: true
     })
+    const lambdaToken = this.output(ETokenType.keyword, 'lambda')
 
-    this.tokens.next()
-    const args = this.astGenerator.expression.arguments.handle(token => isToken(token, ETokenType.punctuation, ':'))
+    const args = this.astGenerator.expression.arguments.handle(
+      token => isToken(token, ETokenType.punctuation, ':'),
+      environment
+    )
 
-    const colonToken = this.tokens.getToken()
     this.check({
-      checkToken: () => isToken(colonToken, ETokenType.punctuation, ':'),
       environment,
       isBefore: true,
       isAfter: true
     })
+    this.output(ETokenType.punctuation, ':')
 
-    this.tokens.next()
     const body = this.astGenerator.expression.handleMaybeIf(environment | EEnvironment.lambda)
 
     const LambdaExpression = this.createNode(ENodeType.LambdaExpression, {

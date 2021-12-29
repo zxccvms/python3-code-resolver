@@ -1,6 +1,3 @@
-import { MemberExpression } from '@babel/types'
-import SubscriptExpression from './AstGenerator/expression/SubscriptExpression'
-
 export enum ETokenType {
   /** 关键字 def global pass */
   keyword = 'keyword',
@@ -15,12 +12,71 @@ export enum ETokenType {
   /** 括号 () [] {} */
   bracket = 'bracket',
   /** 标点符号 . , : */
-  punctuation = 'punctuation'
+  punctuation = 'punctuation',
+  /** ellipsis ... */
+  ellipsis = 'ellipsis'
+}
+
+export enum EStringTokenPrefix {
+  b = 'b',
+  u = 'u',
+  r = 'r',
+  f = 'f',
+  fr = 'fr',
+  rf = 'rf',
+  rb = 'rb',
+  br = 'br'
+}
+
+export enum EUnaryExpressionOperator {
+  '+' = '+',
+  '-' = '-',
+  'not' = 'not',
+  '~' = '~'
+}
+
+export enum EBinaryExpressionOperator {
+  '+' = '+',
+  '-' = '-',
+  '*' = '*',
+  '/' = '/',
+  '%' = '%',
+  '//' = '//',
+  '**' = '**',
+  '==' = '==',
+  '!=' = '!=',
+  '>=' = '>=',
+  '<=' = '<=',
+  '^=' = '^=',
+  '<' = '<',
+  '<<' = '<<',
+  '>' = '>',
+  '>>' = '>>',
+  '|' = '|',
+  '&' = '&',
+  '^' = '^',
+  '@' = '@'
+}
+
+export enum EAssignmentExpressionOperator {
+  '=' = '=',
+  '+=' = '+=',
+  '-=' = '-=',
+  '*=' = '*=',
+  '/=' = '/=',
+  '%=' = '%=',
+  '|=' = '|=',
+  '&=' = '&=',
+  '@=' = '@=',
+  '**=' = '**=',
+  '//=' = '//=',
+  '<<=' = '<<=',
+  '>>=' = '>>='
 }
 
 export type TStringTokenExtra = {
-  prefix?: 'u' | 'r' | 'f'
-  tokensFragment?: TToken[][]
+  prefix?: EStringTokenPrefix
+  multipleLines?: boolean
 }
 
 export type TTokenExtraMap = {
@@ -49,8 +105,6 @@ export type TToken<T extends ETokenType = ETokenType, V extends string = string>
 
 export const enum ENodeType {
   // 特殊类型 只能在某些类型里使用 不能单独使用
-  /** 字典属性 DictionaryExpression内使用 a:1 */
-  DictionaryProperty = 'DictionaryProperty',
   /** 参数列表 */
   Arguments = 'Arguments',
   /** 参数 */
@@ -63,8 +117,10 @@ export const enum ENodeType {
   AliasExpression = 'AliasExpression',
   /** 数组切割表达式 1: 1:1:1 */
   SliceExpression = 'SliceExpression',
-  /** 解析 */
+  /** 解析 for a in 1*/
   Comprehension = 'Comprehension',
+  /** 模版字符串的值 */
+  TemplateValue = 'TemplateValue',
   /** token类型 处理不了的token丢入这个类型中 临时 */
   tokens = 'tokens',
 
@@ -81,6 +137,8 @@ export const enum ENodeType {
   TemplateLiteral = 'TemplateLiteral',
   /** 标识符 a */
   Identifier = 'Identifier',
+  /** Ellipsis ... */
+  Ellipsis = 'Ellipsis',
 
   // 表达式
   /** 一元表达式 -1 +1 not 1 */
@@ -95,6 +153,8 @@ export const enum ENodeType {
   ArrayComprehensionExpression = 'ArrayComprehensionExpression',
   /** 字典表达式 {a:1} */
   DictionaryExpression = 'DictionaryExpression',
+  /** 字典解析表达式 {a: 1 for a in 2} */
+  DictionaryComprehensionExpression = 'DictionaryComprehensionExpression',
   /** 运算表达式 a + b   a == b  a > b */
   BinaryExpression = 'BinaryExpression',
   /** 赋值表达式 a = 1 */
@@ -117,10 +177,16 @@ export const enum ENodeType {
   LambdaExpression = 'LambdaExpression',
   /** yield表达式 */
   YieldExpression = 'YieldExpression',
+  /** yield from 表达式 */
+  YieldFromExpression = 'YieldFromExpression',
   /** a(*b) or class a(*b) 的*b */
   StarredExpression = 'StarredExpression',
   /** 生成器表达式 必须要有bracket环境 (1 for a in 2) */
   GeneratorExpression = 'GeneratorExpression',
+  /** Await表达式 必须要有asyncFunction环境 */
+  AwaitExpression = 'AwaitExpression',
+  /** 命名表达式 (a := 1) */
+  NamedExpression = 'NamedExpression',
 
   // 语句
   /** 导入语句 */
@@ -165,7 +231,6 @@ export const enum ENodeType {
 
 /** 特殊的节点映射表 */
 export type TSpecialNodeMap = {
-  [ENodeType.DictionaryProperty]: IDictionaryProperty
   [ENodeType.Arguments]: IArguments
   [ENodeType.Argument]: IArgument
   [ENodeType.Keyword]: IKeyword
@@ -173,6 +238,7 @@ export type TSpecialNodeMap = {
   [ENodeType.SliceExpression]: ISliceExpression
   [ENodeType.AliasExpression]: IAliasExpression
   [ENodeType.Comprehension]: IComprehension
+  [ENodeType.TemplateValue]: ITemplateValue
   [ENodeType.tokens]: ITokens
 }
 
@@ -186,6 +252,7 @@ export type TBasicExpressionNodeMap = {
   [ENodeType.StringLiteral]: IStringLiteral
   [ENodeType.TemplateLiteral]: ITemplateLiteral
   [ENodeType.Identifier]: IIdentifier
+  [ENodeType.Ellipsis]: IEllipsis
 }
 
 export type TBasicExpressionNode<T extends keyof TBasicExpressionNodeMap = keyof TBasicExpressionNodeMap> =
@@ -197,6 +264,7 @@ export type TExpressionNodeMap = {
   [ENodeType.ArrayExpression]: IArrayExpression
   [ENodeType.ArrayComprehensionExpression]: IArrayComprehensionExpression
   [ENodeType.DictionaryExpression]: IDictionaryExpression
+  [ENodeType.DictionaryComprehensionExpression]: IDictionaryComprehensionExpression
   [ENodeType.BinaryExpression]: IBinaryExpression
   [ENodeType.AssignmentExpression]: IAssignmentExpression
   [ENodeType.MemberExpression]: IMemberExpression
@@ -210,22 +278,29 @@ export type TExpressionNodeMap = {
   [ENodeType.SetComprehensionExpression]: ISetComprehensionExpression
   [ENodeType.LambdaExpression]: ILambdaExpression
   [ENodeType.YieldExpression]: IYieldExpression
+  [ENodeType.YieldFromExpression]: IYieldFromExpression
   [ENodeType.StarredExpression]: IStarredExpression
   [ENodeType.GeneratorExpression]: IGeneratorExpression
+  [ENodeType.AwaitExpression]: IAwaitExpression
+  [ENodeType.NamedExpression]: INamedExpression
 } & TBasicExpressionNodeMap
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
 
-/** 没有AssignmentExpression的表达式 */
-export type TNotAssignmentExpressionNode = Omit<TExpressionNode, ENodeType.AssignmentExpression>
-
 /** 可赋值的表达式 */
 export type TAssignableExpressionNode =
   | IIdentifier
+  | IStarredExpression
   | IMemberExpression
   | ISubscriptExpression
   | IArrayExpression
   | ITupleExpression
+
+export type TBigBracketExpressionNode =
+  | ISetExpression
+  | ISetComprehensionExpression
+  | IDictionaryExpression
+  | IDictionaryComprehensionExpression
 
 /** 装饰的表达式 */
 export type TDecorativeExpressionNode = IIdentifier | IMemberExpression | ICallExpression
@@ -273,24 +348,20 @@ export interface IBaseNodeAttr {
 }
 
 // 特殊节点定义
-export interface IDictionaryProperty extends IBaseNodeAttr {
-  type: ENodeType.DictionaryProperty
-  key: TNotAssignmentExpressionNode
-  value: TNotAssignmentExpressionNode
-}
-
-export interface IArguments {
+export interface IArguments extends IBaseNodeAttr {
   type: ENodeType.Arguments
+  /** / 前的参数 */
+  posArgs: IArgument[]
   /** 参数名 */
   args: IArgument[]
   /** 参数名的默认值 */
-  defaults: TNotAssignmentExpressionNode[]
+  defaults: TExpressionNode[]
   /** *a参数名 */
   varArg: IArgument
   /** *a参数后的参数名 */
   keywordOnlyArgs: IArgument[]
   /** *a参数后的参数默认值 */
-  keywordDefaults: TNotAssignmentExpressionNode[]
+  keywordDefaults: TExpressionNode[]
   /** **a参数名 */
   keywordArg: IArgument
 }
@@ -298,24 +369,34 @@ export interface IArguments {
 export interface IArgument extends IBaseNodeAttr {
   type: ENodeType.Argument
   name: string
-  value?: TNotAssignmentExpressionNode
 }
 
 export interface IKeyword extends IBaseNodeAttr {
   type: ENodeType.Keyword
   name: string
-  value: TNotAssignmentExpressionNode
+  value: TExpressionNode
 }
 
 export interface IStarredExpression extends IBaseNodeAttr {
   type: ENodeType.StarredExpression
-  value: TNotAssignmentExpressionNode
+  value: TExpressionNode
 }
 
 export interface IGeneratorExpression extends IBaseNodeAttr {
   type: ENodeType.GeneratorExpression
-  element: TNotAssignmentExpressionNode
+  element: TExpressionNode
   generators: IComprehension[]
+}
+
+export interface IAwaitExpression extends IBaseNodeAttr {
+  type: ENodeType.AwaitExpression
+  value: TExpressionNode
+}
+
+export interface INamedExpression extends IBaseNodeAttr {
+  type: ENodeType.NamedExpression
+  target: IIdentifier
+  value: TExpressionNode
 }
 
 export interface IExceptHandler extends IBaseNodeAttr {
@@ -352,12 +433,12 @@ export interface IStringLiteral extends IBaseNodeAttr {
   type: ENodeType.StringLiteral
   value: string
   raw: string
-  prefix?: 'u' | 'r'
+  prefix?: Omit<EStringTokenPrefix, 'f' | 'fr' | 'rf'>
 }
 
 export interface ITemplateLiteral extends IBaseNodeAttr {
   type: ENodeType.TemplateLiteral
-  expressions: TExpressionNode[]
+  expressions: (IStringLiteral | ITemplateValue)[]
 }
 
 export interface IIdentifier extends IBaseNodeAttr {
@@ -365,9 +446,13 @@ export interface IIdentifier extends IBaseNodeAttr {
   name: string
 }
 
+export interface IEllipsis extends IBaseNodeAttr {
+  type: ENodeType.Ellipsis
+}
+
 export interface IUnaryExpression extends IBaseNodeAttr {
   type: ENodeType.UnaryExpression
-  operator: '-' | '+' | 'not'
+  operator: EUnaryExpressionOperator
   argument: TExpressionNode
 }
 export interface IIfExpression extends IBaseNodeAttr {
@@ -386,56 +471,70 @@ export interface ILogicalExpression extends IBaseNodeAttr {
 
 export interface ISetExpression extends IBaseNodeAttr {
   type: ENodeType.SetExpression
-  elements: TNotAssignmentExpressionNode[]
+  elements: TExpressionNode[]
 }
 
 export interface ISetComprehensionExpression extends IBaseNodeAttr {
-  type: ENodeType.SetExpression
-  element: TNotAssignmentExpressionNode
+  type: ENodeType.SetComprehensionExpression
+  element: TExpressionNode
   generators: IComprehension[]
 }
 
 export interface ILambdaExpression extends IBaseNodeAttr {
   type: ENodeType.LambdaExpression
   args: IArguments
-  body: TNotAssignmentExpressionNode
+  body: TExpressionNode
 }
 
 export interface IYieldExpression extends IBaseNodeAttr {
   type: ENodeType.YieldExpression
-  value: TNotAssignmentExpressionNode
+  value?: TExpressionNode
+}
+
+export interface IYieldFromExpression extends IBaseNodeAttr {
+  type: ENodeType.YieldFromExpression
+  value: TExpressionNode
 }
 
 export interface ITupleExpression extends IBaseNodeAttr {
   type: ENodeType.TupleExpression
-  elements: TNotAssignmentExpressionNode[]
+  elements: TExpressionNode[]
 }
 
 export interface IArrayExpression extends IBaseNodeAttr {
   type: ENodeType.ArrayExpression
-  elements: TNotAssignmentExpressionNode[]
+  elements: TExpressionNode[]
 }
 
 export interface IArrayComprehensionExpression extends IBaseNodeAttr {
   type: ENodeType.ArrayComprehensionExpression
-  element: TNotAssignmentExpressionNode
+  element: TExpressionNode
   generators: IComprehension[]
 }
 export interface IDictionaryExpression extends IBaseNodeAttr {
   type: ENodeType.DictionaryExpression
-  properties: IDictionaryProperty[]
+  keys: TExpressionNode[]
+  values: TExpressionNode[]
 }
+
+export interface IDictionaryComprehensionExpression extends IBaseNodeAttr {
+  type: ENodeType.DictionaryComprehensionExpression
+  key: TExpressionNode
+  value: TExpressionNode
+  generators: IComprehension[]
+}
+
 export interface IBinaryExpression extends IBaseNodeAttr {
   type: ENodeType.BinaryExpression
-  operator: '+' | '-' | '*' | '/' | '%' | '//' | '**' | '==' | '!=' | '>=' | '<=' | '<' | '>' | '|' | '&'
+  operator: EBinaryExpressionOperator
   left: TExpressionNode
   right: TExpressionNode
 }
 
 export interface IAssignmentExpression extends IBaseNodeAttr {
   type: ENodeType.AssignmentExpression
-  targets: (IIdentifier | IMemberExpression | ISubscriptExpression | ITupleExpression | IArrayExpression)[]
-  operator: '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//='
+  targets: TAssignableExpressionNode[]
+  operator: EAssignmentExpressionOperator
   value: TExpressionNode
 }
 
@@ -447,9 +546,15 @@ export interface IAliasExpression extends IBaseNodeAttr {
 
 export interface IComprehension extends IBaseNodeAttr {
   type: ENodeType.Comprehension
-  ifs: TNotAssignmentExpressionNode[]
-  iterable: TNotAssignmentExpressionNode
+  isAsync: boolean
+  ifs: TExpressionNode[]
+  iterable: TExpressionNode
   target: TAssignableExpressionNode
+}
+
+export interface ITemplateValue extends IBaseNodeAttr {
+  type: ENodeType.TemplateValue
+  value: TExpressionNode
 }
 export interface ITokens extends IBaseNodeAttr {
   type: ENodeType.tokens
@@ -470,8 +575,8 @@ export interface ISubscriptExpression extends IBaseNodeAttr {
 
 export interface ICallExpression extends IBaseNodeAttr {
   type: ENodeType.CallExpression
-  callee: TNotAssignmentExpressionNode
-  args: TNotAssignmentExpressionNode[]
+  callee: TExpressionNode
+  args: TExpressionNode[]
   keywords: IKeyword[]
 }
 
@@ -506,7 +611,7 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
 export interface IClassDeclaration extends IBaseNodeAttr {
   type: ENodeType.ClassDeclaration
   name: string
-  bases: TNotAssignmentExpressionNode[]
+  bases: TExpressionNode[]
   keywords: IKeyword[]
   body: IBlockStatement
   decorators?: TDecorativeExpressionNode[]
@@ -544,7 +649,7 @@ export interface IProgram extends IBaseNodeAttr {
 export interface IForStatement extends IBaseNodeAttr {
   type: ENodeType.ForStatement
   target: TAssignableExpressionNode
-  iterable: TNotAssignmentExpressionNode
+  iterable: TExpressionNode
   body: IBlockStatement
 }
 
@@ -571,8 +676,8 @@ export interface IContinueStatement extends IBaseNodeAttr {
 
 export interface IWithStatement extends IBaseNodeAttr {
   type: ENodeType.WithStatement
-  left: TNotAssignmentExpressionNode[]
-  right: (IIdentifier | MemberExpression | SubscriptExpression | IArrayExpression)[]
+  left: TExpressionNode[]
+  right: (IIdentifier | IMemberExpression | ISubscriptExpression | IArrayExpression)[]
   body: IBlockStatement
 }
 
@@ -587,11 +692,11 @@ export interface IDeleteStatement extends IBaseNodeAttr {
 
 export interface IRaiseStatement extends IBaseNodeAttr {
   type: ENodeType.RaiseStatement
-  target: TNotAssignmentExpressionNode
+  target: TExpressionNode
 }
 
 export interface IAssertStatement extends IBaseNodeAttr {
   type: ENodeType.AssertStatement
-  msg?: TNotAssignmentExpressionNode
-  test: TNotAssignmentExpressionNode
+  msg?: TExpressionNode
+  test: TExpressionNode
 }

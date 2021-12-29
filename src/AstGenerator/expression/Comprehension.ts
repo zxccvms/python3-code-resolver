@@ -1,75 +1,78 @@
-import {
-  ENodeType,
-  ETokenType,
-  IComprehension,
-  TAssignableExpressionNode,
-  TExpressionNode,
-  TNotAssignmentExpressionNode
-} from 'src/types'
+import { ENodeType, ETokenType, IComprehension, TAssignableExpressionNode, TExpressionNode } from 'src/types'
 import { isToken, createLoc, isNode } from 'src/utils'
 import AstGenerator from '../AstGenerator'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
-interface IHandleComprehensionsParams {
-  lastNode?: TExpressionNode
-  comprehensionStack?: IComprehension[]
-  rightBracket: ')' | ']' | '}'
-}
-
 /** 解析表达式 */
 class Comprehension extends BaseHandler {
-  handleComprehensions(lastNode: TExpressionNode): IComprehension[] {
-    if (lastNode && isNode(lastNode, ENodeType.StarredExpression)) {
+  handleComprehensions(lastNode: TExpressionNode, environment: EEnvironment): IComprehension[] {
+    if (isNode(lastNode, ENodeType.StarredExpression)) {
       throw new SyntaxError('iterable unpacking cannot be used in comprehension')
     }
 
-    return this._handleComprehensions()
+    return this._handleComprehensions(environment)
   }
 
-  private _handleComprehensions(comprehensionStack: IComprehension[] = []): IComprehension[] {
-    const forToken = this.tokens.getToken()
-    if (!isToken(forToken, ETokenType.keyword, 'for')) return comprehensionStack
+  private _handleComprehensions(
+    environment: EEnvironment,
+    comprehensionStack: IComprehension[] = []
+  ): IComprehension[] {
+    const startToken = this.tokens.getToken()
+    if (!this.isConformToken(environment)) return comprehensionStack
+    const isAsync = startToken.value === 'async'
 
-    this.tokens.next()
-    const { code, payload: tokens } = this.findTokens(token => isToken(token, ETokenType.keyword, 'in'))
-    if (code === 1) throw new SyntaxError("Expected 'in'")
+    this.tokens.next(isAsync ? 2 : 1)
+    const target = this._handleTarget(environment)
 
-    const astGenerator = new AstGenerator(tokens)
-    const target = astGenerator.expression.handleMaybeTuple(
-      EEnvironment.bracket | EEnvironment.assign
-    ) as TAssignableExpressionNode
+    this.output(ETokenType.keyword, 'in')
 
-    const inToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(inToken, ETokenType.keyword, 'in')
-    })
+    const iterable = this.astGenerator.expression.handleMaybeLogical(environment)
 
-    this.tokens.next()
-    const iterable = this.astGenerator.expression.handleMaybeLogical(EEnvironment.bracket)
-
-    const ifs = this._handleMaybeIfs()
+    const ifs = this._handleMaybeIfs(environment)
 
     const Comprehension = this.createNode(ENodeType.Comprehension, {
+      isAsync,
       target,
       iterable,
       ifs,
-      loc: createLoc(forToken, iterable)
+      loc: createLoc(startToken, iterable)
     })
     comprehensionStack.push(Comprehension)
 
-    return this._handleComprehensions(comprehensionStack)
+    return this._handleComprehensions(environment, comprehensionStack)
   }
 
-  private _handleMaybeIfs(nodeStack: TNotAssignmentExpressionNode[] = []): TNotAssignmentExpressionNode[] {
+  private _handleTarget(environment: EEnvironment): TAssignableExpressionNode {
+    const { payload: tokens } = this.findTokens(token => isToken(token, ETokenType.keyword, 'in'))
+
+    const astGenerator = new AstGenerator(tokens)
+    const target = astGenerator.expression.handleMaybeTuple(environment)
+
+    if (!this.astGenerator.expression.assignmentExpression.isConformNode(target)) {
+      throw new TypeError('Expression cannot be assignment target')
+    }
+
+    return target
+  }
+
+  private _handleMaybeIfs(environment: EEnvironment, nodeStack: TExpressionNode[] = []): TExpressionNode[] {
     const ifToken = this.tokens.getToken()
     if (!isToken(ifToken, ETokenType.keyword, 'if')) return nodeStack
 
     this.tokens.next()
-    const expression = this.astGenerator.expression.handleMaybeLogical(EEnvironment.bracket)
+    const expression = this.astGenerator.expression.handleMaybeLogical(environment)
     nodeStack.push(expression)
 
-    return this._handleMaybeIfs(nodeStack)
+    return this._handleMaybeIfs(environment, nodeStack)
+  }
+
+  isConformToken(environment: EEnvironment) {
+    if (this.isToken(ETokenType.keyword, 'for')) return true
+    else if (!this.isTokens([ETokenType.keyword, 'async'], [ETokenType.keyword, 'for'])) return false
+    else if (!this.isContinue(environment, 'after')) return false
+
+    return true
   }
 }
 

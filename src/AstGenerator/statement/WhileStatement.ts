@@ -13,7 +13,7 @@ class WhileStatement extends BaseHandler {
     })
 
     this.tokens.next()
-    const test = this.astGenerator.expression.handleMaybeIf()
+    const test = this.astGenerator.expression.handleMaybeIf(environment)
     const body = this.astGenerator.statement.blockStatement.handle(whileToken, environment | EEnvironment.loopBody)
 
     const WhileStatement = this.createNode(ENodeType.WhileStatement, {

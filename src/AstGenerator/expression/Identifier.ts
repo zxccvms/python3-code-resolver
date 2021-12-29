@@ -5,12 +5,11 @@ import { EEnvironment } from '../types'
 
 /** 标识符 */
 class Identifier extends BaseHandler {
-  handle(environment: EEnvironment = EEnvironment.normal): IIdentifier {
+  handle(environment: EEnvironment): IIdentifier {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.identifier),
       environment,
-      isAssignableExpression: true,
       isDecorativeExpression: true
     })
 

@@ -5,7 +5,7 @@ import { EEnvironment } from '../types'
 
 /** 布尔 */
 class BooleanLiteral extends BaseHandler {
-  handle(environment: EEnvironment = EEnvironment.normal): IBooleanLiteral {
+  handle(environment: EEnvironment): IBooleanLiteral {
     const currentToken = this.tokens.getToken()
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.keyword, ['True', 'False']),

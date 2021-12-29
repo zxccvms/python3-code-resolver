@@ -12,7 +12,7 @@ class IfStatement extends BaseHandler {
     }
 
     this.tokens.next()
-    const test = this.astGenerator.expression.handleMaybeIf()
+    const test = this.astGenerator.expression.handleMaybeIf(environment)
     const body = this.astGenerator.statement.blockStatement.handle(currentToken, environment)
     const alternate = this._handleAlternate(environment)
 

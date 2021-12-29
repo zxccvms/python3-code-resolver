@@ -1,129 +1,76 @@
-import {
-  ENodeType,
-  ETokenType,
-  TToken,
-  IArguments,
-  IArgument,
-  TExpressionNode,
-  TNotAssignmentExpressionNode
-} from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { ENodeType, ETokenType, TToken, IArguments, IArgument, TExpressionNode } from 'src/types'
+import { createLoc } from 'src/utils'
 import BaseHandler from '../BaseHandler'
+import { EEnvironment } from '../types'
 
-enum EStepState {
-  /** 参数 */
+enum EArgType {
+  /** 普通参数 */
   arg,
   /** 带默认值的参数 */
-  default,
+  defaultArg,
   /** *参数 */
   varArg,
-  /** *参数后的参数 */
-  keywordOnlyArg,
   /** **参数 */
-  keywordArg
+  keywordArg,
+  /** 分割符 */
+  slash
 }
 
-type TState = {
-  stepState: EStepState
-  enableVarArg: boolean
-  enableKeywordArg: boolean
+type TItem = {
+  type: EArgType
+  arg?: IArgument
+  defaultNode?: TExpressionNode
 }
 
 /** 参数列表表达式 */
 class Arguments extends BaseHandler {
-  handle(end: (token: TToken) => boolean): IArguments {
-    const state: TState = {
-      stepState: EStepState.arg,
-      enableVarArg: true,
-      enableKeywordArg: true
-    }
+  handle(end: (token: TToken) => boolean, environment: EEnvironment): IArguments {
+    const startToken = this.tokens.getToken()
 
-    const { payload = [] } = this.findNodes({
+    const { payload } = this.findNodes({
       end,
-      step: () => this._handleCurrentStep(state),
+      step: () => this._handleCurrentStep(environment),
       isSlice: true
     })
 
-    const { args, defaults, varArg, keywordOnlyArgs, keywordDefaults, keywordArg } = this._filtrate(payload)
+    const argMap = this._filtrate(payload)
 
     const Arguments = this.createNode(ENodeType.Arguments, {
-      args,
-      defaults,
-      varArg,
-      keywordOnlyArgs,
-      keywordDefaults,
-      keywordArg
+      ...argMap,
+      loc: createLoc(startToken, this.tokens.getToken())
     })
 
     return Arguments
   }
 
-  private _handleCurrentStep(state: TState) {
-    const nextStepState = this._getNextState(state.stepState)
+  private _handleCurrentStep(environment: EEnvironment) {
+    if (this.eat(ETokenType.operator, '/')) return { type: EArgType.slash }
 
-    this._handleCurrentState(state, nextStepState)
-
-    if (nextStepState === EStepState.varArg) {
-      state.enableVarArg = false
-      this.tokens.next()
-    } else if (nextStepState === EStepState.keywordArg) {
-      state.enableKeywordArg = false
-      this.tokens.next()
+    let type = EArgType.arg
+    if (this.eat(ETokenType.operator, '**')) {
+      type = EArgType.keywordArg
+    } else if (this.eat(ETokenType.operator, '*')) {
+      type = EArgType.varArg
+      if (this.isToken(ETokenType.punctuation, ',')) return { type, arg: null }
     }
-    state.stepState = nextStepState
 
-    const { arg, defaultNode } = this._handleArgAndMaybeDefault(nextStepState)
-
-    return { stepState: nextStepState, arg, defaultNode }
+    return this._handleArgAndMaybeDefault(environment, type)
   }
 
-  private _getNextState(currentStepState: EStepState) {
-    const currentToken = this.tokens.getToken()
-
-    if (isToken(currentToken, ETokenType.operator, '*')) {
-      return EStepState.varArg
-    } else if (isToken(currentToken, ETokenType.operator, '**')) {
-      return EStepState.keywordArg
-    } else if (currentStepState >= EStepState.varArg) {
-      return EStepState.keywordOnlyArg
-    } else if (isToken(this.tokens.getToken(1), ETokenType.operator, '=')) {
-      return EStepState.default
-    } else {
-      return EStepState.arg
-    }
-  }
-
-  private _handleCurrentState(state: TState, nextState: EStepState) {
-    if (nextState === EStepState.varArg && !state.enableVarArg) {
-      throw new SyntaxError('Only one "*" parameter allowed')
-    } else if (nextState === EStepState.keywordArg && !state.enableKeywordArg) {
-      throw new SyntaxError('Only one "**" parameter allowed')
-    }
-
-    if (state.stepState > nextState) {
-      switch (state.stepState) {
-        case EStepState.default:
-          throw new SyntaxError('Non-default argument follows default argument')
-        case EStepState.keywordArg:
-          throw new SyntaxError('Parameter cannot follow "**" parameter')
-      }
-    }
-  }
-
-  private _handleArgAndMaybeDefault(stepState: EStepState) {
+  private _handleArgAndMaybeDefault(environment: EEnvironment, type: EArgType): TItem {
     const arg = this._handleArgument()
 
     let defaultNode: TExpressionNode = null
-    if (isToken(this.tokens.getToken(), ETokenType.operator, '=')) {
-      if (stepState === EStepState.varArg || stepState === EStepState.keywordArg) {
+    if (this.eat(ETokenType.operator, '=')) {
+      if (type === EArgType.varArg || type === EArgType.keywordArg) {
         throw new SyntaxError('Parameter with "*" or "**" cannot have default value')
       }
 
-      this.tokens.next()
-      defaultNode = this.astGenerator.expression.handleMaybeIf()
+      defaultNode = this.astGenerator.expression.handleMaybeIf(environment)
+      type = EArgType.defaultArg
     }
 
-    return { arg, defaultNode }
+    return { type, arg, defaultNode }
   }
 
   private _handleArgument(): IArgument {
@@ -137,31 +84,57 @@ class Arguments extends BaseHandler {
     return Argument
   }
 
-  private _filtrate(data: { stepState: EStepState; arg: IArgument; defaultNode?: TExpressionNode }[]) {
-    const args = []
-    const defaults = []
-    let varArg = null
-    const keywordOnlyArgs = []
-    const keywordDefaults = []
-    let keywordArg = null
+  private _filtrate(data: TItem[]): Omit<IArguments, 'type'> {
+    let posArgs: IArgument[] = []
+    let args: IArgument[] = []
+    const defaults: TExpressionNode[] = []
+    let varArg: IArgument = null
+    const keywordOnlyArgs: IArgument[] = []
+    const keywordDefaults: TExpressionNode[] = []
+    let keywordArg: IArgument = null
+    let hasSlash = false
+    let hasVarArg = false
 
-    for (const { stepState, arg, defaultNode } of data) {
-      if (stepState === EStepState.arg) {
-        args.push(arg)
-      } else if (stepState === EStepState.default) {
-        args.push(arg)
-        defaults.push(defaultNode)
-      } else if (stepState === EStepState.varArg) {
-        varArg = arg
-      } else if (stepState === EStepState.keywordOnlyArg) {
-        keywordOnlyArgs.push(arg)
-        keywordDefaults.push(defaultNode)
-      } else if (stepState === EStepState.keywordArg) {
+    data.forEach(({ type, arg, defaultNode }, index) => {
+      if (keywordArg) {
+        throw new SyntaxError('Only one "**" parameter allowed')
+      } else if (type === EArgType.keywordArg) {
         keywordArg = arg
+      } else if (type === EArgType.defaultArg) {
+        if (hasVarArg) {
+          keywordOnlyArgs.push(arg)
+          keywordDefaults.push(defaultNode)
+        } else {
+          args.push(arg)
+          defaults.push(defaultNode)
+        }
+      } else if (type === EArgType.arg) {
+        if (hasVarArg) {
+          keywordOnlyArgs.push(arg)
+          keywordDefaults.push(null)
+        } else if (defaults.length) {
+          throw new SyntaxError('Non-default argument follows default argument')
+        } else {
+          args.push(arg)
+        }
+      } else if (hasVarArg) {
+        throw new SyntaxError('Only one "*" parameter allowed')
+      } else if (type === EArgType.varArg) {
+        varArg = arg
+        hasVarArg = true
+      } else if (hasSlash) {
+        throw new SyntaxError('Only one "/" parameter allowed')
+      } else if (type === EArgType.slash) {
+        if (index === 0) {
+          throw new SyntaxError('Position-only argument separator not allowed as first parameter')
+        }
+        posArgs = args
+        args = []
+        hasSlash = true
       }
-    }
+    })
 
-    return { args, defaults, varArg, keywordOnlyArgs, keywordDefaults, keywordArg }
+    return { posArgs, args, defaults, varArg, keywordOnlyArgs, keywordDefaults, keywordArg }
   }
 }
 

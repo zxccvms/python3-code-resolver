@@ -1,12 +1,9 @@
 import {
+  EAssignmentExpressionOperator,
   ENodeType,
   ETokenType,
-  IArrayExpression,
   IAssignmentExpression,
-  IIdentifier,
-  IMemberExpression,
-  ISubscriptExpression,
-  ITupleExpression,
+  TAssignableExpressionNode,
   TExpressionNode,
   TNode,
   TToken
@@ -17,8 +14,7 @@ import { EEnvironment } from '../types'
 
 class AssignmentExpression extends BaseHandler {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment): TExpressionNode {
-    const currentToken = this.tokens.getToken()
-    if (this._isConformToken(currentToken)) {
+    if (this.isAssignmentToken()) {
       return this.handle(lastNode, environment)
     }
 
@@ -26,18 +22,15 @@ class AssignmentExpression extends BaseHandler {
   }
 
   handle(lastNode: TExpressionNode, environment: EEnvironment): IAssignmentExpression {
-    const currentToken = this.tokens.getToken()
-
     this.check({
-      checkToken: () => this._isConformToken(currentToken),
-      extraCheck: () => this._isConformNode(lastNode),
+      // extraCheck: () => this._isConformNode(lastNode),
       environment,
       isAfter: true,
       isBefore: true
     })
+    const operatorToken = this.output(ETokenType.operator, Object.values(EAssignmentExpressionOperator))
 
-    this.tokens.next()
-    const rightNode = this.astGenerator.expression.handleMaybeAssignment()
+    const rightNode = this.astGenerator.expression.handleMaybeAssignment(environment)
 
     const isAssignmentExpression = isNode(rightNode, ENodeType.AssignmentExpression)
     const targets = (
@@ -48,23 +41,27 @@ class AssignmentExpression extends BaseHandler {
     const AssignmentExpression = this.createNode(ENodeType.AssignmentExpression, {
       targets,
       value,
-      operator: currentToken.value as '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//=',
+      operator: operatorToken.value,
       loc: createLoc(lastNode, rightNode)
     })
 
     return AssignmentExpression
   }
 
-  private _isConformNode(
-    node: TNode
-  ): node is ITupleExpression | IIdentifier | IMemberExpression | ISubscriptExpression | IArrayExpression {
+  isConformNode(node: TNode): node is TAssignableExpressionNode {
     if (isNode(node, [ENodeType.ArrayExpression, ENodeType.TupleExpression])) {
-      return node.elements.every(node => isNode(node, ENodeType.Identifier))
-    } else return isNode(node, [ENodeType.Identifier, ENodeType.MemberExpression, ENodeType.SubscriptExpression])
+      return node.elements.every(node => this.isConformNode(node))
+    } else
+      return isNode(node, [
+        ENodeType.Identifier,
+        ENodeType.StarredExpression,
+        ENodeType.MemberExpression,
+        ENodeType.SubscriptExpression
+      ])
   }
 
-  private _isConformToken(token: TToken) {
-    return isToken(token, ETokenType.operator, ['=', '+=', '-=', '*=', '/=', '%=', '**=', '//='])
+  isAssignmentToken() {
+    return this.isToken(ETokenType.operator, Object.values(EAssignmentExpressionOperator))
   }
 }
 

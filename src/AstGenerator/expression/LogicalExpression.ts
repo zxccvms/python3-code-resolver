@@ -1,5 +1,5 @@
 import { ENodeType, ETokenType, ILogicalExpression, TExpressionNode, TToken } from 'src/types'
-import { createLoc, isExpressionNode, isToken } from 'src/utils'
+import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -23,7 +23,7 @@ class LogicalExpression extends BaseHandler {
     const currentToken = this.tokens.getToken() as TToken<ETokenType.keyword, 'and' | 'or'>
     this.check({
       checkToken: () => isToken(currentToken, ETokenType.keyword, ['and', 'or']),
-      extraCheck: () => isExpressionNode(lastNode),
+      // extraCheck: () => isExpressionNode(lastNode),
       environment,
       isBefore: true,
       isAfter: true

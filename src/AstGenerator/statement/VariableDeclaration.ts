@@ -1,6 +1,7 @@
 import { ENodeType, ETokenType, IVariableDeclaration, TToken } from '../../types'
 import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
+import { EEnvironment } from '../types'
 
 /** 变量声明 */
 class VariableDeclaration extends BaseHandler {
@@ -25,7 +26,7 @@ class VariableDeclaration extends BaseHandler {
   private _handleDeclarations(currentToken: TToken): IVariableDeclaration['declarations'] {
     const { payload: declarations } = this.findNodes({
       end: token => !isSameRank([currentToken, token], 'endAndStartLine'),
-      step: () => this.astGenerator.expression.identifier.handle(),
+      step: () => this.astGenerator.expression.identifier.handle(EEnvironment.normal),
       isSlice: true
     })
 

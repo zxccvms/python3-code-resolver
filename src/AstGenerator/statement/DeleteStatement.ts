@@ -1,6 +1,7 @@
 import { ENodeType, ETokenType, IDeleteStatement, TToken } from 'src/types'
 import { createLoc, getLatest, isSameRank, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
+import { EEnvironment } from '../types'
 
 /** del语句 */
 class DeleteStatement extends BaseHandler {
@@ -24,7 +25,7 @@ class DeleteStatement extends BaseHandler {
   private _handleTargets(markToken: TToken) {
     const { payload } = this.findNodes({
       end: token => !isSameRank([markToken, token], 'endAndStartLine'),
-      step: () => this.astGenerator.expression.handleMaybeBinary(),
+      step: () => this.astGenerator.expression.handleMaybeBinary(EEnvironment.normal),
       isSlice: true
     })
 

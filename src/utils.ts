@@ -1,4 +1,3 @@
-import { EEnvironment } from './AstGenerator/types'
 import { expressionNodeTypes, statementNodeTypes } from './const'
 import {
   ENodeType,
@@ -18,16 +17,18 @@ export function getLatest<T>(array: Array<T>): T {
   return array[array.length - 1]
 }
 
+/** 转成数组类型 */
 export function toArray<T>(array: T | T[]): T[] {
   return Array.isArray(array) ? array : [array]
 }
 
+/** 数组去重 */
 export function heavyArray<T>(targetArray: T[]): T[] {
   return Array.from(new Set(targetArray))
 }
 
 /** 节点添加基础属性 */
-export function addBaseNodeAttr<T extends ENodeType>(node: TNode<T>, baseAttr: IBaseNodeAttr): TNode<T> {
+export function addBaseNodeAttr<T extends TNode>(node: T, baseAttr: IBaseNodeAttr): T {
   return {
     ...node,
     ...baseAttr
@@ -146,7 +147,7 @@ export function createLocByPosition(start: TPositionInfo, end: TPositionInfo): T
 }
 
 /** 得到定位信息 */
-export function getPositionInfo(tokenOrNode: TToken | TNode, startOrEnd: 'start' | 'end') {
+export function getPositionInfo(tokenOrNode: TToken | TNode, startOrEnd: 'start' | 'end'): TPositionInfo {
   return tokenOrNode.loc[startOrEnd]
 }
 

@@ -1,4 +1,4 @@
-import { ENodeType, TExpressionNodeMap, TStatementNodeMap, TTokenExtraConfigMap } from './types'
+import { ENodeType, TExpressionNodeMap, TStatementNodeMap } from './types'
 
 export const PYTHON = {
   INDENT: '  ',
@@ -39,7 +39,9 @@ export const PYTHON = {
     'try',
     'while',
     'with',
-    'yield'
+    'yield',
+    'async',
+    'await'
   ]
 }
 

@@ -30,7 +30,6 @@ export interface ICheckParams {
   environment?: EEnvironment
   isBefore?: boolean | number
   isAfter?: boolean | number
-  isAssignableExpression?: boolean
   isDecorativeExpression?: boolean
 }
 

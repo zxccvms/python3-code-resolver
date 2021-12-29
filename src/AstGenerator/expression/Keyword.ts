@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, IKeyword, TNode, TNotAssignmentExpressionNode } from 'src/types'
+import { ENodeType, ETokenType, IKeyword, TNode } from 'src/types'
 import { createLoc, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'

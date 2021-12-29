@@ -1,19 +1,12 @@
-import {
-  ENodeType,
-  ETokenType,
-  ICallExpression,
-  IKeyword,
-  TExpressionNode,
-  TNotAssignmentExpressionNode
-} from '../../types'
+import { ENodeType, ETokenType, ICallExpression, IKeyword, TExpressionNode } from '../../types'
 import { createLoc, isNode, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
 interface IState {
-  enableExpression: boolean
-  enableStarred: boolean
-  enableGeneratorExpression: boolean
+  enableExpression?: boolean
+  enableStarred?: boolean
+  enableGeneratorExpression?: boolean
 }
 
 /** 函数调用表达式 */
@@ -27,9 +20,10 @@ class CallExpression extends BaseHandler {
 
     this.output(ETokenType.bracket, '(')
 
-    const { args, keywords } = this.handleArgsAndKeywords(true)
+    const { args, keywords } = this.handleArgsAndKeywords(environment | EEnvironment.bracket)
 
     const rightBracket = this.output(ETokenType.bracket, ')')
+
     const CallExpression = this.createNode(ENodeType.CallExpression, {
       callee: lastNode,
       args,
@@ -41,19 +35,20 @@ class CallExpression extends BaseHandler {
   }
 
   handleArgsAndKeywords(
-    generatorExpression: boolean,
-    state: IState = { enableExpression: true, enableStarred: true, enableGeneratorExpression: true }
+    environment: EEnvironment,
+    { enableExpression = true, enableStarred = true, enableGeneratorExpression = true }: IState = {}
   ): {
-    args: TNotAssignmentExpressionNode[]
+    args: TExpressionNode[]
     keywords: IKeyword[]
   } {
+    const state = { enableExpression, enableStarred, enableGeneratorExpression }
     const { payload } = this.findNodes({
       end: token => isToken(token, ETokenType.bracket, ')'),
-      step: () => this._handleCurrentStep(generatorExpression, state),
+      step: () => this._handleCurrentStep(environment, state),
       isSlice: true
     })
 
-    const args: TNotAssignmentExpressionNode[] = []
+    const args: TExpressionNode[] = []
     const keywords: IKeyword[] = []
     for (const node of payload) {
       if (node.type === ENodeType.Keyword) keywords.push(node)
@@ -63,43 +58,47 @@ class CallExpression extends BaseHandler {
     return { args, keywords }
   }
 
-  private _handleCurrentStep(generatorExpression: boolean, state: IState): TNotAssignmentExpressionNode | IKeyword {
+  private _handleCurrentStep(environment: EEnvironment, state: IState): TExpressionNode | IKeyword {
     let expression
-
-    const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.operator, '**')) {
+    // Keyword
+    if (this.isToken(ETokenType.operator, '**')) {
       state.enableExpression = false
       state.enableStarred = false
-      expression = this.astGenerator.expression.keyword.handle(EEnvironment.bracket)
+      expression = this.astGenerator.expression.keyword.handle(environment)
     } else {
-      expression = this.astGenerator.expression.handleMaybeIf(EEnvironment.bracket)
+      expression = this._handleExpression(environment)
+      // StarredExpression
+      if (isNode(expression, ENodeType.StarredExpression)) {
+        if (!state.enableStarred) {
+          throw new SyntaxError('Iterable argument unpacking follows keyword argument unpacking')
+        }
+      }
+      // GeneratorExpression
+      else if (this.astGenerator.expression.comprehension.isConformToken(environment)) {
+        expression = this.astGenerator.expression.smallBracket.handleGeneratorExpression(expression, environment)
 
-      const keywordOrOperatorToken = this.tokens.getToken()
-      if (generatorExpression && isToken(keywordOrOperatorToken, ETokenType.keyword, 'for')) {
-        expression = this.astGenerator.expression.smallBracket.handleGeneratorExpression(expression)
-
-        const rightBracket = this.tokens.getToken()
-        if (!state.enableGeneratorExpression || !isToken(rightBracket, ETokenType.bracket, ')')) {
+        if (!state.enableGeneratorExpression || !this.isToken(ETokenType.bracket, ')')) {
           throw new SyntaxError('Generator expression must be parenthesized')
         }
-      } else if (
-        isNode(expression, ENodeType.Identifier) &&
-        isToken(keywordOrOperatorToken, ETokenType.operator, '=')
-      ) {
-        state.enableExpression = false
-        expression = this.astGenerator.expression.keyword.handle(EEnvironment.bracket, expression)
       }
-
-      const isStarred = isNode(expression, ENodeType.StarredExpression)
-      if (!isStarred && !state.enableExpression) {
+      // Keyword
+      else if (this.isToken(ETokenType.operator, '=') && isNode(expression, ENodeType.Identifier)) {
+        state.enableExpression = false
+        expression = this.astGenerator.expression.keyword.handle(environment, expression)
+      }
+      // 普通表达式
+      else if (!state.enableExpression) {
         throw new SyntaxError('Positional argument cannot appear after keyword arguments')
-      } else if (isStarred && !state.enableStarred) {
-        throw new SyntaxError('Iterable argument unpacking follows keyword argument unpacking')
       }
     }
 
     state.enableGeneratorExpression = false
     return expression
+  }
+
+  private _handleExpression(environment: EEnvironment) {
+    const expression = this.astGenerator.expression.handleMaybeIf(environment)
+    return this.astGenerator.expression.namedExpression.handleMaybe(expression, environment)
   }
 }
 

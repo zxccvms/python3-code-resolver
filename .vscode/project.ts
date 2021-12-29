@@ -4,17 +4,17 @@ import path from 'path'
 import fs from 'fs'
 
 function readPyFileCode(dirPath: string, cb: (filePath: string, code: string) => void) {
-  fs.readdir(dirPath, { withFileTypes: true }, (_, dirents) => {
-    for (const dirent of dirents) {
-      const absPath = path.join(dirPath, dirent.name)
+  const dirents = fs.readdirSync(dirPath, { withFileTypes: true })
 
-      if (dirent.isDirectory()) readPyFileCode(absPath, cb)
-      else if (path.extname(dirent.name) === '.py') {
-        const pythonCode = fs.readFileSync(absPath, { encoding: 'utf-8' })
-        cb(absPath, pythonCode)
-      }
+  for (const dirent of dirents) {
+    const absPath = path.join(dirPath, dirent.name)
+
+    if (dirent.isDirectory()) readPyFileCode(absPath, cb)
+    else if (path.extname(dirent.name) === '.py') {
+      const pythonCode = fs.readFileSync(absPath, { encoding: 'utf-8' })
+      cb(absPath, pythonCode)
     }
-  })
+  }
 }
 
 new Promise(() => {
@@ -29,6 +29,7 @@ new Promise(() => {
       console.log('ast: ', ast)
     } catch {}
   })
+  console.log('小哥哥你真棒👍～')
 })
 
 setTimeout(() => {}, 9999999)

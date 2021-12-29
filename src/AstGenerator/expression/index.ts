@@ -1,6 +1,6 @@
 import AstGenerator from 'src/AstGenerator/AstGenerator'
 import { ENodeType, ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
-import { getPositionInfo, getTokenExtra, isSameRank, isToken } from 'src/utils'
+import { createLoc, isSameRank, isToken } from 'src/utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -15,7 +15,6 @@ import MemberExpression from './MemberExpression'
 import NoneLiteral from './NoneLiteral'
 import NumberLiteral from './NumberLiteral'
 import StringLiteral from './StringLiteral'
-import TemplateLiteral from './TemplateLiteral'
 import TupleExpression from './TupleExpression'
 import UnaryExpression from './UnaryExpression'
 import SubscriptExpression from './SubscriptExpression'
@@ -29,6 +28,9 @@ import MiddleBracket from './MiddleBracket'
 import Comprehension from './Comprehension'
 import SmallBracket from './SmallBracket'
 import BigBracket from './BigBracket'
+import Ellipsis from './Ellipsis'
+import AwaitExpression from './AwaitExpression'
+import NamedExpression from './NamedExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
@@ -36,8 +38,8 @@ class Expression extends BaseHandler {
   booleanLiteral: BooleanLiteral
   numberLiteral: NumberLiteral
   stringLiteral: StringLiteral
-  templateLiteral: TemplateLiteral
   identifier: Identifier
+  ellipsis: Ellipsis
 
   // 表达式
   smallBracket: SmallBracket
@@ -56,6 +58,8 @@ class Expression extends BaseHandler {
   lambdaExpression: LambdaExpression
   yieldExpression: YieldExpression
   starredExpression: StarredExpression
+  awaitExpression: AwaitExpression
+  namedExpression: NamedExpression
 
   // 特殊表达式
   arguments: Arguments
@@ -69,8 +73,8 @@ class Expression extends BaseHandler {
     this.booleanLiteral = new BooleanLiteral(astGenerator)
     this.numberLiteral = new NumberLiteral(astGenerator)
     this.stringLiteral = new StringLiteral(astGenerator)
-    this.templateLiteral = new TemplateLiteral(astGenerator)
     this.identifier = new Identifier(astGenerator)
+    this.ellipsis = new Ellipsis(astGenerator)
 
     this.smallBracket = new SmallBracket(astGenerator)
     this.middleBracket = new MiddleBracket(astGenerator)
@@ -88,6 +92,8 @@ class Expression extends BaseHandler {
     this.lambdaExpression = new LambdaExpression(astGenerator)
     this.yieldExpression = new YieldExpression(astGenerator)
     this.starredExpression = new StarredExpression(astGenerator)
+    this.awaitExpression = new AwaitExpression(astGenerator)
+    this.namedExpression = new NamedExpression(astGenerator)
 
     this.arguments = new Arguments(astGenerator)
     this.keyword = new Keyword(astGenerator)
@@ -95,49 +101,49 @@ class Expression extends BaseHandler {
   }
 
   /** 解析表达式 */
-  handle(environment: EEnvironment = EEnvironment.normal): TExpressionNode {
+  handle(environment: EEnvironment): TExpressionNode {
     return this.handleMaybeAssignment(environment)
   }
 
   /** 处理可能是赋值表达式 */
-  handleMaybeAssignment(environment: EEnvironment = EEnvironment.normal) {
+  handleMaybeAssignment(environment: EEnvironment) {
     const lastNode = this.handleMaybeTuple(environment)
     return this.assignmentExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是元组表达式 */
-  handleMaybeTuple(environment: EEnvironment = EEnvironment.normal) {
+  handleMaybeTuple(environment: EEnvironment) {
     const lastNode = this.handleMaybeIf(environment)
     return this.tupleExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是条件表达式 */
-  handleMaybeIf(environment: EEnvironment = EEnvironment.normal) {
+  handleMaybeIf(environment: EEnvironment) {
     const lastNode = this.handleMaybeLogical(environment)
     return this.ifExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是逻辑表达式 */
-  handleMaybeLogical(environment: EEnvironment = EEnvironment.normal, disableOr: boolean = false) {
+  handleMaybeLogical(environment: EEnvironment, disableOr: boolean = false) {
     const lastNode = this.handleMaybeCompare(environment)
     return this.logicalExpression.handleMaybe(lastNode, environment, disableOr)
   }
 
   /** 处理可能是比较表达式 */
-  handleMaybeCompare(environment: EEnvironment = EEnvironment.normal) {
+  handleMaybeCompare(environment: EEnvironment) {
     const lastNode = this.handleMaybeBinary(environment)
     return this.compareExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是二元表达式 */
-  handleMaybeBinary(environment: EEnvironment = EEnvironment.normal) {
+  handleMaybeBinary(environment: EEnvironment) {
     const lastNode = this.handleMaybeMemberOrSubscriptOrCall(environment)
     return this.binaryExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是 MemberExpression or SubscriptExpression or CallExpression */
   handleMaybeMemberOrSubscriptOrCall(
-    environment: EEnvironment = EEnvironment.normal,
+    environment: EEnvironment,
     lastNode: TExpressionNode = this.handleFirstExpression(environment)
   ): TExpressionNode {
     if (!this.isContinue(environment)) return lastNode
@@ -156,7 +162,7 @@ class Expression extends BaseHandler {
     return lastNode
   }
 
-  handleFirstExpression(environment: EEnvironment = EEnvironment.normal): TExpressionNode {
+  handleFirstExpression(environment: EEnvironment): TExpressionNode {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.bracket, '(')) {
       return this.smallBracket.handle(environment)
@@ -172,26 +178,25 @@ class Expression extends BaseHandler {
       return this.yieldExpression.handle(environment)
     } else if (isToken(currentToken, ETokenType.keyword, 'lambda')) {
       return this.lambdaExpression.handle(environment)
+    } else if (isToken(currentToken, ETokenType.keyword, 'await')) {
+      return this.awaitExpression.handle(environment)
     } else {
       return this.handleBasicExpression(environment)
     }
   }
 
   /** 基础基础表达式 */
-  handleBasicExpression(environment: EEnvironment = EEnvironment.normal): TBasicExpressionNode {
+  handleBasicExpression(environment: EEnvironment): TBasicExpressionNode {
     const currentToken = this.tokens.getToken()
     switch (currentToken.type) {
-      case ETokenType.string: {
-        if (getTokenExtra(currentToken).prefix === 'f') {
-          return this.templateLiteral.handle(environment)
-        } else {
-          return this.stringLiteral.handle(environment)
-        }
-      }
+      case ETokenType.string:
+        return this.stringLiteral.handle(environment)
       case ETokenType.identifier:
         return this.identifier.handle(environment)
       case ETokenType.number:
         return this.numberLiteral.handle(environment)
+      case ETokenType.ellipsis:
+        return this.ellipsis.handle(environment)
       case ETokenType.keyword:
         switch (currentToken.value) {
           case 'None':
@@ -211,14 +216,13 @@ class Expression extends BaseHandler {
   }
 
   handleTokens() {
-    const tokens = []
-    do {
-      tokens.push(this.tokens.getToken())
-      this.tokens.next()
-    } while (isSameRank([tokens[tokens.length - 1], this.tokens.getToken()], 'endAndStartLine'))
+    const currentToken = this.tokens.getToken()
+    this.tokens.next()
+    const { payload } = this.findTokens(token => !isSameRank([this.tokens.getToken(-1), token], 'endAndStartLine'))
 
     const Tokens = this.createNode(ENodeType.tokens, {
-      tokens
+      tokens: [currentToken, ...payload],
+      loc: createLoc(currentToken, this.tokens.getToken(-1))
     })
 
     return Tokens as any

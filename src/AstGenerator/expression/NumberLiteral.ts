@@ -1,24 +1,19 @@
 import { ENodeType, ETokenType } from '../../types'
-import { createLoc, isToken } from '../../utils'
+import { createLoc } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
 /** 数字 */
 class NumberLiteral extends BaseHandler {
-  handle(environment: EEnvironment = EEnvironment.normal) {
-    const currentToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(currentToken, ETokenType.number),
-      environment
-    })
+  handle(environment: EEnvironment) {
+    this.check({ environment })
+    const numberToken = this.output(ETokenType.number)
 
     const NumberLiteral = this.createNode(ENodeType.NumberLiteral, {
-      value: Number(currentToken.value),
-      raw: currentToken.value,
-      loc: createLoc(currentToken, currentToken)
+      value: Number(numberToken.value.replace(/j|_/g, '')), // js不支持复数
+      raw: numberToken.value,
+      loc: createLoc(numberToken)
     })
-
-    this.tokens.next()
 
     return NumberLiteral
   }

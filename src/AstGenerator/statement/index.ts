@@ -1,17 +1,14 @@
 import {
   ETokenType,
-  ICallExpression,
   IClassDeclaration,
   IFunctionDeclaration,
-  IIdentifier,
-  IMemberExpression,
   TDecorativeExpressionNode,
   TStatementNode
 } from 'src/types'
 import { isToken } from 'src/utils'
 import AstGenerator from '../AstGenerator'
 import BaseHandler from '../BaseHandler'
-import { EEnableCode, EEnvironment } from '../types'
+import { EEnvironment } from '../types'
 import AssertStatement from './AssertStatement'
 
 import BlockStatement from './BlockStatement'
@@ -109,13 +106,13 @@ class Statement extends BaseHandler {
       case 'break':
         return this.breakStatement.handle(environment)
       case 'with':
-        return this.withStatement.handle()
+        return this.withStatement.handle(environment)
       case 'del':
         return this.deleteStatement.handle()
       case 'raise':
-        return this.raiseStatement.handle()
+        return this.raiseStatement.handle(environment)
       case 'assert':
-        return this.assertStatement.handle()
+        return this.assertStatement.handle(environment)
     }
   }
 
