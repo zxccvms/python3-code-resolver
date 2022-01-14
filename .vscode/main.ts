@@ -16,9 +16,9 @@ new Promise(async () => {
   console.log('运行成功')
   console.log('ast: ', ast)
 
-  const astToCode = new AstToCode()
-  const code = astToCode.generate(ast)
-  console.log(`taozhizhu ~🚀 file: main.ts ~🚀 line 21 ~🚀 code`, code)
+  // const astToCode = new AstToCode()
+  // const code = astToCode.generate(ast)
+  // console.log(`taozhizhu ~🚀 file: main.ts ~🚀 line 21 ~🚀 code`, code)
 })
 
 setTimeout(() => {}, 9999999)

@@ -3,6 +3,7 @@ import { ENodeType, TExpressionNodeMap, TStatementNodeMap } from './types'
 export const PYTHON = {
   INDENT: '  ',
   LINE_BREAK: '\n',
+  CR_LINE_BREAK: '\r\n',
   PASS: 'pass',
   COMMENT: '#',
   /** python关键字列表 */

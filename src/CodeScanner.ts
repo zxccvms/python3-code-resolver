@@ -66,6 +66,11 @@ class CodeScanner {
         line++
         column = 1
         continue
+      } else if (currentChar + nextChar === PYTHON.CR_LINE_BREAK) {
+        line++
+        column = 1
+        i++
+        continue
       }
       // 处理注释
       else if (currentChar === '#') {
@@ -75,7 +80,7 @@ class CodeScanner {
       }
       // 处理 \ 拼接字符
       else if (currentChar === '\\') {
-        if (nextChar !== PYTHON.LINE_BREAK) {
+        if (nextChar !== PYTHON.LINE_BREAK && nextChar + nNextChar !== PYTHON.CR_LINE_BREAK) {
           throw new SyntaxError('unexpected character after line continuation character')
         }
         continuationCharacters.push({ line, column })
