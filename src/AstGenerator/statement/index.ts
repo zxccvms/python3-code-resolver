@@ -76,43 +76,43 @@ class Statement extends BaseHandler {
   handle(environment: EEnvironment): TStatementNode {
     const currentToken = this.tokens.getToken()
     switch (currentToken.value) {
-      case 'pass':
-        return this.emptyStatement.handle()
-      case '@':
-        return this._handleDecoratorsInStatement(environment)
-      case 'def':
-        return this.functionDeclaration.handle(environment)
-      case 'class':
-        return this.classDeclaration.handle(environment)
-      case 'nonlocal':
-      case 'global':
-        return this.variableDeclaration.handle()
+      // case 'pass':
+      //   return this.emptyStatement.handle()
+      // case '@':
+      //   return this._handleDecoratorsInStatement(environment)
+      // case 'def':
+      //   return this.functionDeclaration.handle(environment)
+      // case 'class':
+      //   return this.classDeclaration.handle(environment)
+      // case 'nonlocal':
+      // case 'global':
+      //   return this.variableDeclaration.handle()
       case 'if':
         return this.ifStatement.handle(environment)
-      case 'import':
-        return this.importStatement.handle()
-      case 'from':
-        return this.importFromStatement.handle()
-      case 'try':
-        return this.tryStatement.handle(environment)
+      // case 'import':
+      //   return this.importStatement.handle()
+      // case 'from':
+      //   return this.importFromStatement.handle()
+      // case 'try':
+      //   return this.tryStatement.handle(environment)
       case 'for':
         return this.forStatement.handle(environment)
-      case 'return':
-        return this.returnStatement.handle(environment)
-      case 'while':
-        return this.whileStatement.handle(environment)
-      case 'continue':
-        return this.continueStatement.handle(environment)
-      case 'break':
-        return this.breakStatement.handle(environment)
-      case 'with':
-        return this.withStatement.handle(environment)
-      case 'del':
-        return this.deleteStatement.handle()
-      case 'raise':
-        return this.raiseStatement.handle(environment)
-      case 'assert':
-        return this.assertStatement.handle(environment)
+      // case 'return':
+      //   return this.returnStatement.handle(environment)
+      // case 'while':
+      //   return this.whileStatement.handle(environment)
+      // case 'continue':
+      //   return this.continueStatement.handle(environment)
+      // case 'break':
+      //   return this.breakStatement.handle(environment)
+      // case 'with':
+      //   return this.withStatement.handle(environment)
+      // case 'del':
+      //   return this.deleteStatement.handle()
+      // case 'raise':
+      //   return this.raiseStatement.handle(environment)
+      // case 'assert':
+      //   return this.assertStatement.handle(environment)
     }
   }
 

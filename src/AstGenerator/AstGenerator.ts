@@ -51,12 +51,7 @@ class AstGenerator {
     //   throw new SyntaxError('unexpected indent')
     // }
 
-    // return this.statement.handle(environment) || this.expression.handle(environment)
-    if (isToken(token, ETokenType.keyword, 'if')) {
-      return this.expression.handleTokens()
-    }
-
-    return this.expression.handle(environment)
+    return this.statement.handle(environment) || this.expression.handle(environment)
   }
 }
 

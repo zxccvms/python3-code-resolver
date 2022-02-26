@@ -6,17 +6,14 @@ import { EEnvironment } from '../types'
 /** 块声明 */
 class BlockStatement extends BaseHandler {
   handle(startToken: TToken, environment: EEnvironment = EEnvironment.normal): IBlockStatement {
-    let colonToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(colonToken, ETokenType.punctuation, ':')
-    })
-
-    this.tokens.next()
-    const body = this._handleBody(startToken, colonToken, environment)
+    const colonToken = this.output(ETokenType.punctuation, ':')
+    // const body = this._handleBody(startToken, colonToken, environment)
+    const body: any = []
 
     const BlockStatement = this.createNode(ENodeType.BlockStatement, {
       body,
-      loc: createLoc(colonToken, getLatest(body))
+      // loc: createLoc(colonToken, getLatest(body))
+      loc: createLoc(colonToken)
     })
 
     return BlockStatement
