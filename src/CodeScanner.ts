@@ -107,19 +107,24 @@ class CodeScanner {
 
       // 二八十六进制
       else if (systemReg.test(currentChar + nextChar)) {
-        const { lineNum, columnNum, betweenContent, sumLength } = this._findConformString(code.slice(i + 1), char => {
-          switch (nextChar) {
-            case 'b':
-            case 'B':
-              return systemSuffixReg2.test(char)
-            case 'o':
-            case 'O':
-              return systemSuffixReg8.test(char)
-            case 'x':
-            case 'X':
-              return systemSuffixReg16.test(char)
+        const sliceContent = code.slice(i + 1)
+        let reg: RegExp
+        if (nextChar === 'b' || nextChar === 'B') reg = systemSuffixReg2
+        else if (nextChar === 'o' || nextChar === 'O') reg = systemSuffixReg8
+        else if (nextChar === 'x' || nextChar === 'X') reg = systemSuffixReg16
+        const { lineNum, columnNum, betweenContent, sumLength } = this._findConformString(
+          sliceContent,
+          (char, index) => {
+            if (char === '_') {
+              const nextChar = sliceContent[index + 1]
+              if (!reg.test(nextChar)) {
+                throw new SyntaxError('invalid decimal literal')
+              }
+
+              return true
+            } else return reg.test(char)
           }
-        })
+        )
         type = ETokenType.number
         value = currentChar + nextChar + betweenContent
         handleCycleParams(sumLength + 1, lineNum, columnNum)
