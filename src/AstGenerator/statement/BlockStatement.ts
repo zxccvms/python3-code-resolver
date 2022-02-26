@@ -7,13 +7,11 @@ import { EEnvironment } from '../types'
 class BlockStatement extends BaseHandler {
   handle(startToken: TToken, environment: EEnvironment = EEnvironment.normal): IBlockStatement {
     const colonToken = this.output(ETokenType.punctuation, ':')
-    // const body = this._handleBody(startToken, colonToken, environment)
-    const body: any = []
+    const body = this._handleBody(startToken, colonToken, environment)
 
     const BlockStatement = this.createNode(ENodeType.BlockStatement, {
       body,
-      // loc: createLoc(colonToken, getLatest(body))
-      loc: createLoc(colonToken)
+      loc: createLoc(colonToken, getLatest(body))
     })
 
     return BlockStatement
@@ -31,15 +29,15 @@ class BlockStatement extends BaseHandler {
     }
     // 多行定义
     else {
-      const indentCount = getColumn(startToken, 'start')
-      const nextIndentCount = getColumn(markToken, 'start')
-      if (nextIndentCount < indentCount) {
+      const startColumn = getColumn(startToken, 'start')
+      const markColumn = getColumn(markToken, 'start')
+      if (markColumn < startColumn) {
         throw new SyntaxError('Expected indented block')
       }
 
       const { payload } = this.findNodes({
-        end: token => getColumn(token, 'start') <= indentCount,
-        step: () => this.astGenerator.handleNode(environment, nextIndentCount)
+        end: token => getColumn(token, 'start') !== markColumn,
+        step: () => this.astGenerator.handleNode(environment, markColumn - 1)
       })
 
       return payload

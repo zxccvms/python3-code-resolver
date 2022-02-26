@@ -42,12 +42,11 @@ class AstGenerator {
     indentCount: number = 0
   ): TExpressionNode | TStatementNode {
     // const lastToken = this.tokens.getToken(-1)
-    const token = this.tokens.getToken()
+    // const token = this.tokens.getToken()
     // const column = getColumn(token, 'start')
     // if (lastToken && isSameRank([lastToken, token], 'endAndStartLine')) {
     //   throw new SyntaxError('Statements must be separated by newlines or semicolons')
-    // }
-    // else if (indentCount !== column) {
+    // } else if (indentCount !== column - 1) {
     //   throw new SyntaxError('unexpected indent')
     // }
 

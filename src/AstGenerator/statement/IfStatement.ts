@@ -6,12 +6,7 @@ import { EEnvironment } from '../types'
 /** if语句 */
 class IfStatement extends BaseHandler {
   handle(environment: EEnvironment, keyword: 'if' | 'elif' = 'if'): IIfStatement {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.keyword, keyword)) {
-      throw new TypeError(`handleIfStatement err: currentToken is not keyword '${keyword}'`)
-    }
-
-    this.tokens.next()
+    const currentToken = this.output(ETokenType.keyword, keyword)
     const test = this.astGenerator.expression.handleMaybeIf(environment)
     const body = this.astGenerator.statement.blockStatement.handle(currentToken, environment)
     const alternate = this._handleAlternate(environment)
