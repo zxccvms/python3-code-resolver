@@ -105,7 +105,7 @@ export type TToken<T extends ETokenType = ETokenType, V extends string = string>
   extra?: T extends keyof TTokenExtraMap ? TTokenExtraMap[T] : never
 }
 
-export const enum ENodeType {
+export enum ENodeType {
   // 特殊类型 只能在某些类型里使用 不能单独使用
   /** 参数列表 */
   Arguments = 'Arguments',

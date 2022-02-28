@@ -1,26 +1,40 @@
 {
-  "name": "python3-code-resolver",
-  "version": "0.0.0",
-  "scripts": {
-    "build": "tsc && vite build",
-    "test": "jest --config ./config/jest.config.ts"
-  },
-  "_moduleAliases": {
-    "src": "src"
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.14.8",
-    "@babel/core": "^7.15.0",
-    "@babel/preset-env": "^7.15.0",
-    "@babel/preset-typescript": "^7.15.0",
-    "@types/jest": "^26.0.24",
-    "babel-jest": "^27.0.6",
-    "jest": "^27.0.6",
-    "module-alias": "^2.2.2",
-    "nodemon": "^2.0.12",
-    "ts-jest": "^27.0.4",
-    "ts-node": "^10.1.0",
-    "typescript": "^4.3.2",
-    "vite": "^2.4.4"
-  }
+	"name": "python3-code-resolver",
+	"version": "0.0.1",
+	"description": "可以解析python3的 表达式 & if语句 & for语句 ,部分语法错误未进行抛错",
+	"scripts": {
+		"build-umd": "rm -fr umd & ttsc -p ./config/tsconfig.umd.json",
+		"build-es": "rm -fr es & ttsc -p ./config/tsconfig.es.json",
+		"build": "yarn run build-umd & yarn run build-es",
+		"test": "jest --config ./config/jest.config.ts"
+	},
+	"_moduleAliases": {
+		"src": "src"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.14.8",
+		"@babel/core": "^7.15.0",
+		"@babel/preset-env": "^7.15.0",
+		"@babel/preset-typescript": "^7.15.0",
+		"@types/jest": "^26.0.24",
+		"babel-jest": "^27.0.6",
+		"jest": "^27.0.6",
+		"module-alias": "^2.2.2",
+		"nodemon": "^2.0.12",
+		"ts-jest": "^27.0.4",
+		"ts-node": "^10.1.0",
+		"ttypescript": "^1.5.13",
+		"typescript": "^4.3.2",
+		"typescript-transform-paths": "^3.3.1"
+	},
+	"author": "zxccvms",
+	"main": "umd/index.js",
+	"module": "es/index.js",
+	"files": [
+		"es",
+		"umd"
+	],
+	"publishConfig": {
+		"registry": "http://mvn-dev.ext.ii-ai.tech/repository/npm-hosted/"
+	}
 }

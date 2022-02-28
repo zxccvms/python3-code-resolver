@@ -43,7 +43,7 @@ class WithStatement extends BaseHandler {
       isSlice: true
     })
 
-    return payload
+    return payload as any // todo
   }
 }
 
