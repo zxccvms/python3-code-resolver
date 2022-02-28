@@ -26,7 +26,7 @@ class MiddleBracket extends BaseHandler {
     }
 
     if (!Node) {
-      this.check({ environment, isAssignableExpression: true })
+      this.check({ environment })
       const elements = [element, ...this._handleElements(environment)]
 
       Node = this.createNode(ENodeType.ArrayExpression, {

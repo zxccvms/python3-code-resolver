@@ -15,13 +15,13 @@ import { EEnvironment } from '../types'
 class AssignmentExpression extends BaseHandler {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment): TExpressionNode {
     if (this.isAssignmentToken()) {
-      return this.handle(lastNode, environment)
+      return this.handle(lastNode as TAssignableExpressionNode, environment)
     }
 
     return lastNode
   }
 
-  handle(lastNode: TExpressionNode, environment: EEnvironment): IAssignmentExpression {
+  handle(lastNode: TAssignableExpressionNode, environment: EEnvironment): IAssignmentExpression {
     this.check({
       // extraCheck: () => this._isConformNode(lastNode),
       environment,
@@ -32,11 +32,15 @@ class AssignmentExpression extends BaseHandler {
 
     const rightNode = this.astGenerator.expression.handleMaybeAssignment(environment)
 
-    const isAssignmentExpression = isNode(rightNode, ENodeType.AssignmentExpression)
-    const targets = (
-      isAssignmentExpression ? [lastNode, ...rightNode.targets] : [lastNode]
-    ) as IAssignmentExpression['targets']
-    const value = isAssignmentExpression ? rightNode.value : rightNode
+    let targets: TAssignableExpressionNode[]
+    let value: TExpressionNode
+    if (isNode(rightNode, ENodeType.AssignmentExpression)) {
+      targets = [lastNode, ...rightNode.targets]
+      value = rightNode.value
+    } else {
+      targets = [lastNode]
+      value = rightNode
+    }
 
     const AssignmentExpression = this.createNode(ENodeType.AssignmentExpression, {
       targets,

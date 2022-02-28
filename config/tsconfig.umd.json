@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "umd",
+    "outDir": "../umd",
+    "noEmit": false
+  },
+  "include": ["../src/**/*"]
+}

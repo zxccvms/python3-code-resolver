@@ -61,7 +61,7 @@ class AstTraverser {
         this.traverse(rNode)
       } else if (rNode !== false) {
         this.options.enter?.(nodePath)
-        this.options[type]?.(nodePath)
+        this.options[type]?.(nodePath as any)
 
         this[type]?.(node) // todo 部分token未转成node
       }

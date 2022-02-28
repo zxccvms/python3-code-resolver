@@ -4,3 +4,6 @@ pythonProject
 dist
 dist-ssr
 *.local
+umd
+es
+types
