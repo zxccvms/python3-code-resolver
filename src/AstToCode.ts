@@ -8,6 +8,7 @@ import {
   IAssignmentExpression,
   IAwaitExpression,
   IBinaryExpression,
+  IBlockStatement,
   IBooleanLiteral,
   ICallExpression,
   ICompareExpression,
@@ -15,9 +16,11 @@ import {
   IDictionaryComprehensionExpression,
   IDictionaryExpression,
   IEllipsis,
+  IForStatement,
   IGeneratorExpression,
   IIdentifier,
   IIfExpression,
+  IIfStatement,
   IKeyword,
   ILambdaExpression,
   ILogicalExpression,
@@ -39,10 +42,11 @@ import {
   IYieldFromExpression,
   TNode
 } from './types'
-import { hasParenthesized, isNode } from './utils'
-
+import { getPositionInfo, hasParenthesized, isNode } from './utils'
+import { PYTHON } from './const'
 export interface IAstToCodeOptions {
   transform?(node: TNode, code: string, props: IRecursiveProps): string
+  lineBreak?: 'lf' | 'crlf'
 }
 
 interface IRecursiveProps {
@@ -56,7 +60,10 @@ const recursiveDefaultProps: IRecursiveProps = {
 }
 
 class AstToCode {
-  constructor(private options: IAstToCodeOptions = {}) {}
+  private lineBreak: string
+  constructor(private options: IAstToCodeOptions = {}) {
+    this.lineBreak = options.lineBreak === 'crlf' ? PYTHON.CR_LINE_BREAK : PYTHON.LINE_BREAK
+  }
 
   generate(node: TNode, recursiveProps = recursiveDefaultProps, { prefix = '', suffix = '' } = {}) {
     try {
@@ -272,8 +279,10 @@ class AstToCode {
   }
   /** 赋值表达式 a = 1 */
   private [ENodeType.AssignmentExpression](node: IAssignmentExpression, recursiveProps: IRecursiveProps) {
-    this.generateArray(node.targets, recursiveProps, { suffix: ', ', enableLastSuffix: false }) +
+    return (
+      this.generateArray(node.targets, recursiveProps, { suffix: ', ', enableLastSuffix: false }) +
       this.generate(node.value, recursiveProps, { prefix: ` ${node.operator} ` })
+    )
   }
   /** 对象引用表达式 a.b  */
   private [ENodeType.MemberExpression](node: IMemberExpression, recursiveProps: IRecursiveProps) {
@@ -356,8 +365,47 @@ class AstToCode {
     return this.generate(node.target, recursiveProps, { suffix: ' := ' }) + this.generate(node.value, recursiveProps)
   }
 
+  // 语句
+
+  private [ENodeType.IfStatement](node: IIfStatement, recursiveProps: IRecursiveProps) {
+    const isElIfStatement = node.alternate?.type === ENodeType.IfStatement
+
+    return (
+      this.generate(node.test, recursiveProps, { prefix: 'if ' }) +
+      this.generate(node.body, recursiveProps) +
+      this.generate(node.alternate, recursiveProps, { prefix: `${this.lineBreak}${isElIfStatement ? 'el' : 'else'}` })
+    )
+  }
+
+  private [ENodeType.ForStatement](node: IForStatement, recursiveProps: IRecursiveProps) {
+    return (
+      this.generate(node.target, recursiveProps, { prefix: 'for ', suffix: ' in ' }) +
+      this.generate(node.iterable, recursiveProps) +
+      this.generate(node.body, recursiveProps)
+    )
+  }
+
+  private [ENodeType.BlockStatement](node: IBlockStatement, recursiveProps: IRecursiveProps) {
+    const blockPosition = getPositionInfo(node, 'start')
+    const childPosition = getPositionInfo(node.body[0], 'start')
+    const isSameLine = blockPosition.line === childPosition.line
+
+    if (isSameLine) return `: ${this.generateArray(node.body, recursiveProps)}`
+
+    const blockCode = this.generateArray(node.body, recursiveProps, {
+      suffix: this.lineBreak,
+      enableLastSuffix: false
+    })
+    const codes = blockCode.split(this.lineBreak).map(code => ' '.repeat(childPosition.column) + code)
+
+    return `:${this.lineBreak}${codes.join(this.lineBreak)}`
+  }
+
   private [ENodeType.Program](node: IProgram, recursiveProps: IRecursiveProps) {
-    return this.generateArray(node.body, recursiveProps)
+    return this.generateArray(node.body, recursiveProps, {
+      suffix: this.lineBreak,
+      enableLastSuffix: false
+    })
   }
 }
 

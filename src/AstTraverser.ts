@@ -29,7 +29,10 @@ import {
   IStarredExpression,
   IGeneratorExpression,
   IAwaitExpression,
-  INamedExpression
+  INamedExpression,
+  IIfStatement,
+  IForStatement,
+  IBlockStatement
 } from './types'
 
 export type TTraverseOptions = {
@@ -217,6 +220,24 @@ class AstTraverser {
   private [ENodeType.NamedExpression](node: INamedExpression) {
     this.traverse(node.target)
     this.traverse(node.value)
+  }
+
+  // 语句
+
+  private [ENodeType.IfStatement](node: IIfStatement) {
+    this.traverse(node.test)
+    this.traverse(node.body)
+    this.traverse(node.alternate)
+  }
+
+  private [ENodeType.ForStatement](node: IForStatement) {
+    this.traverse(node.target)
+    this.traverse(node.iterable)
+    this.traverse(node.body)
+  }
+
+  private [ENodeType.BlockStatement](node: IBlockStatement) {
+    this.traverseArray(node.body)
   }
 
   private [ENodeType.Program](node: IProgram) {
