@@ -35,6 +35,6 @@
 		"umd"
 	],
 	"publishConfig": {
-		"registry": "http://mvn-dev.ext.ii-ai.tech/repository/npm-hosted/"
+		"registry": "http://192.168.1.111:8081/repository/npm-hosted/"
 	}
 }
