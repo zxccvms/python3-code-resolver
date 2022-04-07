@@ -1,6 +1,6 @@
 {
 	"name": "python3-code-resolver",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "可以解析python3的 表达式 & if语句 & for语句 ,部分语法错误未进行抛错",
 	"scripts": {
 		"build-umd": "rm -fr umd & ttsc -p ./config/tsconfig.umd.json",
@@ -35,6 +35,6 @@
 		"umd"
 	],
 	"publishConfig": {
-		"registry": "http://192.168.1.111:8081/repository/npm-hosted/"
+		"registry": "http://10.4.2.21:8081/repository/npm-hosted/"
 	}
 }

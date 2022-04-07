@@ -13,7 +13,7 @@ class UnaryExpression extends BaseHandler {
     })
 
     this.tokens.next()
-    const argument = this.astGenerator.expression.handleFirstExpression(environment)
+    const argument = this.astGenerator.expression.handleMaybeMemberOrSubscriptOrCall(environment)
 
     const UnaryExpression = this.createNode(ENodeType.UnaryExpression, {
       operator: currentToken.value as EUnaryExpressionOperator,

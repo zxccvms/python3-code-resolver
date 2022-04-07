@@ -41,10 +41,6 @@ class BinaryExpression extends BaseHandler {
 
     return BinaryExpression
   }
-
-  private _isConformToken(token: TToken) {
-    return isToken(token, ETokenType.operator, Object.values(EBinaryExpressionOperator))
-  }
 }
 
 export default BinaryExpression
