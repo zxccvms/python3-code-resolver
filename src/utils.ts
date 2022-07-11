@@ -184,3 +184,10 @@ export function checkBit(num: number, targetNum: number) {
 export function deleteBit(num: number, targetNum: number) {
   return num & ~targetNum
 }
+
+export function mergeObject<T extends Record<string, any>>(o: T, p: Partial<T>): T {
+  return {
+    ...o,
+    ...p
+  }
+}

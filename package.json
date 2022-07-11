@@ -1,6 +1,6 @@
 {
 	"name": "python3-code-resolver",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "可以解析python3的 表达式 & if语句 & for语句 ,部分语法错误未进行抛错",
 	"scripts": {
 		"build-umd": "rm -fr umd & ttsc -p ./config/tsconfig.umd.json",

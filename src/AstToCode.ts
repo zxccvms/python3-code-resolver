@@ -42,7 +42,7 @@ import {
   IYieldFromExpression,
   TNode
 } from './types'
-import { getPositionInfo, hasParenthesized, isNode } from './utils'
+import { getPositionInfo, hasParenthesized, isNode, mergeObject } from './utils'
 import { PYTHON } from './const'
 export interface IAstToCodeOptions {
   transform?(node: TNode, code: string, props: IRecursiveProps): string
@@ -52,6 +52,7 @@ export interface IAstToCodeOptions {
 interface IRecursiveProps {
   rank: number
   parentNode: TNode
+  relevantInfo?: Record<string, any>
 }
 
 const recursiveDefaultProps: IRecursiveProps = {
@@ -243,19 +244,20 @@ class AstToCode {
   private [ENodeType.DictionaryExpression](node: IDictionaryExpression, recursiveProps: IRecursiveProps) {
     const { keys, values } = node
 
-    return (
-      '{' +
-      keys.reduce(
-        (res, key, index) =>
-          res +
-          this.generate(values[index], recursiveProps, {
-            prefix: key ? this.generate(key, recursiveProps, { suffix: ': ' }) : '**',
-            suffix: index === keys.length - 1 ? '' : ', '
-          }),
-        ''
-      ) +
-      '}'
-    )
+    const code = keys.reduce((res, keyNode, index) => {
+      const valueNode = values[index]
+
+      const keyCode = keyNode
+        ? this.generate(keyNode, mergeObject(recursiveProps, { relevantInfo: { valueNode } }), { suffix: ': ' })
+        : '**'
+      const code = this.generate(values[index], mergeObject(recursiveProps, { relevantInfo: { keyNode } }), {
+        prefix: keyCode,
+        suffix: index === keys.length - 1 ? '' : ', '
+      })
+      return res + code
+    }, '')
+
+    return '{' + code + '}'
   }
   /** 字典解析表达式 {a: 1 for a in 2} */
   private [ENodeType.DictionaryComprehensionExpression](
