@@ -6,19 +6,17 @@ import { EEnvironment } from '../types'
 /** 标识符 */
 class Identifier extends BaseHandler {
   handle(environment: EEnvironment): IIdentifier {
-    const currentToken = this.tokens.getToken()
     this.check({
-      checkToken: () => isToken(currentToken, ETokenType.identifier),
       environment,
-      isDecorativeExpression: true
+      isDecorativeExpression: true,
+      isAssignableExpression: true
     })
+    const currentToken = this.output(ETokenType.identifier)
 
     const Identifier = this.createNode(ENodeType.Identifier, {
       name: currentToken.value,
       loc: createLoc(currentToken, currentToken)
     })
-
-    this.tokens.next()
 
     return Identifier
   }

@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, ICompareExpression, TExpressionNode, TToken } from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { ENodeType, ETokenType, ICompareExpression, TExpressionNode, TToken } from '../../types'
+import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -9,21 +9,19 @@ class CompareExpression extends BaseHandler {
     const currentToken = this.tokens.getToken()
 
     if (!this.isContinue(environment)) return lastNode
-    else if (!this._isConformToken(currentToken)) return lastNode
+    else if (!isToken(currentToken, ETokenType.keyword, ['in', 'is', 'not'])) return lastNode
 
     return this.handle(lastNode, environment)
   }
 
   handle(lastNode: TExpressionNode, environment: EEnvironment): ICompareExpression {
-    const operatorToken = this.tokens.getToken()
     this.check({
-      checkToken: () => this._isConformToken(operatorToken),
       environment,
       isBefore: true,
       isAfter: true
     })
 
-    this.tokens.next()
+    const operatorToken = this.output(ETokenType.keyword, ['in', 'is', 'not'])
 
     let operator = operatorToken.value as 'in' | 'is' | 'not in'
     if (isToken(operatorToken, ETokenType.keyword, 'not')) {
@@ -46,10 +44,6 @@ class CompareExpression extends BaseHandler {
     })
 
     return CompareExpression
-  }
-
-  private _isConformToken(currentToken: TToken) {
-    return isToken(currentToken, ETokenType.keyword, ['in', 'is', 'not'])
   }
 }
 

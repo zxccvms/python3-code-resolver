@@ -25,7 +25,7 @@ class BlockStatement extends BaseHandler {
 
     // 单行定义
     if (isSameRank([colonToken, markToken], 'line')) {
-      return [this.astGenerator.expression.handle(environment)]
+      return [this.astGenerator.statement.handle(environment) || this.astGenerator.expression.handle(environment)]
     }
     // 多行定义
     else {

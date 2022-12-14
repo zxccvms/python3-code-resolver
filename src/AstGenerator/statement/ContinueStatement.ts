@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, IContinueStatement } from 'src/types'
-import { createLoc, checkBit, isToken } from 'src/utils'
+import { ENodeType, ETokenType, IContinueStatement } from '../../types'
+import { createLoc, checkBit, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -10,12 +10,7 @@ class ContinueStatement extends BaseHandler {
       throw new SyntaxError('"continue" can be used only within a loop')
     }
 
-    const continueToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(continueToken, ETokenType.keyword, 'continue')
-    })
-
-    this.tokens.next()
+    const continueToken = this.output(ETokenType.keyword, 'continue')
 
     const ContinueStatement = this.createNode(ENodeType.ContinueStatement, {
       loc: createLoc(continueToken)

@@ -144,7 +144,7 @@ class CodeScanner {
           } else if (hasJ) return false
           else if (char === '.') return (hasPoint = !hasPoint)
           else if (char === 'j') return (hasJ = !hasJ)
-          else if (char === 'e') {
+          else if (char === 'e' || char === 'E') {
             hasPoint = true
             if (sliceContent[index + 1] === '-') ignore = true
             return (hasE = !hasE)

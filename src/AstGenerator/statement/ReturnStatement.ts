@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, IReturnStatement } from 'src/types'
-import { createLoc, checkBit, isSameRank } from 'src/utils'
+import { ENodeType, ETokenType, IReturnStatement } from '../../types'
+import { createLoc, checkBit, isSameRank } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -11,7 +11,7 @@ class ReturnStatement extends BaseHandler {
 
     const returnToken = this.output(ETokenType.keyword, 'return')
 
-    let argument
+    let argument = null
     if (isSameRank([returnToken, this.tokens.getToken()], 'endAndStartLine')) {
       argument = this.astGenerator.expression.handleMaybeTuple(environment)
     }

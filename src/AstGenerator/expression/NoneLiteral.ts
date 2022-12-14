@@ -5,17 +5,12 @@ import { EEnvironment } from '../types'
 
 class NoneLiteral extends BaseHandler {
   handle(environment: EEnvironment): INoneLiteral {
-    const currentToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(currentToken, ETokenType.keyword, 'None'),
-      environment
-    })
+    this.check({ environment })
 
+    const currentToken = this.output(ETokenType.keyword, 'None')
     const NoneLiteral = this.createNode(ENodeType.NoneLiteral, {
       loc: createLoc(currentToken, currentToken)
     })
-
-    this.tokens.next()
 
     return NoneLiteral
   }

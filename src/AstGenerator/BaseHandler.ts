@@ -2,19 +2,17 @@ import NodeGenerator from '../NodeGenerator'
 import { ETokenType, TToken } from '../types'
 import TokenArray from './utils/TokenArray'
 import { EEnvironment, ICheckParams, IFindNodesParams } from './types'
-import { checkBit, getRightBracket, isSameRank, isToken } from 'src/utils'
+import { checkBit, getRightBracket, isSameRank, isToken } from '../utils'
 import AstGenerator from './AstGenerator'
 
 /** 节点基础的处理者 */
 class BaseHandler {
-  tokens: TokenArray
-  createNode: NodeGenerator['generate']
-  astGenerator: AstGenerator
+  public tokens: TokenArray
+  public createNode: NodeGenerator['generate']
 
-  constructor(astGenerator: AstGenerator) {
+  constructor(public astGenerator: AstGenerator) {
     this.tokens = astGenerator.tokens
     this.createNode = astGenerator.createNode
-    this.astGenerator = astGenerator
   }
 
   /** 通过 符合的token 和 步进函数 得到期间的token */
@@ -110,6 +108,10 @@ class BaseHandler {
 
     if (checkBit(checkParams.environment, EEnvironment.decorative) && !checkParams.isDecorativeExpression) {
       throw new TypeError('Expression form not supported for decorator prior to Python 3.9')
+    }
+
+    if (checkBit(checkParams.environment, EEnvironment.assign) && !checkParams.isAssignableExpression) {
+      throw new TypeError('This is not assignable expression')
     }
 
     const hasBracket = checkBit(checkParams.environment, EEnvironment.bracket)

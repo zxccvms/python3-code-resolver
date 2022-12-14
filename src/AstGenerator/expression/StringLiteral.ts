@@ -1,5 +1,5 @@
-import CodeScanner from 'src/CodeScanner'
-import { PYTHON } from 'src/const'
+import CodeScanner from '../../CodeScanner'
+import { PYTHON } from '../../const'
 import {
   ENodeType,
   ETokenType,

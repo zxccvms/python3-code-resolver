@@ -23,7 +23,7 @@ class AssignmentExpression extends BaseHandler {
 
   handle(lastNode: TAssignableExpressionNode, environment: EEnvironment): IAssignmentExpression {
     this.check({
-      // extraCheck: () => this._isConformNode(lastNode),
+      extraCheck: () => this.isConformNode(lastNode),
       environment,
       isAfter: true,
       isBefore: true
@@ -55,13 +55,14 @@ class AssignmentExpression extends BaseHandler {
   isConformNode(node: TNode): node is TAssignableExpressionNode {
     if (isNode(node, [ENodeType.ArrayExpression, ENodeType.TupleExpression])) {
       return node.elements.every(node => this.isConformNode(node))
-    } else
+    } else {
       return isNode(node, [
         ENodeType.Identifier,
         ENodeType.StarredExpression,
         ENodeType.MemberExpression,
         ENodeType.SubscriptExpression
       ])
+    }
   }
 
   isAssignmentToken() {

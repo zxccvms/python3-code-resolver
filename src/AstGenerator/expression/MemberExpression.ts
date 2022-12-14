@@ -19,16 +19,15 @@ class MemberExpression extends BaseHandler {
 
   /** 处理对象调用属性节点 */
   handle(lastNode: TExpressionNode, environment: EEnvironment): IMemberExpression {
-    const currentToken = this.tokens.getToken()
     this.check({
-      checkToken: () => isToken(currentToken, ETokenType.punctuation, '.'),
       environment,
       isBefore: true,
       isAfter: true,
-      isDecorativeExpression: true
+      isDecorativeExpression: true,
+      isAssignableExpression: true
     })
 
-    this.tokens.next()
+    this.output(ETokenType.punctuation, '.')
     const property = this.astGenerator.expression.identifier.handle(environment)
 
     const MemberExpression = this.createNode(ENodeType.MemberExpression, {

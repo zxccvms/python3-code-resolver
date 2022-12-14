@@ -12,6 +12,7 @@ class TupleExpression extends BaseHandler {
   ) {
     if (!this.isToken(ETokenType.punctuation, ',')) return lastNode
     else if (!this.isContinue(environment)) return lastNode
+    else if (checkBit(environment, EEnvironment.assign) && !checkBit(environment, EEnvironment.bracket)) return lastNode
 
     return this.handle(lastNode, environment, handleExpression)
   }
@@ -24,7 +25,8 @@ class TupleExpression extends BaseHandler {
     this.check({
       checkToken: () => this.isToken(ETokenType.punctuation, ','),
       environment,
-      isBefore: true
+      isBefore: true,
+      isAssignableExpression: true
     })
 
     const elements = this._handleElements(environment, [lastNode], handleExpression)

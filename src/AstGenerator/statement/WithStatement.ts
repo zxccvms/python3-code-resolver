@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, IWithStatement } from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { ENodeType, ETokenType, IWithItem, IWithStatement, TAssignableExpressionNode } from '../../types'
+import { createLoc } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -8,17 +8,16 @@ class WithStatement extends BaseHandler {
   handle(environment: EEnvironment): IWithStatement {
     const withToken = this.output(ETokenType.keyword, 'with')
 
-    const left = this._handleLeft(environment)
-
-    this.output(ETokenType.keyword, 'as')
-
-    const right = this._handleRight(environment)
+    const withItems: IWithItem[] = []
+    do {
+      const withItem = this._handleWithItem(environment)
+      withItems.push(withItem)
+    } while (this.eat(ETokenType.punctuation, ','))
 
     const body = this.astGenerator.statement.blockStatement.handle(withToken)
 
     const WithStatement = this.createNode(ENodeType.WithStatement, {
-      left,
-      right,
+      withItems,
       body,
       loc: createLoc(withToken, body)
     })
@@ -26,24 +25,23 @@ class WithStatement extends BaseHandler {
     return WithStatement
   }
 
-  private _handleLeft(environment: EEnvironment): IWithStatement['left'] {
-    const { payload } = this.findNodes({
-      end: token => isToken(token, ETokenType.keyword, 'as'),
-      step: () => this.astGenerator.expression.handleMaybeIf(environment),
-      isSlice: true
+  private _handleWithItem(environment: EEnvironment): IWithItem {
+    const expression = this.astGenerator.expression.handleMaybeIf(environment)
+
+    let optionalVars: TAssignableExpressionNode = null
+    if (this.eat(ETokenType.keyword, 'as')) {
+      optionalVars = this.astGenerator.expression.handleMaybeTuple(
+        environment | EEnvironment.assign
+      ) as TAssignableExpressionNode
+    }
+
+    const withItem = this.createNode(ENodeType.WithItem, {
+      expression,
+      optionalVars,
+      loc: createLoc(expression, optionalVars || expression)
     })
 
-    return payload
-  }
-
-  private _handleRight(environment: EEnvironment): IWithStatement['right'] {
-    const { payload } = this.findNodes({
-      end: token => isToken(token, ETokenType.punctuation, ':'),
-      step: () => this.astGenerator.expression.handleMaybeIf(environment), // todo
-      isSlice: true
-    })
-
-    return payload as any // todo
+    return withItem
   }
 }
 

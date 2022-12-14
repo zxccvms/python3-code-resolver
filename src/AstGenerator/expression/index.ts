@@ -1,6 +1,5 @@
-import AstGenerator from 'src/AstGenerator/AstGenerator'
-import { ENodeType, ETokenType, TBasicExpressionNode, TExpressionNode } from 'src/types'
-import { createLoc, isSameRank, isToken } from 'src/utils'
+import { ENodeType, ETokenType, TAssignableExpressionNode, TBasicExpressionNode, TExpressionNode } from '../../types'
+import { createLoc, getPositionInfo, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -34,71 +33,37 @@ import NamedExpression from './NamedExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
-  noneLiteral: NoneLiteral
-  booleanLiteral: BooleanLiteral
-  numberLiteral: NumberLiteral
-  stringLiteral: StringLiteral
-  identifier: Identifier
-  ellipsis: Ellipsis
+  public readonly noneLiteral = new NoneLiteral(this.astGenerator)
+  public readonly booleanLiteral = new BooleanLiteral(this.astGenerator)
+  public readonly numberLiteral = new NumberLiteral(this.astGenerator)
+  public readonly stringLiteral = new StringLiteral(this.astGenerator)
+  public readonly identifier = new Identifier(this.astGenerator)
+  public readonly ellipsis = new Ellipsis(this.astGenerator)
 
   // 表达式
-  smallBracket: SmallBracket
-  middleBracket: MiddleBracket
-  bigBracket: BigBracket
-  unaryExpression: UnaryExpression
-  ifExpression: IfExpression
-  tupleExpression: TupleExpression
-  binaryExpression: BinaryExpression
-  assignmentExpression: AssignmentExpression
-  memberExpression: MemberExpression
-  subscriptExpression: SubscriptExpression
-  callExpression: CallExpression
-  compareExpression: CompareExpression
-  logicalExpression: LogicalExpression
-  lambdaExpression: LambdaExpression
-  yieldExpression: YieldExpression
-  starredExpression: StarredExpression
-  awaitExpression: AwaitExpression
-  namedExpression: NamedExpression
+  public readonly smallBracket = new SmallBracket(this.astGenerator)
+  public readonly middleBracket = new MiddleBracket(this.astGenerator)
+  public readonly bigBracket = new BigBracket(this.astGenerator)
+  public readonly unaryExpression = new UnaryExpression(this.astGenerator)
+  public readonly ifExpression = new IfExpression(this.astGenerator)
+  public readonly tupleExpression = new TupleExpression(this.astGenerator)
+  public readonly binaryExpression = new BinaryExpression(this.astGenerator)
+  public readonly assignmentExpression = new AssignmentExpression(this.astGenerator)
+  public readonly memberExpression = new MemberExpression(this.astGenerator)
+  public readonly subscriptExpression = new SubscriptExpression(this.astGenerator)
+  public readonly callExpression = new CallExpression(this.astGenerator)
+  public readonly compareExpression = new CompareExpression(this.astGenerator)
+  public readonly logicalExpression = new LogicalExpression(this.astGenerator)
+  public readonly lambdaExpression = new LambdaExpression(this.astGenerator)
+  public readonly yieldExpression = new YieldExpression(this.astGenerator)
+  public readonly starredExpression = new StarredExpression(this.astGenerator)
+  public readonly awaitExpression = new AwaitExpression(this.astGenerator)
+  public readonly namedExpression = new NamedExpression(this.astGenerator)
 
   // 特殊表达式
-  arguments: Arguments
-  keyword: Keyword
-  comprehension: Comprehension
-
-  constructor(astGenerator: AstGenerator) {
-    super(astGenerator)
-
-    this.noneLiteral = new NoneLiteral(astGenerator)
-    this.booleanLiteral = new BooleanLiteral(astGenerator)
-    this.numberLiteral = new NumberLiteral(astGenerator)
-    this.stringLiteral = new StringLiteral(astGenerator)
-    this.identifier = new Identifier(astGenerator)
-    this.ellipsis = new Ellipsis(astGenerator)
-
-    this.smallBracket = new SmallBracket(astGenerator)
-    this.middleBracket = new MiddleBracket(astGenerator)
-    this.bigBracket = new BigBracket(astGenerator)
-    this.unaryExpression = new UnaryExpression(astGenerator)
-    this.ifExpression = new IfExpression(astGenerator)
-    this.tupleExpression = new TupleExpression(astGenerator)
-    this.binaryExpression = new BinaryExpression(astGenerator)
-    this.assignmentExpression = new AssignmentExpression(astGenerator)
-    this.memberExpression = new MemberExpression(astGenerator)
-    this.subscriptExpression = new SubscriptExpression(astGenerator)
-    this.callExpression = new CallExpression(astGenerator)
-    this.compareExpression = new CompareExpression(astGenerator)
-    this.logicalExpression = new LogicalExpression(astGenerator)
-    this.lambdaExpression = new LambdaExpression(astGenerator)
-    this.yieldExpression = new YieldExpression(astGenerator)
-    this.starredExpression = new StarredExpression(astGenerator)
-    this.awaitExpression = new AwaitExpression(astGenerator)
-    this.namedExpression = new NamedExpression(astGenerator)
-
-    this.arguments = new Arguments(astGenerator)
-    this.keyword = new Keyword(astGenerator)
-    this.comprehension = new Comprehension(astGenerator)
-  }
+  public readonly arguments = new Arguments(this.astGenerator)
+  public readonly keyword = new Keyword(this.astGenerator)
+  public readonly comprehension = new Comprehension(this.astGenerator)
 
   /** 解析表达式 */
   handle(environment: EEnvironment): TExpressionNode {
@@ -206,26 +171,26 @@ class Expression extends BaseHandler {
             return this.booleanLiteral.handle(environment)
         }
       default: {
-        // const position = getPositionInfo(currentToken, 'start')
-        // throw new TypeError(
-        //   `Unexpected token: value: ${currentToken.value} line: ${position.line} column: ${position.column}`
-        // )
-        return this.handleTokens()
+        const position = getPositionInfo(currentToken, 'start')
+        throw new TypeError(
+          `Unexpected token: value: ${currentToken.value} line: ${position.line} column: ${position.column}`
+        )
       }
     }
   }
 
-  handleTokens() {
-    const currentToken = this.tokens.getToken()
-    this.tokens.next()
-    const { payload } = this.findTokens(token => !isSameRank([this.tokens.getToken(-1), token], 'endAndStartLine'))
-
-    const Tokens = this.createNode(ENodeType.tokens, {
-      tokens: [currentToken, ...payload],
-      loc: createLoc(currentToken, this.tokens.getToken(-1))
-    })
-
-    return Tokens as any
+  /** 处理可赋值表达式 */
+  handleAssignableExpression(environment: EEnvironment): TAssignableExpressionNode {
+    const token = this.tokens.getToken()
+    if (isToken(token, ETokenType.operator, '*')) {
+      return this.starredExpression.handle(environment)
+    } else if (isToken(token, ETokenType.bracket, '[')) {
+      // return this.handleAssignableExpression(environment)
+    } else if (isToken(token, ETokenType.bracket, '(')) {
+      // return this.handleAssignableExpression(environment)
+    } else {
+      return this.output(ETokenType.identifier)
+    }
   }
 }
 

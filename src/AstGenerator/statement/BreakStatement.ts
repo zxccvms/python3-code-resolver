@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType } from 'src/types'
-import { createLoc, checkBit, isToken } from 'src/utils'
+import { ENodeType, ETokenType } from '../../types'
+import { createLoc, checkBit, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -9,12 +9,8 @@ class BreakStatement extends BaseHandler {
       throw new SyntaxError('"break" can be used only within a loop')
     }
 
-    const breakToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(breakToken, ETokenType.keyword, 'break')
-    })
+    const breakToken = this.output(ETokenType.keyword, 'break')
 
-    this.tokens.next()
     const BreakStatement = this.createNode(ENodeType.BreakStatement, {
       loc: createLoc(breakToken)
     })

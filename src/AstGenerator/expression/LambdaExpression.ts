@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, ILambdaExpression } from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { ENodeType, ETokenType, ILambdaExpression } from '../../types'
+import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 

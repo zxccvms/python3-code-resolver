@@ -1,4 +1,4 @@
-import { TExpressionNode, TToken } from 'src/types'
+import { TExpressionNode, TToken } from '../types'
 
 /** 节点所处环境 */
 export enum EEnvironment {
@@ -31,6 +31,7 @@ export interface ICheckParams {
   isBefore?: boolean | number
   isAfter?: boolean | number
   isDecorativeExpression?: boolean
+  isAssignableExpression?: boolean
 }
 
 export interface IExpressionHandler<T extends TExpressionNode = TExpressionNode> {

@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, IIdentifier, INamedExpression, TExpressionNode } from 'src/types'
-import { createLoc, isNode } from 'src/utils'
+import { ENodeType, ETokenType, IIdentifier, INamedExpression, TExpressionNode } from '../../types'
+import { createLoc, isNode } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 

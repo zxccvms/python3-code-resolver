@@ -5,14 +5,9 @@ import { EEnvironment } from '../types'
 
 class UnaryExpression extends BaseHandler {
   handle(environment: EEnvironment): IUnaryExpression {
-    const currentToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => this.isConformToken(currentToken),
-      environment,
-      isAfter: true
-    })
+    this.check({ environment, isAfter: true })
 
-    this.tokens.next()
+    const currentToken = this.eat(ETokenType.operator, ['+', '-', '~']) || this.output(ETokenType.keyword, 'not')
     const argument = this.astGenerator.expression.handleMaybeMemberOrSubscriptOrCall(environment)
 
     const UnaryExpression = this.createNode(ENodeType.UnaryExpression, {

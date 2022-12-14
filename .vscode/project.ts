@@ -1,5 +1,4 @@
-import 'module-alias/register'
-import { AstGenerator, CodeScanner } from 'src'
+import { AstGenerator, CodeScanner } from '../src'
 import path from 'path'
 import fs from 'fs'
 
@@ -22,12 +21,12 @@ new Promise(() => {
   const pythonProjectPath = path.join(__dirname, '../pythonProject')
   readPyFileCode(pythonProjectPath, (filePath, code) => {
     try {
-      console.log('filePath: ', filePath)
       const tokens = codeScanner.scan(code)
       const astGenerator = new AstGenerator(tokens)
       const ast = astGenerator.generate()
-      console.log('ast: ', ast)
-    } catch {}
+    } catch {
+      console.error(filePath)
+    }
   })
   console.log('小哥哥你真棒👍～')
 })

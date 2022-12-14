@@ -17,26 +17,22 @@ class IfExpression extends BaseHandler {
   }
 
   handle(lastNode: TExpressionNode, environment: EEnvironment): IIfExpression {
-    const ifToken = this.tokens.getToken()
     this.check({
-      checkToken: () => isToken(ifToken, ETokenType.keyword, 'if'),
       environment,
       isAfter: true,
       isBefore: true
     })
 
-    this.tokens.next()
+    const ifToken = this.output(ETokenType.keyword, 'if')
     const test = this.astGenerator.expression.handleMaybeLogical(environment)
 
-    const elseToken = this.tokens.getToken()
     this.check({
-      checkToken: () => isToken(elseToken, ETokenType.keyword, 'else'),
       environment,
       isAfter: true,
       isBefore: true
     })
 
-    this.tokens.next()
+    const elseToken = this.output(ETokenType.keyword, 'else')
     const alternate = this.astGenerator.expression.handleMaybeIf(environment)
 
     const IfExpression = this.createNode(ENodeType.IfExpression, {

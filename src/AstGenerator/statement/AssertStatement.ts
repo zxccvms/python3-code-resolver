@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, IAssertStatement } from 'src/types'
-import { createLoc } from 'src/utils'
+import { ENodeType, ETokenType, IAssertStatement } from '../../types'
+import { createLoc } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 

@@ -1,12 +1,12 @@
-import { ENodeType, ETokenType, ISubscriptExpression, TExpressionNode } from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { ENodeType, ETokenType, ISubscriptExpression, TExpressionNode } from '../../types'
+import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
 /** 下标表达式 */
 class SubscriptExpression extends BaseHandler {
   handle(lastNode: TExpressionNode, environment: EEnvironment): ISubscriptExpression {
-    this.check({ environment, isBefore: true })
+    this.check({ environment, isBefore: true, isAssignableExpression: true })
 
     this.output(ETokenType.bracket, '[')
 

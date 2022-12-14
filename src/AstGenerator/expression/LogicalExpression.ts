@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, ILogicalExpression, TExpressionNode, TToken } from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { ENodeType, ETokenType, ILogicalExpression, TExpressionNode, TToken } from '../../types'
+import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -20,16 +20,15 @@ class LogicalExpression extends BaseHandler {
   }
 
   handle(lastNode: TExpressionNode, environment: EEnvironment): ILogicalExpression {
-    const currentToken = this.tokens.getToken() as TToken<ETokenType.keyword, 'and' | 'or'>
     this.check({
-      checkToken: () => isToken(currentToken, ETokenType.keyword, ['and', 'or']),
       // extraCheck: () => isExpressionNode(lastNode),
       environment,
       isBefore: true,
       isAfter: true
     })
 
-    this.tokens.next()
+    const currentToken = this.output(ETokenType.keyword, ['and', 'or'])
+
     const right =
       currentToken.value === 'and'
         ? this.astGenerator.expression.handleMaybeCompare(environment)

@@ -6,18 +6,13 @@ import { EEnvironment } from '../types'
 /** 布尔 */
 class BooleanLiteral extends BaseHandler {
   handle(environment: EEnvironment): IBooleanLiteral {
-    const currentToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(currentToken, ETokenType.keyword, ['True', 'False']),
-      environment
-    })
+    this.check({ environment })
+    const currentToken = this.output(ETokenType.keyword, ['True', 'False'])
 
     const BooleanLiteral = this.createNode(ENodeType.BooleanLiteral, {
       value: currentToken.value === 'True' ? true : false,
       loc: createLoc(currentToken, currentToken)
     })
-
-    this.tokens.next()
 
     return BooleanLiteral
   }

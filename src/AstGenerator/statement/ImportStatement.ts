@@ -1,4 +1,4 @@
-import AstToCode from 'src/AstToCode'
+import AstToCode from '../../AstToCode'
 import { ENodeType, ETokenType, IAliasExpression, IImportStatement, TToken } from '../../types'
 import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
@@ -7,12 +7,7 @@ import { EEnvironment } from '../types'
 /** 导入语句 */
 class ImportStatement extends BaseHandler {
   handle(): IImportStatement {
-    const importToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(importToken, ETokenType.keyword, 'import')
-    })
-
-    this.tokens.next()
+    const importToken = this.output(ETokenType.keyword, 'import')
     const names = this._handleNames(importToken)
 
     const ImportExpression = this.createNode(ENodeType.ImportStatement, {
@@ -37,19 +32,17 @@ class ImportStatement extends BaseHandler {
     const identifier = this.astGenerator.expression.identifier.handle(EEnvironment.normal)
     const maybeMemberExpression = this.astGenerator.expression.memberExpression.handleMaybe(identifier)
 
-    let asname
-    const asToken = this.tokens.getToken()
-    if (isToken(asToken, ETokenType.keyword, 'as')) {
-      this.tokens.next()
-      asname = this.astGenerator.expression.identifier.handle(EEnvironment.normal)
+    let asnameToken: TToken = null
+    if (this.eat(ETokenType.keyword, 'as')) {
+      asnameToken = this.output(ETokenType.identifier)
     }
 
     const astToCode = new AstToCode()
     const name = astToCode.generate(maybeMemberExpression)
     const AliasExpression = this.createNode(ENodeType.AliasExpression, {
       name,
-      asname: asname?.name,
-      loc: createLoc(maybeMemberExpression, asname || maybeMemberExpression)
+      asname: asnameToken?.value || null,
+      loc: createLoc(maybeMemberExpression, asnameToken || maybeMemberExpression)
     })
 
     return AliasExpression

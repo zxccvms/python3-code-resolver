@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, IComprehension, TAssignableExpressionNode, TExpressionNode } from 'src/types'
-import { isToken, createLoc, isNode } from 'src/utils'
+import { ENodeType, ETokenType, IComprehension, TAssignableExpressionNode, TExpressionNode } from '../../types'
+import { isToken, createLoc, isNode } from '../../utils'
 import AstGenerator from '../AstGenerator'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'

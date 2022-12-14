@@ -123,8 +123,8 @@ export enum ENodeType {
   Comprehension = 'Comprehension',
   /** 模版字符串的值 */
   TemplateValue = 'TemplateValue',
-  /** token类型 处理不了的token丢入这个类型中 临时 */
-  tokens = 'tokens',
+  /** With语句项 with a,b: 1 */
+  WithItem = 'WithItem',
 
   //基础表达式
   /** None */
@@ -241,7 +241,7 @@ export type TSpecialNodeMap = {
   [ENodeType.AliasExpression]: IAliasExpression
   [ENodeType.Comprehension]: IComprehension
   [ENodeType.TemplateValue]: ITemplateValue
-  [ENodeType.tokens]: ITokens
+  [ENodeType.WithItem]: IWithItem
 }
 
 export type TSpecialNode<T extends keyof TSpecialNodeMap = keyof TSpecialNodeMap> = TSpecialNodeMap[T]
@@ -415,6 +415,12 @@ export interface ISliceExpression extends IBaseNodeAttr {
   step: TExpressionNode
 }
 
+export interface IWithItem extends IBaseNodeAttr {
+  type: ENodeType.SliceExpression
+  expression: TExpressionNode
+  optionalVars?: TAssignableExpressionNode
+}
+
 // 表达式节点定义
 export interface INoneLiteral extends IBaseNodeAttr {
   type: ENodeType.NoneLiteral
@@ -558,10 +564,6 @@ export interface ITemplateValue extends IBaseNodeAttr {
   type: ENodeType.TemplateValue
   value: TExpressionNode
 }
-export interface ITokens extends IBaseNodeAttr {
-  type: ENodeType.tokens
-  tokens: TToken[]
-}
 
 export interface IMemberExpression extends IBaseNodeAttr {
   type: ENodeType.MemberExpression
@@ -599,7 +601,7 @@ export interface IImportFromStatement extends IBaseNodeAttr {
   type: ENodeType.ImportFromStatement
   names: IAliasExpression[]
   level: number
-  module: IIdentifier | IMemberExpression
+  module?: string
 }
 
 export interface IFunctionDeclaration extends IBaseNodeAttr {
@@ -663,7 +665,7 @@ export interface IVariableDeclaration extends IBaseNodeAttr {
 
 export interface IReturnStatement extends IBaseNodeAttr {
   type: ENodeType.ReturnStatement
-  argument: TExpressionNode
+  argument?: TExpressionNode
 }
 
 export interface IWhileStatement extends IBaseNodeAttr {
@@ -678,8 +680,7 @@ export interface IContinueStatement extends IBaseNodeAttr {
 
 export interface IWithStatement extends IBaseNodeAttr {
   type: ENodeType.WithStatement
-  left: TExpressionNode[]
-  right: (IIdentifier | IMemberExpression | ISubscriptExpression | IArrayExpression)[]
+  withItems: IWithItem[]
   body: IBlockStatement
 }
 

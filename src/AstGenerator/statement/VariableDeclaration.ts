@@ -6,12 +6,7 @@ import { EEnvironment } from '../types'
 /** 变量声明 */
 class VariableDeclaration extends BaseHandler {
   handle(): IVariableDeclaration {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.keyword, 'global')) {
-      throw new TypeError("VariableDeclaration err: currentToken is not keyword 'global'")
-    }
-
-    this.tokens.next()
+    const currentToken = this.output(ETokenType.keyword, 'global')
     const declarations = this._handleDeclarations(currentToken)
 
     const VariableDeclaration = this.createNode(ENodeType.VariableDeclaration, {

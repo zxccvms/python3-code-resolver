@@ -6,28 +6,20 @@ import { EEnvironment } from '../types'
 /** 导入语句 */
 class ImportFromStatement extends BaseHandler {
   handle(): IImportFromStatement {
-    const fromToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(fromToken, ETokenType.keyword, 'from')
-    })
+    const fromToken = this.output(ETokenType.keyword, 'from')
 
-    this.tokens.next()
     const level = this._handleLevel()
     const module = this._handleModule()
 
-    const importToken = this.tokens.getToken()
-    this.check({
-      checkToken: () => isToken(importToken, ETokenType.keyword, 'import')
-    })
+    const importToken = this.output(ETokenType.keyword, 'import')
 
-    this.tokens.next()
     const names = this._handleNames(importToken)
 
     const ImportExpression = this.createNode(ENodeType.ImportFromStatement, {
       names,
       module,
       level,
-      loc: createLoc(module || names[0], getLatest(names))
+      loc: createLoc(fromToken, getLatest(names))
     })
 
     return ImportExpression
@@ -35,7 +27,7 @@ class ImportFromStatement extends BaseHandler {
 
   private _handleLevel(): IImportFromStatement['level'] {
     const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.punctuation, '.')) return null
+    if (!isToken(currentToken, ETokenType.punctuation, '.')) return 0
 
     const { payload: pointTokens } = this.findNodes({
       end: token => !isToken(token, ETokenType.punctuation, '.'),
@@ -50,10 +42,14 @@ class ImportFromStatement extends BaseHandler {
   }
 
   private _handleModule(): IImportFromStatement['module'] {
-    const identifier = this.astGenerator.expression.identifier.handle(EEnvironment.normal)
-    const maybeMemberExpression = this.astGenerator.expression.memberExpression.handleMaybe(identifier)
+    let module = this.eat(ETokenType.identifier)?.value
+    if (!module) return null
 
-    return maybeMemberExpression
+    while (this.eat(ETokenType.punctuation, '.')) {
+      module += this.output(ETokenType.identifier).value
+    }
+
+    return module
   }
 
   private _handleNames(markToken: TToken): IImportFromStatement['names'] {
@@ -84,32 +80,22 @@ class ImportFromStatement extends BaseHandler {
   }
 
   private _handleAliasExpression(isUnpackOperation: boolean): IAliasExpression {
-    let name: string
-    let asname: string
-    const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.operator, '*')) {
+    let nameToken: TToken
+    let asNameToken: TToken | null = null
+    if ((nameToken = this.eat(ETokenType.operator, '*'))) {
       if (!isUnpackOperation) {
         throw new SyntaxError('Unpack operation not allowed in this context')
       }
-
-      name = '*'
-      this.tokens.next()
-    } else {
-      name = this.astGenerator.expression.identifier.handle(EEnvironment.normal).name
-
-      const asToken = this.tokens.getToken()
-      if (isToken(asToken, ETokenType.keyword, 'as')) {
-        this.tokens.next()
-        asname = this.astGenerator.expression.identifier.handle(EEnvironment.normal).name
+    } else if ((nameToken = this.output(ETokenType.identifier))) {
+      if (this.eat(ETokenType.keyword, 'as')) {
+        asNameToken = this.output(ETokenType.identifier)
       }
     }
 
-    const endToken = this.tokens.getToken(-1)
-
     const AliasExpression = this.createNode(ENodeType.AliasExpression, {
-      name,
-      asname,
-      loc: createLoc(currentToken, endToken)
+      name: nameToken.value,
+      asname: asNameToken?.value || null,
+      loc: createLoc(nameToken, asNameToken || nameToken)
     })
 
     return AliasExpression

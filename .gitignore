@@ -1,9 +1,5 @@
 node_modules
 pythonProject
 .DS_Store
-dist
-dist-ssr
-*.local
-umd
-es
+lib
 types

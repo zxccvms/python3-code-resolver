@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, IYieldExpression, IYieldFromExpression } from 'src/types'
-import { createLoc, checkBit, isToken, isSameRank } from 'src/utils'
+import { ENodeType, ETokenType, IYieldExpression, IYieldFromExpression } from '../../types'
+import { createLoc, checkBit, isToken, isSameRank } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 

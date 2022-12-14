@@ -1,10 +1,2 @@
-build
-ci
-configs
 dist
-dll
-docs
-internals
 node-modules
-release
-resources

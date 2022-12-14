@@ -20,7 +20,7 @@ class ClassDeclaration extends BaseHandler {
     let bases: TExpressionNode[] = []
     let keywords: IKeyword[] = []
 
-    if (this.isToken(ETokenType.bracket, '(')) {
+    if (this.eat(ETokenType.bracket, '(')) {
       const hResult = this.astGenerator.expression.callExpression.handleArgsAndKeywords(EEnvironment.bracket, {
         enableGeneratorExpression: false
       })

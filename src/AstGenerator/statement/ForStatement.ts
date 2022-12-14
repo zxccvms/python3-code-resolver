@@ -1,6 +1,6 @@
 import AstGenerator from '../AstGenerator'
-import { ENodeType, ETokenType, IForStatement, TAssignableExpressionNode } from 'src/types'
-import { createLoc, isToken } from 'src/utils'
+import { ENodeType, ETokenType, IForStatement, TAssignableExpressionNode } from '../../types'
+import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
