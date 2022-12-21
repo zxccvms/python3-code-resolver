@@ -5,7 +5,7 @@ import { EEnvironment } from '../types'
 
 /** 块声明 */
 class BlockStatement extends BaseHandler {
-  handle(startToken: TToken, environment: EEnvironment = EEnvironment.normal): IBlockStatement {
+  handle(startToken: TToken, environment: EEnvironment): IBlockStatement {
     const colonToken = this.output(ETokenType.punctuation, ':')
     const body = this._handleBody(startToken, colonToken, environment)
 

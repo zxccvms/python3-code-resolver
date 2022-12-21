@@ -14,7 +14,7 @@ class WithStatement extends BaseHandler {
       withItems.push(withItem)
     } while (this.eat(ETokenType.punctuation, ','))
 
-    const body = this.astGenerator.statement.blockStatement.handle(withToken)
+    const body = this.astGenerator.statement.blockStatement.handle(withToken, environment)
 
     const WithStatement = this.createNode(ENodeType.WithStatement, {
       withItems,
