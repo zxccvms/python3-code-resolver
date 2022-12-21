@@ -14,7 +14,7 @@ class LambdaExpression extends BaseHandler {
 
     const args = this.astGenerator.expression.arguments.handle(
       token => isToken(token, ETokenType.punctuation, ':'),
-      environment
+      environment | EEnvironment.lambda
     )
 
     this.check({

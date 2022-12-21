@@ -159,8 +159,10 @@ export enum ENodeType {
   DictionaryComprehensionExpression = 'DictionaryComprehensionExpression',
   /** 运算表达式 a + b   a == b  a > b */
   BinaryExpression = 'BinaryExpression',
-  /** 赋值表达式 a = 1 */
+  /** 赋值表达式 a = 1   a = b = 1 */
   AssignmentExpression = 'AssignmentExpression',
+  /** 类型定义赋值表达式 a: 1 = 1    a: 1 */
+  AnnAssignmentExpression = 'AnnAssignmentExpression',
   /** 对象引用表达式 a.b  */
   MemberExpression = 'MemberExpression',
   /** 下标表达式 a["b"] a[1:] */
@@ -269,6 +271,7 @@ export type TExpressionNodeMap = {
   [ENodeType.DictionaryComprehensionExpression]: IDictionaryComprehensionExpression
   [ENodeType.BinaryExpression]: IBinaryExpression
   [ENodeType.AssignmentExpression]: IAssignmentExpression
+  [ENodeType.AnnAssignmentExpression]: IAnnAssignmentExpression
   [ENodeType.MemberExpression]: IMemberExpression
   [ENodeType.SubscriptExpression]: ISubscriptExpression
   [ENodeType.CallExpression]: ICallExpression
@@ -289,12 +292,13 @@ export type TExpressionNodeMap = {
 
 export type TExpressionNode<T extends keyof TExpressionNodeMap = keyof TExpressionNodeMap> = TExpressionNodeMap[T]
 
+/** 可类型定义赋值的表达式 */
+export type TAnnAssignableExpressionNode = IIdentifier | IMemberExpression | ISubscriptExpression
+
 /** 可赋值的表达式 */
 export type TAssignableExpressionNode =
-  | IIdentifier
+  | TAnnAssignableExpressionNode
   | IStarredExpression
-  | IMemberExpression
-  | ISubscriptExpression
   | IArrayExpression
   | ITupleExpression
 
@@ -371,6 +375,7 @@ export interface IArguments extends IBaseNodeAttr {
 export interface IArgument extends IBaseNodeAttr {
   type: ENodeType.Argument
   name: string
+  annotation?: TExpressionNode
 }
 
 export interface IKeyword extends IBaseNodeAttr {
@@ -546,6 +551,13 @@ export interface IAssignmentExpression extends IBaseNodeAttr {
   value: TExpressionNode
 }
 
+export interface IAnnAssignmentExpression extends IBaseNodeAttr {
+  type: ENodeType.AnnAssignmentExpression
+  annotation: TExpressionNode
+  target: TAssignableExpressionNode
+  value: TExpressionNode
+}
+
 export interface IAliasExpression extends IBaseNodeAttr {
   type: ENodeType.AliasExpression
   name: string
@@ -609,6 +621,7 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
   name: string
   args: IArguments
   body: IBlockStatement
+  returnType?: TExpressionNode
   decorators?: TDecorativeExpressionNode[]
 }
 

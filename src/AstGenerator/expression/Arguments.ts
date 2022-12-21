@@ -1,5 +1,5 @@
 import { ENodeType, ETokenType, TToken, IArguments, IArgument, TExpressionNode } from '../../types'
-import { createLoc } from '../../utils'
+import { checkBit, createLoc } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
@@ -58,7 +58,7 @@ class Arguments extends BaseHandler {
   }
 
   private _handleArgAndMaybeDefault(environment: EEnvironment, type: EArgType): TItem {
-    const arg = this._handleArgument()
+    const arg = this._handleArgument(environment)
 
     let defaultNode: TExpressionNode = null
     if (this.eat(ETokenType.operator, '=')) {
@@ -73,12 +73,18 @@ class Arguments extends BaseHandler {
     return { type, arg, defaultNode }
   }
 
-  private _handleArgument(): IArgument {
+  private _handleArgument(environment: EEnvironment): IArgument {
     const identifierToken = this.output(ETokenType.identifier)
+
+    let annotation: TExpressionNode = null
+    if (!checkBit(environment, EEnvironment.lambda) && this.eat(ETokenType.punctuation, ':')) {
+      annotation = this.astGenerator.expression.handleMaybeIf(environment)
+    }
 
     const Argument = this.createNode(ENodeType.Argument, {
       name: identifierToken.value,
-      loc: createLoc(identifierToken)
+      annotation,
+      loc: createLoc(identifierToken, annotation || identifierToken)
     })
 
     return Argument

@@ -28,6 +28,7 @@ class AssignmentExpression extends BaseHandler {
       isAfter: true,
       isBefore: true
     })
+
     const operatorToken = this.output(ETokenType.operator, Object.values(EAssignmentExpressionOperator))
 
     const rightNode = this.astGenerator.expression.handleMaybeAssignment(environment)

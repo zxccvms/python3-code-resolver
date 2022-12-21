@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, IFunctionDeclaration, TDecorativeExpressionNode } from '../../types'
+import { ENodeType, ETokenType, IFunctionDeclaration, TDecorativeExpressionNode, TExpressionNode } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
@@ -20,12 +20,19 @@ class FunctionDeclaration extends BaseHandler {
     )
 
     this.output(ETokenType.bracket, ')')
+
+    let returnType: TExpressionNode = null
+    if (this.eat(ETokenType.operator, '->')) {
+      returnType = this.astGenerator.expression.handleMaybeIf(environment)
+    }
+
     const body = this.astGenerator.statement.blockStatement.handle(defToken, environment | EEnvironment.functionBody)
 
     const FunctionDeclaration = this.createNode(ENodeType.FunctionDeclaration, {
       name: identifier.name,
       args,
       body,
+      returnType,
       decorators,
       loc: createLoc(decorators?.[0] || defToken, body)
     })

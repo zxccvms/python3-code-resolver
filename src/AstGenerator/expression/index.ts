@@ -30,40 +30,42 @@ import BigBracket from './BigBracket'
 import Ellipsis from './Ellipsis'
 import AwaitExpression from './AwaitExpression'
 import NamedExpression from './NamedExpression'
+import AnnAssignmentExpression from './AnnAssignmentExpression'
 
 class Expression extends BaseHandler {
   // 基础表达式
-  public readonly noneLiteral = new NoneLiteral(this.astGenerator)
-  public readonly booleanLiteral = new BooleanLiteral(this.astGenerator)
-  public readonly numberLiteral = new NumberLiteral(this.astGenerator)
-  public readonly stringLiteral = new StringLiteral(this.astGenerator)
-  public readonly identifier = new Identifier(this.astGenerator)
-  public readonly ellipsis = new Ellipsis(this.astGenerator)
+  readonly noneLiteral = new NoneLiteral(this.astGenerator)
+  readonly booleanLiteral = new BooleanLiteral(this.astGenerator)
+  readonly numberLiteral = new NumberLiteral(this.astGenerator)
+  readonly stringLiteral = new StringLiteral(this.astGenerator)
+  readonly identifier = new Identifier(this.astGenerator)
+  readonly ellipsis = new Ellipsis(this.astGenerator)
 
   // 表达式
-  public readonly smallBracket = new SmallBracket(this.astGenerator)
-  public readonly middleBracket = new MiddleBracket(this.astGenerator)
-  public readonly bigBracket = new BigBracket(this.astGenerator)
-  public readonly unaryExpression = new UnaryExpression(this.astGenerator)
-  public readonly ifExpression = new IfExpression(this.astGenerator)
-  public readonly tupleExpression = new TupleExpression(this.astGenerator)
-  public readonly binaryExpression = new BinaryExpression(this.astGenerator)
-  public readonly assignmentExpression = new AssignmentExpression(this.astGenerator)
-  public readonly memberExpression = new MemberExpression(this.astGenerator)
-  public readonly subscriptExpression = new SubscriptExpression(this.astGenerator)
-  public readonly callExpression = new CallExpression(this.astGenerator)
-  public readonly compareExpression = new CompareExpression(this.astGenerator)
-  public readonly logicalExpression = new LogicalExpression(this.astGenerator)
-  public readonly lambdaExpression = new LambdaExpression(this.astGenerator)
-  public readonly yieldExpression = new YieldExpression(this.astGenerator)
-  public readonly starredExpression = new StarredExpression(this.astGenerator)
-  public readonly awaitExpression = new AwaitExpression(this.astGenerator)
-  public readonly namedExpression = new NamedExpression(this.astGenerator)
+  readonly smallBracket = new SmallBracket(this.astGenerator)
+  readonly middleBracket = new MiddleBracket(this.astGenerator)
+  readonly bigBracket = new BigBracket(this.astGenerator)
+  readonly unaryExpression = new UnaryExpression(this.astGenerator)
+  readonly ifExpression = new IfExpression(this.astGenerator)
+  readonly tupleExpression = new TupleExpression(this.astGenerator)
+  readonly binaryExpression = new BinaryExpression(this.astGenerator)
+  readonly annAssignmentExpression = new AnnAssignmentExpression(this.astGenerator)
+  readonly assignmentExpression = new AssignmentExpression(this.astGenerator)
+  readonly memberExpression = new MemberExpression(this.astGenerator)
+  readonly subscriptExpression = new SubscriptExpression(this.astGenerator)
+  readonly callExpression = new CallExpression(this.astGenerator)
+  readonly compareExpression = new CompareExpression(this.astGenerator)
+  readonly logicalExpression = new LogicalExpression(this.astGenerator)
+  readonly lambdaExpression = new LambdaExpression(this.astGenerator)
+  readonly yieldExpression = new YieldExpression(this.astGenerator)
+  readonly starredExpression = new StarredExpression(this.astGenerator)
+  readonly awaitExpression = new AwaitExpression(this.astGenerator)
+  readonly namedExpression = new NamedExpression(this.astGenerator)
 
   // 特殊表达式
-  public readonly arguments = new Arguments(this.astGenerator)
-  public readonly keyword = new Keyword(this.astGenerator)
-  public readonly comprehension = new Comprehension(this.astGenerator)
+  readonly arguments = new Arguments(this.astGenerator)
+  readonly keyword = new Keyword(this.astGenerator)
+  readonly comprehension = new Comprehension(this.astGenerator)
 
   /** 解析表达式 */
   handle(environment: EEnvironment): TExpressionNode {
@@ -72,8 +74,14 @@ class Expression extends BaseHandler {
 
   /** 处理可能是赋值表达式 */
   handleMaybeAssignment(environment: EEnvironment) {
-    const lastNode = this.handleMaybeTuple(environment)
+    const lastNode = this.handleMaybeAnnAssignment(environment)
     return this.assignmentExpression.handleMaybe(lastNode, environment)
+  }
+
+  /** 处理可能是类型定义赋值表达式 */
+  handleMaybeAnnAssignment(environment: EEnvironment) {
+    const lastNode = this.handleMaybeTuple(environment)
+    return this.annAssignmentExpression.handleMaybe(lastNode, environment)
   }
 
   /** 处理可能是元组表达式 */
@@ -176,20 +184,6 @@ class Expression extends BaseHandler {
           `Unexpected token: value: ${currentToken.value} line: ${position.line} column: ${position.column}`
         )
       }
-    }
-  }
-
-  /** 处理可赋值表达式 */
-  handleAssignableExpression(environment: EEnvironment): TAssignableExpressionNode {
-    const token = this.tokens.getToken()
-    if (isToken(token, ETokenType.operator, '*')) {
-      return this.starredExpression.handle(environment)
-    } else if (isToken(token, ETokenType.bracket, '[')) {
-      // return this.handleAssignableExpression(environment)
-    } else if (isToken(token, ETokenType.bracket, '(')) {
-      // return this.handleAssignableExpression(environment)
-    } else {
-      return this.output(ETokenType.identifier)
     }
   }
 }
