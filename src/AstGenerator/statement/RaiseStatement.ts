@@ -14,7 +14,7 @@ class RaiseStatement extends BaseHandler {
     }
 
     let cause: TExpressionNode = null
-    if (this.eat(ETokenType.keyword, 'from')) {
+    if (this.eatLine(ETokenType.keyword, 'from')) {
       cause = this.astGenerator.expression.handleMaybeIf(environment)
     }
 

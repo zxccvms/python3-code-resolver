@@ -89,6 +89,17 @@ class BaseHandler {
     return token
   }
 
+  eatLine<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
+    const token = this.tokens.getToken()
+    if (!isToken(token, types, value)) return
+
+    const lastToken = this.tokens.getToken(-1)
+    if (!this.isSameLine(lastToken)) return
+
+    this.tokens.next()
+    return token
+  }
+
   /** 判断当前token && 将索引指向下一个token */
   output<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
     const token = this.tokens.getToken()
