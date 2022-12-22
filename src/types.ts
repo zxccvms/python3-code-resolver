@@ -685,6 +685,7 @@ export interface IWhileStatement extends IBaseNodeAttr {
   type: ENodeType.WhileStatement
   test: TExpressionNode
   body: IBlockStatement
+  elseBody?: IBlockStatement
 }
 
 export interface IContinueStatement extends IBaseNodeAttr {

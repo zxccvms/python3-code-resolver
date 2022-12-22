@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, IWhileStatement } from '../../types'
+import { ENodeType, ETokenType, IBlockStatement, IWhileStatement } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
@@ -11,10 +11,17 @@ class WhileStatement extends BaseHandler {
     const test = this.astGenerator.expression.handleMaybeIf(environment)
     const body = this.astGenerator.statement.blockStatement.handle(whileToken, environment | EEnvironment.loopBody)
 
+    let elseBody: IBlockStatement = null
+    const elseToken = this.eat(ETokenType.keyword, 'else')
+    if (elseToken) {
+      elseBody = this.astGenerator.statement.blockStatement.handle(elseToken, environment)
+    }
+
     const WhileStatement = this.createNode(ENodeType.WhileStatement, {
       test,
       body,
-      loc: createLoc(whileToken)
+      elseBody,
+      loc: createLoc(whileToken, elseBody || body)
     })
 
     return WhileStatement
