@@ -408,8 +408,8 @@ export interface INamedExpression extends IBaseNodeAttr {
 
 export interface IExceptHandler extends IBaseNodeAttr {
   type: ENodeType.ExceptHandler
-  errName?: TExpressionNode
-  name?: IIdentifier
+  exceptType?: TExpressionNode
+  name?: string
   body: IBlockStatement
 }
 

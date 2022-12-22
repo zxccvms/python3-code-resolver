@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, IExceptHandler, ITryStatement } from '../../types'
+import { ENodeType, ETokenType, IBlockStatement, IExceptHandler, ITryStatement, TExpressionNode } from '../../types'
 import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
@@ -10,8 +10,22 @@ class TryStatement extends BaseHandler {
 
     const body = this.astGenerator.statement.blockStatement.handle(tryToken, environment)
     const handlers = this._handleHandlers(environment)
-    const elseBody = this._handleElseBody(environment, !!handlers.length)
-    const finalBody = this._handleFinalBody(environment)
+
+    let elseBody: IBlockStatement = null
+    const elseToken = this.eat(ETokenType.keyword, 'else')
+    if (elseToken) {
+      if (!handlers.length) {
+        throw new SyntaxError('Try statement must have at least one except or finally clause')
+      }
+
+      elseBody = this.astGenerator.statement.blockStatement.handle(elseToken, environment)
+    }
+
+    let finalBody: IBlockStatement = null
+    const finallyToken = this.eat(ETokenType.keyword, 'finally')
+    if (finallyToken) {
+      finalBody = this.astGenerator.statement.blockStatement.handle(finallyToken, environment)
+    }
 
     const TryStatement = this.createNode(ENodeType.TryStatement, {
       body,
@@ -36,67 +50,28 @@ class TryStatement extends BaseHandler {
   }
 
   private _handleExceptHandler(environment: EEnvironment): IExceptHandler {
-    const exceptToken = this.tokens.getToken()
-    if (!isToken(exceptToken, ETokenType.keyword, 'except')) {
-      throw new TypeError("ExceptHandler err: currentToken is not keyword 'except'")
+    const exceptToken = this.output(ETokenType.keyword, 'except')
+
+    let exceptType: TExpressionNode = null
+    if (!this.isToken(ETokenType.punctuation, ':')) {
+      exceptType = this.astGenerator.expression.handleMaybeIf(environment)
     }
 
-    this.tokens.next()
-    const nextToken = this.tokens.getToken()
-    if (!isToken(nextToken, ETokenType.punctuation, ':') && !isToken(nextToken, ETokenType.identifier)) {
-      throw new TypeError("ExceptHandler err: nextToken is not punctuation ':' or identifier")
+    let name: string = null
+    if (this.eat(ETokenType.keyword, 'as')) {
+      name = this.output(ETokenType.identifier).value
     }
 
-    const errName = this._handleErrName(environment)
-    const name = this._handleName()
     const body = this.astGenerator.statement.blockStatement.handle(exceptToken, environment)
 
     const ExceptHandlerStatement = this.createNode(ENodeType.ExceptHandler, {
       body,
-      errName,
+      exceptType,
       name,
       loc: createLoc(exceptToken, body)
     })
 
     return ExceptHandlerStatement
-  }
-
-  private _handleErrName(environment: EEnvironment): IExceptHandler['errName'] {
-    const currentToken = this.tokens.getToken()
-    if (!isToken(currentToken, ETokenType.identifier)) return null
-
-    const errName = this.astGenerator.expression.handleMaybeIf(environment)
-
-    return errName
-  }
-
-  private _handleName(): IExceptHandler['name'] {
-    if (!this.eat(ETokenType.keyword, 'as')) return null
-
-    return this.astGenerator.expression.identifier.handle(EEnvironment.normal)
-  }
-
-  private _handleElseBody(environment: EEnvironment, hasHandler: boolean): ITryStatement['elseBody'] {
-    const elseToken = this.tokens.getToken()
-    if (!isToken(elseToken, ETokenType.keyword, 'else')) return null
-    else if (!hasHandler) {
-      throw new SyntaxError('Try statement must have at least one except or finally clause')
-    }
-
-    this.tokens.next()
-    const BlockStatement = this.astGenerator.statement.blockStatement.handle(elseToken, environment)
-
-    return BlockStatement
-  }
-
-  private _handleFinalBody(environment: EEnvironment): ITryStatement['finalBody'] {
-    const finallyToken = this.tokens.getToken()
-    if (!isToken(finallyToken, ETokenType.keyword, 'finally')) return null
-
-    this.tokens.next()
-    const BlockStatement = this.astGenerator.statement.blockStatement.handle(finallyToken, environment)
-
-    return BlockStatement
   }
 }
 
