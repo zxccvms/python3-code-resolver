@@ -211,6 +211,8 @@ export enum ENodeType {
   TryStatement = 'TryStatement',
   /** AST根节点 */
   Program = 'Program',
+  /** async for 语句 */
+  AsyncForStatement = 'AsyncForStatement',
   /** for 语句 */
   ForStatement = 'ForStatement',
   /** 非局部变量声明语句 nonlocal a,b */
@@ -325,6 +327,7 @@ export type TStatementNodeMap = {
   [ENodeType.IfStatement]: IIfStatement
   [ENodeType.TryStatement]: ITryStatement
   [ENodeType.Program]: IProgram
+  [ENodeType.AsyncForStatement]: IAsyncForStatement
   [ENodeType.ForStatement]: IForStatement
   [ENodeType.NonlocalStatement]: INonlocalStatement
   [ENodeType.GlobalStatement]: IGlobalStatement
@@ -674,6 +677,14 @@ export interface ITryStatement extends IBaseNodeAttr {
 export interface IProgram extends IBaseNodeAttr {
   type: ENodeType.Program
   body: TNode[]
+}
+
+export interface IAsyncForStatement extends IBaseNodeAttr {
+  type: ENodeType.AsyncForStatement
+  target: TAssignableExpressionNode
+  iterable: TExpressionNode
+  body: IBlockStatement
+  elseBody?: IBlockStatement
 }
 
 export interface IForStatement extends IBaseNodeAttr {

@@ -4,10 +4,11 @@ import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 
-/** for 语句 */
-class ForStatement extends BaseHandler {
+/** async for 语句 */
+class AsyncForStatement extends BaseHandler {
   handle(environment: EEnvironment): IForStatement {
-    const forToken = this.output(ETokenType.keyword, 'for')
+    const asyncToken = this.output(ETokenType.keyword, 'async')
+    this.outputLine(ETokenType.keyword, 'for')
 
     const target = this._handleTarget(environment)
 
@@ -15,7 +16,7 @@ class ForStatement extends BaseHandler {
 
     const iterable = this.astGenerator.expression.handleMaybeTuple(environment)
 
-    const body = this.astGenerator.statement.blockStatement.handle(forToken, environment | EEnvironment.loopBody)
+    const body = this.astGenerator.statement.blockStatement.handle(asyncToken, environment | EEnvironment.loopBody)
 
     let elseBody: IBlockStatement = null
     const elseToken = this.eat(ETokenType.keyword, 'else')
@@ -28,7 +29,7 @@ class ForStatement extends BaseHandler {
       iterable,
       body,
       elseBody,
-      loc: createLoc(forToken, elseBody || body)
+      loc: createLoc(asyncToken, elseBody || body)
     })
 
     return ForStatement
@@ -49,4 +50,4 @@ class ForStatement extends BaseHandler {
   }
 }
 
-export default ForStatement
+export default AsyncForStatement

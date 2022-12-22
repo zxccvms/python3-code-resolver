@@ -30,6 +30,7 @@ import WhileStatement from './WhileStatement'
 import WithStatement from './WithStatement'
 import NonlocalStatement from './NonlocalStatement'
 import AsyncFunctionDeclaration from './AsyncFunctionDeclaration'
+import AsyncForStatement from './AsyncForStatement'
 
 class Statement extends BaseHandler {
   readonly nonlocalStatement = new NonlocalStatement(this.astGenerator)
@@ -43,6 +44,7 @@ class Statement extends BaseHandler {
   readonly blockStatement = new BlockStatement(this.astGenerator)
   readonly emptyStatement = new EmptyStatement(this.astGenerator)
   readonly ifStatement = new IfStatement(this.astGenerator)
+  readonly asyncForStatement = new AsyncForStatement(this.astGenerator)
   readonly forStatement = new ForStatement(this.astGenerator)
   readonly returnStatement = new ReturnStatement(this.astGenerator)
   readonly whileStatement = new WhileStatement(this.astGenerator)
@@ -61,8 +63,6 @@ class Statement extends BaseHandler {
         return this.emptyStatement.handle()
       case '@':
         return this._handleDecoratorsInStatement(environment)
-      case 'async':
-        return this.asyncfunctionDeclaration.handle(environment)
       case 'def':
         return this.functionDeclaration.handle(environment)
       case 'class':
@@ -97,6 +97,15 @@ class Statement extends BaseHandler {
         return this.raiseStatement.handle(environment)
       case 'assert':
         return this.assertStatement.handle(environment)
+      case 'async': {
+        const nextToken = this.tokens.getToken(1)
+        switch (nextToken.value) {
+          case 'def':
+            return this.asyncfunctionDeclaration.handle(environment)
+          case 'for':
+            return this.asyncForStatement.handle(environment)
+        }
+      }
     }
   }
 
