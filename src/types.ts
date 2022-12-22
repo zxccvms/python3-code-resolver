@@ -710,6 +710,7 @@ export interface IDeleteStatement extends IBaseNodeAttr {
 export interface IRaiseStatement extends IBaseNodeAttr {
   type: ENodeType.RaiseStatement
   target?: TExpressionNode
+  cause?: TExpressionNode
 }
 
 export interface IAssertStatement extends IBaseNodeAttr {

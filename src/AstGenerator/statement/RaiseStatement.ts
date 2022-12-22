@@ -13,8 +13,14 @@ class RaiseStatement extends BaseHandler {
       target = this.astGenerator.expression.handleMaybeIf(environment)
     }
 
+    let cause: TExpressionNode = null
+    if (this.eat(ETokenType.keyword, 'from')) {
+      cause = this.astGenerator.expression.handleMaybeIf(environment)
+    }
+
     const RaiseStatement = this.createNode(ENodeType.RaiseStatement, {
       target,
+      cause,
       loc: createLoc(raiseToken, target)
     })
 
