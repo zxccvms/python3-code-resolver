@@ -1,5 +1,5 @@
 import { ENodeType, ETokenType, IBlockStatement, IWhileStatement } from '../../types'
-import { createLoc, isToken } from '../../utils'
+import { createLoc } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
 

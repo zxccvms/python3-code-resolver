@@ -225,6 +225,8 @@ export enum ENodeType {
   WhileStatement = 'WhileStatement',
   /** continue语句 */
   ContinueStatement = 'ContinueStatement',
+  /** async with语句 */
+  AsyncWithStatement = 'AsyncWithStatement',
   /** with语句 */
   WithStatement = 'WithStatement',
   /** break语句 */
@@ -334,6 +336,7 @@ export type TStatementNodeMap = {
   [ENodeType.ReturnStatement]: IReturnStatement
   [ENodeType.WhileStatement]: IWhileStatement
   [ENodeType.ContinueStatement]: IContinueStatement
+  [ENodeType.AsyncWithStatement]: IAsyncWithStatement
   [ENodeType.WithStatement]: IWithStatement
   [ENodeType.BreakStatement]: IBreakStatement
   [ENodeType.DeleteStatement]: IDeleteStatement
@@ -719,6 +722,12 @@ export interface IWhileStatement extends IBaseNodeAttr {
 
 export interface IContinueStatement extends IBaseNodeAttr {
   type: ENodeType.ContinueStatement
+}
+
+export interface IAsyncWithStatement extends IBaseNodeAttr {
+  type: ENodeType.AsyncWithStatement
+  withItems: IWithItem[]
+  body: IBlockStatement
 }
 
 export interface IWithStatement extends IBaseNodeAttr {

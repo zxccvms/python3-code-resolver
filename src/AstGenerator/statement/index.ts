@@ -31,6 +31,7 @@ import WithStatement from './WithStatement'
 import NonlocalStatement from './NonlocalStatement'
 import AsyncFunctionDeclaration from './AsyncFunctionDeclaration'
 import AsyncForStatement from './AsyncForStatement'
+import AsyncWithStatement from './AsyncWithStatement'
 
 class Statement extends BaseHandler {
   readonly nonlocalStatement = new NonlocalStatement(this.astGenerator)
@@ -50,6 +51,7 @@ class Statement extends BaseHandler {
   readonly whileStatement = new WhileStatement(this.astGenerator)
   readonly continueStatement = new ContinueStatement(this.astGenerator)
   readonly breakStatement = new BreakStatement(this.astGenerator)
+  readonly asyncWithStatement = new AsyncWithStatement(this.astGenerator)
   readonly withStatement = new WithStatement(this.astGenerator)
   readonly deleteStatement = new DeleteStatement(this.astGenerator)
   readonly raiseStatement = new RaiseStatement(this.astGenerator)
@@ -104,6 +106,8 @@ class Statement extends BaseHandler {
             return this.asyncfunctionDeclaration.handle(environment)
           case 'for':
             return this.asyncForStatement.handle(environment)
+          case 'with':
+            return this.asyncWithStatement.handle(environment)
         }
       }
     }
