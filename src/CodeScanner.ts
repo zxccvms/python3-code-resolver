@@ -210,7 +210,7 @@ class CodeScanner {
         value = betweenContent
         extra = { prefix: (currentChar + nextChar) as EStringTokenPrefix }
         handleCycleParams(sumLength, lineNum, columnNum) // 将光标移至引号后面
-      } else if (/u|r|f|b/.test(currentChar) && /\"|\'/.test(nextChar)) {
+      } else if (/u|r|f|b|R/.test(currentChar) && /\"|\'/.test(nextChar)) {
         const { sumLength, lineNum, columnNum, betweenContent } = this._handleQuotesChar(
           code.slice(++i),
           nextChar as '"' | "'"
