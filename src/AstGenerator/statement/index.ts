@@ -24,12 +24,14 @@ import ImportStatement from './ImportStatement'
 import RaiseStatement from './RaiseStatement'
 import ReturnStatement from './ReturnStatement'
 import TryStatement from './TryStatement'
-import VariableDeclaration from './VariableDeclaration'
+import GlobalStatement from './GlobalStatement'
 import WhileStatement from './WhileStatement'
 import WithStatement from './WithStatement'
+import NonlocalStatement from './NonlocalStatement'
 
 class Statement extends BaseHandler {
-  readonly variableDeclaration = new VariableDeclaration(this.astGenerator)
+  readonly nonlocalStatement = new NonlocalStatement(this.astGenerator)
+  readonly globalStatement = new GlobalStatement(this.astGenerator)
   readonly tryStatement = new TryStatement(this.astGenerator)
   readonly importStatement = new ImportStatement(this.astGenerator)
   readonly importFromStatement = new ImportFromStatement(this.astGenerator)
@@ -61,8 +63,9 @@ class Statement extends BaseHandler {
       case 'class':
         return this.classDeclaration.handle(environment)
       case 'nonlocal':
+        return this.nonlocalStatement.handle()
       case 'global':
-        return this.variableDeclaration.handle()
+        return this.globalStatement.handle()
       case 'if':
         return this.ifStatement.handle(environment)
       case 'import':

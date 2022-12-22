@@ -1,5 +1,3 @@
-import { ENodeType, TExpressionNodeMap, TStatementNodeMap } from './types'
-
 export const PYTHON = {
   INDENT: '  ',
   LINE_BREAK: '\n',
@@ -45,35 +43,3 @@ export const PYTHON = {
     'await'
   ]
 }
-
-export const expressionNodeTypes: (keyof TExpressionNodeMap)[] = [
-  ENodeType.NoneLiteral,
-  ENodeType.BooleanLiteral,
-  ENodeType.NumberLiteral,
-  ENodeType.StringLiteral,
-  ENodeType.TemplateLiteral,
-  ENodeType.Identifier,
-  ENodeType.UnaryExpression,
-  ENodeType.IfExpression,
-  ENodeType.ArrayExpression,
-  ENodeType.DictionaryExpression,
-  ENodeType.BinaryExpression,
-  ENodeType.AssignmentExpression,
-  ENodeType.MemberExpression,
-  ENodeType.SubscriptExpression,
-  ENodeType.CallExpression,
-  ENodeType.TupleExpression,
-  ENodeType.CompareExpression,
-  ENodeType.LogicalExpression
-]
-
-export const statementNodeTypes: (keyof TStatementNodeMap)[] = [
-  ENodeType.VariableDeclaration,
-  ENodeType.ImportStatement,
-  ENodeType.FunctionDeclaration,
-  ENodeType.ClassDeclaration,
-  ENodeType.BlockStatement,
-  ENodeType.EmptyStatement,
-  ENodeType.IfStatement,
-  ENodeType.Program
-]

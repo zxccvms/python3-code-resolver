@@ -1,15 +1,4 @@
-import { expressionNodeTypes, statementNodeTypes } from './const'
-import {
-  ENodeType,
-  ETokenType,
-  IBaseNodeAttr,
-  TExpressionNode,
-  TLoc,
-  TNode,
-  TPositionInfo,
-  TStatementNode,
-  TToken
-} from './types'
+import { ENodeType, ETokenType, IBaseNodeAttr, TLoc, TNode, TPositionInfo, TToken } from './types'
 
 /** 得到数组的最后一项 */
 export function getLatest<T>(array: Array<T>): T {
@@ -89,47 +78,9 @@ export function isToken<T extends ETokenType, V extends string>(
   }
 }
 
-/** 赋值token */
-export function isAssignmentToken(
-  token: TToken
-): token is TToken<ETokenType.operator, '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//='> {
-  return isToken(token, ETokenType.operator, ['=', '+=', '-=', '*=', '/=', '%=', '**=', '//='])
-}
-
-/** 左括号token */
-export function isLeftBracketToken(token: TToken): token is TToken<ETokenType.bracket, '(' | '[' | '{'> {
-  return isToken(token, ETokenType.bracket, ['(', '[', '{'])
-}
-
-/** 右括号token */
-export function isRightBracketToken(token: TToken): token is TToken<ETokenType.bracket, ')' | ']' | '}'> {
-  return isToken(token, ETokenType.bracket, [')', ']', '}'])
-}
-
-/** 隔断的标点符号token */
-export function isSeparatePunctuationToken(token: TToken): token is TToken<ETokenType.punctuation, ',' | ':'> {
-  return isToken(token, ETokenType.punctuation, [',', ':'])
-}
-
-export function isSeparateKeywordToken(token: TToken): token is TToken<ETokenType.punctuation, 'in' | 'not'> {
-  return isToken(token, ETokenType.keyword, ['in', 'not'])
-}
-
 export function isNode<T extends ENodeType>(node: TNode, types: T | T[]): node is TNode<T> {
   if (!node) return false
   return toArray(types).some(type => type === node.type)
-}
-
-export function isExpressionNode(node: TNode): node is TExpressionNode {
-  return isNode(node, expressionNodeTypes)
-}
-
-export function isExpressionNodes(nodes: TNode[]): nodes is TExpressionNode[] {
-  return nodes.every(node => isNode(node, expressionNodeTypes))
-}
-
-export function isStatementNode(node: TNode): node is TStatementNode {
-  return isNode(node, statementNodeTypes)
 }
 
 export function createLoc(start: TToken | TNode, end?: TToken | TNode): TLoc {

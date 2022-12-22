@@ -1,5 +1,5 @@
 import NodeGenerator from '../NodeGenerator'
-import { ETokenType, TToken } from '../types'
+import { ETokenType, TNode, TToken } from '../types'
 import TokenArray from './utils/TokenArray'
 import { EEnvironment, ICheckParams, IFindNodesParams } from './types'
 import { checkBit, getRightBracket, isSameRank, isToken } from '../utils'
@@ -65,6 +65,10 @@ class BaseHandler {
     if (checkBit(environment, EEnvironment.bracket)) return true
 
     return isSameRank([this.tokens.getToken(mode === 'before' ? -1 : 1), currentToken], 'endAndStartLine')
+  }
+
+  isSameLine(target: TToken | TNode) {
+    return isSameRank([target, this.tokens.getToken()], 'endAndStartLine')
   }
 
   isToken(types: ETokenType | ETokenType[], value?: string | string[]): boolean {

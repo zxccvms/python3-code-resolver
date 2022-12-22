@@ -213,8 +213,10 @@ export enum ENodeType {
   Program = 'Program',
   /** for 语句 */
   ForStatement = 'ForStatement',
-  /** 变量声明语句 global a,b */
-  VariableDeclaration = 'VariableDeclaration',
+  /** 非局部变量声明语句 nonlocal a,b */
+  NonlocalStatement = 'NonlocalStatement',
+  /** 全局变量声明语句 global a,b */
+  GlobalStatement = 'GlobalStatement',
   /** 返回语句 return 1*/
   ReturnStatement = 'ReturnStatement',
   /** while语句 */
@@ -323,7 +325,8 @@ export type TStatementNodeMap = {
   [ENodeType.TryStatement]: ITryStatement
   [ENodeType.Program]: IProgram
   [ENodeType.ForStatement]: IForStatement
-  [ENodeType.VariableDeclaration]: IVariableDeclaration
+  [ENodeType.NonlocalStatement]: INonlocalStatement
+  [ENodeType.GlobalStatement]: IGlobalStatement
   [ENodeType.ReturnStatement]: IReturnStatement
   [ENodeType.WhileStatement]: IWhileStatement
   [ENodeType.ContinueStatement]: IContinueStatement
@@ -670,10 +673,14 @@ export interface IForStatement extends IBaseNodeAttr {
   body: IBlockStatement
 }
 
-export interface IVariableDeclaration extends IBaseNodeAttr {
-  type: ENodeType.VariableDeclaration
-  kind: string
-  declarations: IIdentifier[]
+export interface INonlocalStatement extends IBaseNodeAttr {
+  type: ENodeType.NonlocalStatement
+  names: string[]
+}
+
+export interface IGlobalStatement extends IBaseNodeAttr {
+  type: ENodeType.GlobalStatement
+  names: string[]
 }
 
 export interface IReturnStatement extends IBaseNodeAttr {
