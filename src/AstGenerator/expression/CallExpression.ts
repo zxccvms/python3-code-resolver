@@ -20,7 +20,7 @@ class CallExpression extends BaseHandler {
 
     this.output(ETokenType.bracket, '(')
 
-    const { args, keywords } = this.handleArgsAndKeywords(environment | EEnvironment.bracket)
+    const { args, keywords } = this.handleArgsAndKeywords(EEnvironment.bracket)
 
     const rightBracket = this.output(ETokenType.bracket, ')')
 

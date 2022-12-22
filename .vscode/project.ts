@@ -19,16 +19,20 @@ function readPyFileCode(dirPath: string, cb: (filePath: string, code: string) =>
 new Promise(() => {
   const codeScanner = new CodeScanner()
   const pythonProjectPath = path.join(__dirname, '../pythonProject')
+  let count = 0
+  let errCount = 0
   readPyFileCode(pythonProjectPath, (filePath, code) => {
     try {
+      count++
       const tokens = codeScanner.scan(code)
       const astGenerator = new AstGenerator(tokens)
       const ast = astGenerator.generate()
     } catch {
+      errCount++
       console.error(filePath)
     }
   })
-  console.log('小哥哥你真棒👍～')
+  console.log(`解析py文件数量: ${count}, 解析失败数量: ${errCount}, 小哥哥你真棒👍～`)
 })
 
 setTimeout(() => {}, 9999999)
