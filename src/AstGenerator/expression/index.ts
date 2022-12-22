@@ -168,8 +168,8 @@ class Expression extends BaseHandler {
         return this.identifier.handle(environment)
       case ETokenType.number:
         return this.numberLiteral.handle(environment)
-      case ETokenType.ellipsis:
-        return this.ellipsis.handle(environment)
+      // case ETokenType.ellipsis:
+      //   return this.ellipsis.handle(environment)
       case ETokenType.keyword:
         switch (currentToken.value) {
           case 'None':
@@ -177,6 +177,10 @@ class Expression extends BaseHandler {
           case 'True':
           case 'False':
             return this.booleanLiteral.handle(environment)
+        }
+      case ETokenType.punctuation:
+        if (this.ellipsis.isConform()) {
+          return this.ellipsis.handle(environment)
         }
       default: {
         const position = getPositionInfo(currentToken, 'start')

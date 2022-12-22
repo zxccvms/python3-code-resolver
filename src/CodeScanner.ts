@@ -184,9 +184,6 @@ class CodeScanner {
         type = ETokenType.number
         value = currentChar + betweenContent
         handleCycleParams(betweenContent.length, lineNum, columnNum)
-      } else if ('...' === currentChar + nextChar + nNextChar) {
-        type = ETokenType.ellipsis
-        handleCycleParams(2, 0, 2)
       }
       // 处理标点符号
       else if (punctuationReg.test(currentChar)) {

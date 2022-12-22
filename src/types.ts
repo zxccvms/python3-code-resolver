@@ -12,9 +12,7 @@ export enum ETokenType {
   /** 括号 () [] {} */
   bracket = 'bracket',
   /** 标点符号 . , : */
-  punctuation = 'punctuation',
-  /** ellipsis ... */
-  ellipsis = 'ellipsis'
+  punctuation = 'punctuation'
 }
 
 export enum EStringTokenPrefix {
