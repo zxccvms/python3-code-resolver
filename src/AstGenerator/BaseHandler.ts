@@ -111,6 +111,18 @@ class BaseHandler {
     return token
   }
 
+  outputLine<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
+    const token = this.tokens.getToken()
+    if (!isToken(token, types, value)) {
+      throw new TypeError('Unexpected token')
+    } else if (!this.isSameLine(this.tokens.getToken(-1))) {
+      throw new TypeError('Unexpected token')
+    }
+
+    this.tokens.next()
+    return token
+  }
+
   /** 检查 */
   check(checkParams: ICheckParams) {
     if (checkParams.checkToken && !checkParams.checkToken()) {

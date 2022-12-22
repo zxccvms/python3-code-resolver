@@ -1,5 +1,6 @@
 import {
   ETokenType,
+  IAsyncFunctionDeclaration,
   IClassDeclaration,
   IFunctionDeclaration,
   TDecorativeExpressionNode,
@@ -28,6 +29,7 @@ import GlobalStatement from './GlobalStatement'
 import WhileStatement from './WhileStatement'
 import WithStatement from './WithStatement'
 import NonlocalStatement from './NonlocalStatement'
+import AsyncFunctionDeclaration from './AsyncFunctionDeclaration'
 
 class Statement extends BaseHandler {
   readonly nonlocalStatement = new NonlocalStatement(this.astGenerator)
@@ -35,6 +37,7 @@ class Statement extends BaseHandler {
   readonly tryStatement = new TryStatement(this.astGenerator)
   readonly importStatement = new ImportStatement(this.astGenerator)
   readonly importFromStatement = new ImportFromStatement(this.astGenerator)
+  readonly asyncfunctionDeclaration = new AsyncFunctionDeclaration(this.astGenerator)
   readonly functionDeclaration = new FunctionDeclaration(this.astGenerator)
   readonly classDeclaration = new ClassDeclaration(this.astGenerator)
   readonly blockStatement = new BlockStatement(this.astGenerator)
@@ -58,6 +61,8 @@ class Statement extends BaseHandler {
         return this.emptyStatement.handle()
       case '@':
         return this._handleDecoratorsInStatement(environment)
+      case 'async':
+        return this.asyncfunctionDeclaration.handle(environment)
       case 'def':
         return this.functionDeclaration.handle(environment)
       case 'class':
@@ -96,14 +101,18 @@ class Statement extends BaseHandler {
   }
 
   /** 处理有装饰器的语句 */
-  private _handleDecoratorsInStatement(environment: EEnvironment): IFunctionDeclaration | IClassDeclaration {
+  private _handleDecoratorsInStatement(
+    environment: EEnvironment
+  ): IAsyncFunctionDeclaration | IFunctionDeclaration | IClassDeclaration {
     const decorators = this._handleDecorators(environment)
 
-    const defOrClassToken = this.tokens.getToken()
-    if (isToken(defOrClassToken, ETokenType.keyword, 'def')) {
+    const currentToken = this.tokens.getToken()
+    if (isToken(currentToken, ETokenType.keyword, 'def')) {
       return this.functionDeclaration.handle(environment, decorators)
-    } else if (isToken(defOrClassToken, ETokenType.keyword, 'class')) {
+    } else if (isToken(currentToken, ETokenType.keyword, 'class')) {
       return this.classDeclaration.handle(environment, decorators)
+    } else if (isToken(currentToken, ETokenType.keyword, 'async')) {
+      return this.asyncfunctionDeclaration.handle(environment, decorators)
     }
 
     throw new SyntaxError('Expected function or class declaration after decorator')
@@ -121,8 +130,9 @@ class Statement extends BaseHandler {
 
     decorators.push(expression)
 
-    if (isToken(this.tokens.getToken(), ETokenType.operator, '@'))
+    if (this.isToken(ETokenType.operator, '@')) {
       return this._handleDecorators(environment, decorators)
+    }
 
     return decorators
   }

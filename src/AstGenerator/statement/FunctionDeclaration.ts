@@ -7,12 +7,11 @@ import { EEnvironment } from '../types'
 class FunctionDeclaration extends BaseHandler {
   /** 处理函数定义节点 */
   handle(environment: EEnvironment, decorators?: TDecorativeExpressionNode[]): IFunctionDeclaration {
-    this.check({ isAfter: true })
     const defToken = this.output(ETokenType.keyword, 'def')
 
-    const identifier = this.astGenerator.expression.identifier.handle(EEnvironment.normal)
+    const nameToken = this.outputLine(ETokenType.identifier)
 
-    this.output(ETokenType.bracket, '(')
+    this.outputLine(ETokenType.bracket, '(')
 
     const args = this.astGenerator.expression.arguments.handle(
       token => isToken(token, ETokenType.bracket, ')'),
@@ -22,14 +21,14 @@ class FunctionDeclaration extends BaseHandler {
     this.output(ETokenType.bracket, ')')
 
     let returnType: TExpressionNode = null
-    if (this.eat(ETokenType.operator, '->')) {
+    if (this.eatLine(ETokenType.operator, '->')) {
       returnType = this.astGenerator.expression.handleMaybeIf(environment)
     }
 
     const body = this.astGenerator.statement.blockStatement.handle(defToken, environment | EEnvironment.functionBody)
 
     const FunctionDeclaration = this.createNode(ENodeType.FunctionDeclaration, {
-      name: identifier.name,
+      name: nameToken.value,
       args,
       body,
       returnType,

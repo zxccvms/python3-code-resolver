@@ -3,3 +3,4 @@ pythonProject
 .DS_Store
 lib
 types
+.vscode/code.py

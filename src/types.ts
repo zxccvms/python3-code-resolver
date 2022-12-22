@@ -197,6 +197,8 @@ export enum ENodeType {
   ImportFromStatement = 'ImportFromStatement',
   /** 函数定义 def a(): 1 */
   FunctionDeclaration = 'FunctionDeclaration',
+  /** 异步函数定义 def a(): 1 */
+  AsyncFunctionDeclaration = 'AsyncFunctionDeclaration',
   /** 类定义 class a: 1 */
   ClassDeclaration = 'ClassDeclaration',
   /** 块语句 */
@@ -316,6 +318,7 @@ export type TStatementNodeMap = {
   [ENodeType.ImportStatement]: IImportStatement
   [ENodeType.ImportFromStatement]: IImportFromStatement
   [ENodeType.FunctionDeclaration]: IFunctionDeclaration
+  [ENodeType.AsyncFunctionDeclaration]: IAsyncFunctionDeclaration
   [ENodeType.ClassDeclaration]: IClassDeclaration
   [ENodeType.BlockStatement]: IBlockStatement
   [ENodeType.EmptyStatement]: IEmptyStatement
@@ -619,6 +622,15 @@ export interface IImportFromStatement extends IBaseNodeAttr {
 
 export interface IFunctionDeclaration extends IBaseNodeAttr {
   type: ENodeType.FunctionDeclaration
+  name: string
+  args: IArguments
+  body: IBlockStatement
+  returnType?: TExpressionNode
+  decorators?: TDecorativeExpressionNode[]
+}
+
+export interface IAsyncFunctionDeclaration extends IBaseNodeAttr {
+  type: ENodeType.AsyncFunctionDeclaration
   name: string
   args: IArguments
   body: IBlockStatement
