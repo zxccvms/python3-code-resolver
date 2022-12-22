@@ -1,5 +1,5 @@
 import AstGenerator from '../AstGenerator'
-import { ENodeType, ETokenType, IForStatement, TAssignableExpressionNode } from '../../types'
+import { ENodeType, ETokenType, IBlockStatement, IForStatement, TAssignableExpressionNode } from '../../types'
 import { createLoc, isToken } from '../../utils'
 import BaseHandler from '../BaseHandler'
 import { EEnvironment } from '../types'
@@ -17,11 +17,18 @@ class ForStatement extends BaseHandler {
 
     const body = this.astGenerator.statement.blockStatement.handle(forToken, environment | EEnvironment.loopBody)
 
+    let elseBody: IBlockStatement = null
+    const elseToken = this.eat(ETokenType.keyword, 'else')
+    if (elseToken) {
+      elseBody = this.astGenerator.statement.blockStatement.handle(elseToken, environment)
+    }
+
     const ForStatement = this.createNode(ENodeType.ForStatement, {
       target,
       iterable,
       body,
-      loc: createLoc(forToken, body)
+      elseBody,
+      loc: createLoc(forToken, elseBody || body)
     })
 
     return ForStatement

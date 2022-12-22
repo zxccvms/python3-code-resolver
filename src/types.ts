@@ -669,6 +669,7 @@ export interface IForStatement extends IBaseNodeAttr {
   target: TAssignableExpressionNode
   iterable: TExpressionNode
   body: IBlockStatement
+  elseBody?: IBlockStatement
 }
 
 export interface INonlocalStatement extends IBaseNodeAttr {
