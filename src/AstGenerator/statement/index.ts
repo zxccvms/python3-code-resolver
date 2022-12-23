@@ -134,7 +134,7 @@ class Statement extends Node {
       do {
         const node = this.astGenerator.handleNode(environment, markColumn - 1)
         if (node) nodes.push(node)
-      } while (this.hasToken() && this.getStartColumn() === markColumn)
+      } while (this.hasToken() && (this.getStartColumn() === markColumn || this.isToken(ETokenType.punctuation, ';')))
     }
 
     return nodes

@@ -45,7 +45,7 @@ class AstGenerator extends BaseHandler {
   ): TExpressionNode | TStatementNode | undefined {
     if (this.eatLine(ETokenType.punctuation, ';')) {
       if (this.isSameLine()) {
-        return this.expression.handle(environment)
+        return this.statement.handle(environment) || this.expression.handle(environment)
       }
     }
 
