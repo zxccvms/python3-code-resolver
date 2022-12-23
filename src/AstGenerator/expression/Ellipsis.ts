@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IEllipsis } from '../../types'
-import { createLoc, isSameRank, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isSameRank, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** Ellipsis ... */
-class Ellipsis extends BaseHandler {
+class Ellipsis extends Node {
   handle(environment: EEnvironment): IEllipsis {
     this.check({ environment })
 
@@ -12,7 +12,7 @@ class Ellipsis extends BaseHandler {
     this.output(ETokenType.punctuation, '.')
     const endToken = this.output(ETokenType.punctuation, '.')
 
-    const Ellipsis = this.createNode(ENodeType.Ellipsis, {
+    const Ellipsis = createNode(ENodeType.Ellipsis, {
       loc: createLoc(startToken, endToken)
     })
 

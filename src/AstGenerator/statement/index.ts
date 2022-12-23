@@ -4,14 +4,15 @@ import {
   IClassDeclaration,
   IFunctionDeclaration,
   TDecorativeExpressionNode,
-  TStatementNode
+  TNode,
+  TStatementNode,
+  TToken
 } from '../../types'
-import { isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { getColumn, isToken } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 import AssertStatement from './AssertStatement'
 
-import BlockStatement from './BlockStatement'
 import BreakStatement from './BreakStatement'
 import ClassDeclaration from './ClassDeclaration'
 import ContinueStatement from './ContinueStatement'
@@ -33,7 +34,7 @@ import AsyncFunctionDeclaration from './AsyncFunctionDeclaration'
 import AsyncForStatement from './AsyncForStatement'
 import AsyncWithStatement from './AsyncWithStatement'
 
-class Statement extends BaseHandler {
+class Statement extends Node {
   readonly nonlocalStatement = new NonlocalStatement(this.astGenerator)
   readonly globalStatement = new GlobalStatement(this.astGenerator)
   readonly tryStatement = new TryStatement(this.astGenerator)
@@ -42,7 +43,6 @@ class Statement extends BaseHandler {
   readonly asyncfunctionDeclaration = new AsyncFunctionDeclaration(this.astGenerator)
   readonly functionDeclaration = new FunctionDeclaration(this.astGenerator)
   readonly classDeclaration = new ClassDeclaration(this.astGenerator)
-  readonly blockStatement = new BlockStatement(this.astGenerator)
   readonly emptyStatement = new EmptyStatement(this.astGenerator)
   readonly ifStatement = new IfStatement(this.astGenerator)
   readonly asyncForStatement = new AsyncForStatement(this.astGenerator)
@@ -59,7 +59,9 @@ class Statement extends BaseHandler {
 
   /** 处理语句 */
   handle(environment: EEnvironment): TStatementNode {
-    const currentToken = this.tokens.getToken()
+    if (!this.hasToken()) return
+
+    const currentToken = this.getToken()
     switch (currentToken.value) {
       case 'pass':
         return this.emptyStatement.handle()
@@ -113,6 +115,31 @@ class Statement extends BaseHandler {
     }
   }
 
+  handleBody(environment: EEnvironment, start: TToken | TNode): TNode[] {
+    this.outputLine(ETokenType.punctuation, ':')
+
+    const nodes: TNode[] = []
+    if (this.isSameLine()) {
+      do {
+        const node = this.handle(environment) || this.astGenerator.expression.handle(environment)
+        if (node) nodes.push(node)
+      } while (this.eatLine(ETokenType.punctuation, ';'))
+    } else {
+      const startColumn = getColumn(start, 'start')
+      const markColumn = this.getStartColumn()
+      if (markColumn < startColumn) {
+        throw new SyntaxError('Expected indented block')
+      }
+
+      do {
+        const node = this.astGenerator.handleNode(environment, markColumn - 1)
+        if (node) nodes.push(node)
+      } while (this.hasToken() && this.getStartColumn() === markColumn)
+    }
+
+    return nodes
+  }
+
   /** 处理有装饰器的语句 */
   private _handleDecoratorsInStatement(
     environment: EEnvironment
@@ -136,7 +163,7 @@ class Statement extends BaseHandler {
     environment: EEnvironment,
     decorators: TDecorativeExpressionNode[] = []
   ): TDecorativeExpressionNode[] {
-    const currentToken = this.output(ETokenType.operator, '@')
+    this.output(ETokenType.operator, '@')
     const expression = this.astGenerator.expression.handleMaybeMemberOrSubscriptOrCall(
       EEnvironment.decorative
     ) as TDecorativeExpressionNode

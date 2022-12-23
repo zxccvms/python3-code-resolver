@@ -1,9 +1,9 @@
 import { ENodeType, ETokenType, IMemberExpression, TExpressionNode } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
-class MemberExpression extends BaseHandler {
+class MemberExpression extends Node {
   handleMaybe<T extends TExpressionNode>(
     lastNode: T,
     environment: EEnvironment = EEnvironment.normal
@@ -30,7 +30,7 @@ class MemberExpression extends BaseHandler {
     this.output(ETokenType.punctuation, '.')
     const property = this.astGenerator.expression.identifier.handle(environment)
 
-    const MemberExpression = this.createNode(ENodeType.MemberExpression, {
+    const MemberExpression = createNode(ENodeType.MemberExpression, {
       object: lastNode,
       property,
       loc: createLoc(lastNode, property)

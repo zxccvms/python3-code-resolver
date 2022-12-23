@@ -8,11 +8,11 @@ import {
   TBigBracketExpressionNode,
   TExpressionNode
 } from '../../types'
-import { addBaseNodeAttr, createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { addBaseNodeAttr, createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
-class BigBracket extends BaseHandler {
+class BigBracket extends Node {
   handle(environment: EEnvironment): TBigBracketExpressionNode {
     this.check({ environment })
     const leftBracket = this.output(ETokenType.bracket, '{')
@@ -56,14 +56,14 @@ class BigBracket extends BaseHandler {
       isSlice: true
     })
 
-    return this.createNode(ENodeType.SetExpression, {
+    return createNode(ENodeType.SetExpression, {
       elements: [element, ...payload]
     })
   }
   private _handleSetComprehensionExpression(element: TExpressionNode, environment: EEnvironment) {
     const generators = this.astGenerator.expression.comprehension.handleComprehensions(element, environment)
 
-    return this.createNode(ENodeType.SetComprehensionExpression, {
+    return createNode(ENodeType.SetComprehensionExpression, {
       element,
       generators
     })
@@ -111,7 +111,7 @@ class BigBracket extends BaseHandler {
       values.push(value)
     }
 
-    return this.createNode(ENodeType.DictionaryExpression, {
+    return createNode(ENodeType.DictionaryExpression, {
       keys,
       values
     })
@@ -124,7 +124,7 @@ class BigBracket extends BaseHandler {
   ) {
     const generators = this.astGenerator.expression.comprehension.handleComprehensions(valueNode, environment)
 
-    return this.createNode(ENodeType.DictionaryComprehensionExpression, {
+    return createNode(ENodeType.DictionaryComprehensionExpression, {
       key: keyNode,
       value: valueNode,
       generators

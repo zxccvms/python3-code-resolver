@@ -420,7 +420,7 @@ export interface IExceptHandler extends IBaseNodeAttr {
   type: ENodeType.ExceptHandler
   exceptType?: TExpressionNode
   name?: string
-  body: IBlockStatement
+  body: TNode[]
 }
 
 export interface ISliceExpression extends IBaseNodeAttr {
@@ -630,7 +630,7 @@ export interface IFunctionDeclaration extends IBaseNodeAttr {
   type: ENodeType.FunctionDeclaration
   name: string
   args: IArguments
-  body: IBlockStatement
+  body: TNode[]
   returnType?: TExpressionNode
   decorators?: TDecorativeExpressionNode[]
 }
@@ -639,7 +639,7 @@ export interface IAsyncFunctionDeclaration extends IBaseNodeAttr {
   type: ENodeType.AsyncFunctionDeclaration
   name: string
   args: IArguments
-  body: IBlockStatement
+  body: TNode[]
   returnType?: TExpressionNode
   decorators?: TDecorativeExpressionNode[]
 }
@@ -649,7 +649,7 @@ export interface IClassDeclaration extends IBaseNodeAttr {
   name: string
   bases: TExpressionNode[]
   keywords: IKeyword[]
-  body: IBlockStatement
+  body: TNode[]
   decorators?: TDecorativeExpressionNode[]
 }
 
@@ -665,16 +665,16 @@ export interface IEmptyStatement extends IBaseNodeAttr {
 export interface IIfStatement extends IBaseNodeAttr {
   type: ENodeType.IfStatement
   test: TExpressionNode
-  body: IBlockStatement
-  alternate?: IBlockStatement | IIfStatement
+  body: TNode[]
+  orelse?: TNode[]
 }
 
 export interface ITryStatement extends IBaseNodeAttr {
   type: ENodeType.TryStatement
-  body: IBlockStatement
+  body: TNode[]
   handlers?: IExceptHandler[]
-  elseBody: IBlockStatement
-  finalBody: IBlockStatement
+  elseBody?: TNode[]
+  finalBody?: TNode[]
 }
 
 export interface IProgram extends IBaseNodeAttr {
@@ -694,8 +694,8 @@ export interface IForStatement extends IBaseNodeAttr {
   type: ENodeType.ForStatement
   target: TAssignableExpressionNode
   iterable: TExpressionNode
-  body: IBlockStatement
-  elseBody?: IBlockStatement
+  body: TNode[]
+  elseBody?: TNode[]
 }
 
 export interface INonlocalStatement extends IBaseNodeAttr {
@@ -716,8 +716,8 @@ export interface IReturnStatement extends IBaseNodeAttr {
 export interface IWhileStatement extends IBaseNodeAttr {
   type: ENodeType.WhileStatement
   test: TExpressionNode
-  body: IBlockStatement
-  elseBody?: IBlockStatement
+  body: TNode[]
+  elseBody?: TNode[]
 }
 
 export interface IContinueStatement extends IBaseNodeAttr {
@@ -727,13 +727,13 @@ export interface IContinueStatement extends IBaseNodeAttr {
 export interface IAsyncWithStatement extends IBaseNodeAttr {
   type: ENodeType.AsyncWithStatement
   withItems: IWithItem[]
-  body: IBlockStatement
+  body: TNode[]
 }
 
 export interface IWithStatement extends IBaseNodeAttr {
   type: ENodeType.WithStatement
   withItems: IWithItem[]
-  body: IBlockStatement
+  body: TNode[]
 }
 
 export interface IBreakStatement extends IBaseNodeAttr {

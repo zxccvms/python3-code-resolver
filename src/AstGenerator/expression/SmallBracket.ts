@@ -1,9 +1,9 @@
 import { ENodeType, ETokenType, IGeneratorExpression, TExpressionNode } from '../../types'
-import { createLoc, getPositionInfo, hasParenthesized, addBaseNodeAttr, getLatest } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, getPositionInfo, hasParenthesized, addBaseNodeAttr, getLatest, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
-class SmallBracket extends BaseHandler {
+class SmallBracket extends Node {
   handle(environment: EEnvironment): TExpressionNode {
     const leftBracket = this.output(ETokenType.bracket, '(')
     environment = environment | EEnvironment.bracket
@@ -11,7 +11,7 @@ class SmallBracket extends BaseHandler {
     let expression: TExpressionNode
     let rightBracketToken = this.eat(ETokenType.bracket, ')')
     if (rightBracketToken) {
-      expression = this.createNode(ENodeType.TupleExpression, {
+      expression = createNode(ENodeType.TupleExpression, {
         elements: [],
         loc: {
           start: getPositionInfo(rightBracketToken, 'start'),
@@ -45,7 +45,7 @@ class SmallBracket extends BaseHandler {
   handleGeneratorExpression(element: TExpressionNode, environment: EEnvironment): IGeneratorExpression {
     const generators = this.astGenerator.expression.comprehension.handleComprehensions(element, environment)
 
-    const GeneratorExpression = this.createNode(ENodeType.GeneratorExpression, {
+    const GeneratorExpression = createNode(ENodeType.GeneratorExpression, {
       element,
       generators,
       loc: createLoc(element, getLatest(generators))

@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, ICompareExpression, TExpressionNode, TToken } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** todo  比较表达式 a in b */
-class CompareExpression extends BaseHandler {
+class CompareExpression extends Node {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment) {
     const currentToken = this.tokens.getToken()
 
@@ -36,7 +36,7 @@ class CompareExpression extends BaseHandler {
 
     const right = this.astGenerator.expression.handleMaybeCompare(environment)
 
-    const CompareExpression = this.createNode(ENodeType.CompareExpression, {
+    const CompareExpression = createNode(ENodeType.CompareExpression, {
       left: lastNode,
       operator,
       right,

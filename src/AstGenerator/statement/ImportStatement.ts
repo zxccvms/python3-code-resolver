@@ -1,16 +1,16 @@
 import AstToCode from '../../AstToCode'
 import { ENodeType, ETokenType, IAliasExpression, IImportStatement, TToken } from '../../types'
-import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, getLatest, isSameRank, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 导入语句 */
-class ImportStatement extends BaseHandler {
+class ImportStatement extends Node {
   handle(): IImportStatement {
     const importToken = this.output(ETokenType.keyword, 'import')
     const names = this._handleNames(importToken)
 
-    const ImportExpression = this.createNode(ENodeType.ImportStatement, {
+    const ImportExpression = createNode(ENodeType.ImportStatement, {
       names,
       loc: createLoc(importToken, getLatest(names))
     })
@@ -39,7 +39,7 @@ class ImportStatement extends BaseHandler {
 
     const astToCode = new AstToCode()
     const name = astToCode.generate(maybeMemberExpression)
-    const AliasExpression = this.createNode(ENodeType.AliasExpression, {
+    const AliasExpression = createNode(ENodeType.AliasExpression, {
       name,
       asname: asnameToken?.value || null,
       loc: createLoc(maybeMemberExpression, asnameToken || maybeMemberExpression)

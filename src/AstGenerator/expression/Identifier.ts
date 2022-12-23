@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IIdentifier } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 标识符 */
-class Identifier extends BaseHandler {
+class Identifier extends Node {
   handle(environment: EEnvironment): IIdentifier {
     this.check({
       environment,
@@ -13,7 +13,7 @@ class Identifier extends BaseHandler {
     })
     const currentToken = this.output(ETokenType.identifier)
 
-    const Identifier = this.createNode(ENodeType.Identifier, {
+    const Identifier = createNode(ENodeType.Identifier, {
       name: currentToken.value,
       loc: createLoc(currentToken, currentToken)
     })

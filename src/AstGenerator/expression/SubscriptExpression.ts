@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, ISubscriptExpression, TExpressionNode } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 下标表达式 */
-class SubscriptExpression extends BaseHandler {
+class SubscriptExpression extends Node {
   handle(lastNode: TExpressionNode, environment: EEnvironment): ISubscriptExpression {
     this.check({ environment, isBefore: true, isAssignableExpression: true })
 
@@ -14,7 +14,7 @@ class SubscriptExpression extends BaseHandler {
 
     const rightMediumBracket = this.output(ETokenType.bracket, ']')
 
-    const SubscriptExpression = this.createNode(ENodeType.SubscriptExpression, {
+    const SubscriptExpression = createNode(ENodeType.SubscriptExpression, {
       object: lastNode,
       subscript,
       loc: createLoc(lastNode, rightMediumBracket)
@@ -56,7 +56,7 @@ class SubscriptExpression extends BaseHandler {
     if (expressions.length === 1 && expressions[0]) {
       return expressions[0]
     } else {
-      const SliceExpression = this.createNode(ENodeType.SliceExpression, {
+      const SliceExpression = createNode(ENodeType.SliceExpression, {
         lower: expressions[0],
         upper: expressions[2],
         step: expressions[4],

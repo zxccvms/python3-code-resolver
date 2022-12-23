@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IYieldExpression, IYieldFromExpression } from '../../types'
-import { createLoc, checkBit, isToken, isSameRank } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, checkBit, isToken, isSameRank, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** yield表达式 yield a */ // todo 只能当作开头
-class YieldExpression extends BaseHandler {
+class YieldExpression extends Node {
   handle(environment: EEnvironment): IYieldExpression | IYieldFromExpression {
     // if (!checkBit(environment, EEnvironment.functionBody | EEnvironment.lambda)) {
     //   throw new SyntaxError('"yield" not allowed outside of a function or lambda')
@@ -22,7 +22,7 @@ class YieldExpression extends BaseHandler {
       formToken = this.eat(ETokenType.keyword, 'from')
       value = this.astGenerator.expression.handleMaybeTuple(environment)
     }
-    return this.createNode(formToken ? ENodeType.YieldFromExpression : ENodeType.YieldExpression, {
+    return createNode(formToken ? ENodeType.YieldFromExpression : ENodeType.YieldExpression, {
       value,
       loc: createLoc(yieldToken, value)
     })

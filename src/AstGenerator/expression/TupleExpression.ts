@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, ITupleExpression, TExpressionNode } from '../../types'
-import { createLoc, checkBit, isSameRank, isToken, getLatest } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, checkBit, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 处理元组 */
-class TupleExpression extends BaseHandler {
+class TupleExpression extends Node {
   handleMaybe(
     lastNode: TExpressionNode,
     environment: EEnvironment,
@@ -31,7 +31,7 @@ class TupleExpression extends BaseHandler {
 
     const elements = this._handleElements(environment, [lastNode], handleExpression)
 
-    const TupleExpression = this.createNode(ENodeType.TupleExpression, {
+    const TupleExpression = createNode(ENodeType.TupleExpression, {
       elements,
       loc: createLoc(lastNode, this.tokens.getToken(-1))
     })

@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IAliasExpression, IImportFromStatement, TToken } from '../../types'
-import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, getLatest, isSameRank, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 导入语句 */
-class ImportFromStatement extends BaseHandler {
+class ImportFromStatement extends Node {
   handle(): IImportFromStatement {
     const fromToken = this.output(ETokenType.keyword, 'from')
 
@@ -15,7 +15,7 @@ class ImportFromStatement extends BaseHandler {
 
     const names = this._handleNames(importToken)
 
-    const ImportExpression = this.createNode(ENodeType.ImportFromStatement, {
+    const ImportExpression = createNode(ENodeType.ImportFromStatement, {
       names,
       module,
       level,
@@ -92,7 +92,7 @@ class ImportFromStatement extends BaseHandler {
       }
     }
 
-    const AliasExpression = this.createNode(ENodeType.AliasExpression, {
+    const AliasExpression = createNode(ENodeType.AliasExpression, {
       name: nameToken.value,
       asname: asNameToken?.value || null,
       loc: createLoc(nameToken, asNameToken || nameToken)

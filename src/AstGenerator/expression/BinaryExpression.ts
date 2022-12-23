@@ -6,12 +6,12 @@ import {
   TExpressionNode,
   TToken
 } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 二进制表达式 */
-class BinaryExpression extends BaseHandler {
+class BinaryExpression extends Node {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment): TExpressionNode {
     if (this.isToken(ETokenType.operator, Object.values(EBinaryExpressionOperator)) && this.isContinue(environment)) {
       const binaryExpression = this.handle(lastNode, environment)
@@ -32,7 +32,7 @@ class BinaryExpression extends BaseHandler {
 
     const rightNode = this.astGenerator.expression.handleMaybeMemberOrSubscriptOrCall(environment)
 
-    const BinaryExpression = this.createNode(ENodeType.BinaryExpression, {
+    const BinaryExpression = createNode(ENodeType.BinaryExpression, {
       operator: operatorToken.value,
       left: lastNode,
       right: rightNode,

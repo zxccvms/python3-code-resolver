@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IKeyword, TNode } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 赋值的参数 */
-class Keyword extends BaseHandler {
+class Keyword extends Node {
   handle(environment: EEnvironment, lastNode?: TNode<ENodeType.Identifier>): IKeyword {
     const operatorToken = this.output(ETokenType.operator, ['=', '**'])
 
@@ -12,7 +12,7 @@ class Keyword extends BaseHandler {
 
     const value = this.astGenerator.expression.handleMaybeIf(environment)
 
-    const Keyword = this.createNode(ENodeType.Keyword, {
+    const Keyword = createNode(ENodeType.Keyword, {
       name,
       value,
       loc: createLoc(lastNode || operatorToken, value)

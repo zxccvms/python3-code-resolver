@@ -1,19 +1,11 @@
-import NodeGenerator from '../NodeGenerator'
-import { ETokenType, TNode, TToken } from '../types'
-import TokenArray from './utils/TokenArray'
-import { EEnvironment, ICheckParams, IFindNodesParams } from './types'
-import { checkBit, getRightBracket, isSameRank, isToken } from '../utils'
-import AstGenerator from './AstGenerator'
+import { ETokenType, TToken } from '../../types'
+import TokenArray from './TokenArray'
+import { EEnvironment, ICheckParams, IFindNodesParams } from '../types'
+import { checkBit, getColumn, getRightBracket, isSameRank, isToken } from '../../utils'
 
 /** 节点基础的处理者 */
 class BaseHandler {
   public tokens: TokenArray
-  public createNode: NodeGenerator['generate']
-
-  constructor(public astGenerator: AstGenerator) {
-    this.tokens = astGenerator.tokens
-    this.createNode = astGenerator.createNode
-  }
 
   /** 通过 符合的token 和 步进函数 得到期间的token */
   findTokens(end: (token: TToken) => boolean): TStateResponse<TToken[]> {
@@ -67,8 +59,16 @@ class BaseHandler {
     return isSameRank([this.tokens.getToken(mode === 'before' ? -1 : 1), currentToken], 'endAndStartLine')
   }
 
-  isSameLine(target: TToken | TNode) {
-    return isSameRank([target, this.tokens.getToken()], 'endAndStartLine')
+  hasToken() {
+    return Boolean(this.tokens.getToken())
+  }
+
+  getToken(extraIndex?: number) {
+    return this.tokens.getToken(extraIndex)
+  }
+
+  isSameLine() {
+    return isSameRank([this.tokens.getToken(-1), this.tokens.getToken()], 'endAndStartLine')
   }
 
   isToken(types: ETokenType | ETokenType[], value?: string | string[]): boolean {
@@ -92,9 +92,7 @@ class BaseHandler {
   eatLine<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
     const token = this.tokens.getToken()
     if (!isToken(token, types, value)) return
-
-    const lastToken = this.tokens.getToken(-1)
-    if (!this.isSameLine(lastToken)) return
+    else if (!this.isSameLine()) return
 
     this.tokens.next()
     return token
@@ -115,7 +113,7 @@ class BaseHandler {
     const token = this.tokens.getToken()
     if (!isToken(token, types, value)) {
       throw new TypeError('Unexpected token')
-    } else if (!this.isSameLine(this.tokens.getToken(-1))) {
+    } else if (!this.isSameLine()) {
       throw new TypeError('Unexpected token')
     }
 
@@ -170,6 +168,11 @@ class BaseHandler {
         throw new SyntaxError('invalid syntax')
       }
     }
+  }
+
+  getStartColumn() {
+    const currentToken = this.tokens.getToken()
+    return getColumn(currentToken, 'start')
   }
 }
 

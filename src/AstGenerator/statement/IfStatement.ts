@@ -1,34 +1,32 @@
 import { ENodeType, ETokenType, IIfStatement } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** if语句 */
-class IfStatement extends BaseHandler {
+class IfStatement extends Node {
   handle(environment: EEnvironment, keyword: 'if' | 'elif' = 'if'): IIfStatement {
     const currentToken = this.output(ETokenType.keyword, keyword)
     const test = this.astGenerator.expression.handleMaybeIf(environment)
-    const body = this.astGenerator.statement.blockStatement.handle(currentToken, environment)
-    const alternate = this._handleAlternate(environment)
+    const body = this.astGenerator.statement.handleBody(environment, currentToken)
+    const orelse = this._handleOrelse(environment)
 
-    const IfStatement = this.createNode(ENodeType.IfStatement, {
+    const IfStatement = createNode(ENodeType.IfStatement, {
       test,
       body,
-      alternate,
-      loc: createLoc(currentToken, alternate || body)
+      orelse,
+      loc: createLoc(currentToken, (orelse || body).at(-1))
     })
 
     return IfStatement
   }
 
-  private _handleAlternate(environment: EEnvironment): IIfStatement['alternate'] {
-    const currentToken = this.tokens.getToken()
-
-    if (isToken(currentToken, ETokenType.keyword, 'else')) {
-      this.tokens.next()
-      return this.astGenerator.statement.blockStatement.handle(currentToken, environment)
-    } else if (isToken(currentToken, ETokenType.keyword, 'elif')) {
-      return this.handle(environment, 'elif')
+  private _handleOrelse(environment: EEnvironment): IIfStatement['orelse'] {
+    const elseToken = this.eat(ETokenType.keyword, 'else')
+    if (elseToken) {
+      return this.astGenerator.statement.handleBody(environment, elseToken)
+    } else if (this.isToken(ETokenType.keyword, 'elif')) {
+      return [this.handle(environment, 'elif')]
     } else {
       return null
     }

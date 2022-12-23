@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IArrayComprehensionExpression, IArrayExpression, TExpressionNode } from '../../types'
-import { addBaseNodeAttr, createLoc, isNode, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { addBaseNodeAttr, createLoc, isNode, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 数组 or 数组解析 表达式 */
-class MiddleBracket extends BaseHandler {
+class MiddleBracket extends Node {
   handle(environment: EEnvironment): IArrayExpression | IArrayComprehensionExpression {
     const leftBracket = this.output(ETokenType.bracket, '[')
     environment = environment | EEnvironment.bracket
@@ -18,7 +18,7 @@ class MiddleBracket extends BaseHandler {
         this.check({ environment })
         const generators = this.astGenerator.expression.comprehension.handleComprehensions(element, environment)
 
-        Node = this.createNode(ENodeType.ArrayComprehensionExpression, {
+        Node = createNode(ENodeType.ArrayComprehensionExpression, {
           element,
           generators
         })
@@ -29,7 +29,7 @@ class MiddleBracket extends BaseHandler {
       this.check({ environment, isAssignableExpression: true })
       const elements = [element, ...this._handleElements(environment)]
 
-      Node = this.createNode(ENodeType.ArrayExpression, {
+      Node = createNode(ENodeType.ArrayExpression, {
         elements
       })
     }

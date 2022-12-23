@@ -1,6 +1,6 @@
 import { ENodeType, ETokenType, TToken, IArguments, IArgument, TExpressionNode } from '../../types'
-import { checkBit, createLoc } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { checkBit, createLoc, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 enum EArgType {
@@ -23,7 +23,7 @@ type TItem = {
 }
 
 /** 参数列表表达式 */
-class Arguments extends BaseHandler {
+class Arguments extends Node {
   handle(end: (token: TToken) => boolean, environment: EEnvironment): IArguments {
     const startToken = this.tokens.getToken()
 
@@ -35,7 +35,7 @@ class Arguments extends BaseHandler {
 
     const argMap = this._filtrate(payload)
 
-    const Arguments = this.createNode(ENodeType.Arguments, {
+    const Arguments = createNode(ENodeType.Arguments, {
       ...argMap,
       loc: createLoc(startToken, this.tokens.getToken())
     })
@@ -81,7 +81,7 @@ class Arguments extends BaseHandler {
       annotation = this.astGenerator.expression.handleMaybeIf(environment)
     }
 
-    const Argument = this.createNode(ENodeType.Argument, {
+    const Argument = createNode(ENodeType.Argument, {
       name: identifierToken.value,
       annotation,
       loc: createLoc(identifierToken, annotation || identifierToken)

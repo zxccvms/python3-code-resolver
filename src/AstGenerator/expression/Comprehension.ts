@@ -1,11 +1,11 @@
 import { ENodeType, ETokenType, IComprehension, TAssignableExpressionNode, TExpressionNode } from '../../types'
-import { isToken, createLoc, isNode } from '../../utils'
-import AstGenerator from '../AstGenerator'
-import BaseHandler from '../BaseHandler'
+import { isToken, createLoc, isNode, createNode } from '../../utils'
+import AstGenerator from '..'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 解析表达式 */
-class Comprehension extends BaseHandler {
+class Comprehension extends Node {
   handleComprehensions(lastNode: TExpressionNode, environment: EEnvironment): IComprehension[] {
     if (isNode(lastNode, ENodeType.StarredExpression)) {
       throw new SyntaxError('iterable unpacking cannot be used in comprehension')
@@ -31,7 +31,7 @@ class Comprehension extends BaseHandler {
 
     const ifs = this._handleMaybeIfs(environment)
 
-    const Comprehension = this.createNode(ENodeType.Comprehension, {
+    const Comprehension = createNode(ENodeType.Comprehension, {
       isAsync,
       target,
       iterable,

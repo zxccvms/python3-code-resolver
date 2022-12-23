@@ -1,12 +1,12 @@
 import { ENodeType, ETokenType, IIfExpression, TExpressionNode } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** if表达式
  * 'Z-Factory.exe' if port == '6444' else 'Z-Bot.exe'
  */
-class IfExpression extends BaseHandler {
+class IfExpression extends Node {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment) {
     const currentToken = this.tokens.getToken()
     if (isToken(currentToken, ETokenType.keyword, 'if') && this.isContinue(environment)) {
@@ -35,7 +35,7 @@ class IfExpression extends BaseHandler {
     const elseToken = this.output(ETokenType.keyword, 'else')
     const alternate = this.astGenerator.expression.handleMaybeIf(environment)
 
-    const IfExpression = this.createNode(ENodeType.IfExpression, {
+    const IfExpression = createNode(ENodeType.IfExpression, {
       test,
       body: lastNode,
       alternate,

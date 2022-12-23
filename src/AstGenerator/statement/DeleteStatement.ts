@@ -1,15 +1,15 @@
 import { ENodeType, ETokenType, IDeleteStatement, TToken } from '../../types'
-import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, getLatest, isSameRank, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** del语句 */
-class DeleteStatement extends BaseHandler {
+class DeleteStatement extends Node {
   handle(): IDeleteStatement {
     const delToken = this.output(ETokenType.keyword, 'del')
     const targets = this._handleTargets(delToken)
 
-    const DeleteStatement = this.createNode(ENodeType.DeleteStatement, {
+    const DeleteStatement = createNode(ENodeType.DeleteStatement, {
       targets,
       loc: createLoc(delToken, getLatest(targets))
     })

@@ -1,13 +1,13 @@
 import { ENodeType, ETokenType, IEmptyStatement } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, createNode } from '../../utils'
+import Node from '../utils/Node'
 
 /** 处理空语句 */
-class EmptyStatement extends BaseHandler {
+class EmptyStatement extends Node {
   handle(): IEmptyStatement {
     const passToken = this.output(ETokenType.keyword, 'pass')
 
-    const EmptyStatement = this.createNode(ENodeType.EmptyStatement, {
+    const EmptyStatement = createNode(ENodeType.EmptyStatement, {
       loc: createLoc(passToken)
     })
 

@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IAsyncWithStatement, IWithItem, TAssignableExpressionNode } from '../../types'
-import { createLoc } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** async with语句 */
-class AsyncWithStatement extends BaseHandler {
+class AsyncWithStatement extends Node {
   handle(environment: EEnvironment): IAsyncWithStatement {
     const asyncToken = this.output(ETokenType.keyword, 'async')
     this.outputLine(ETokenType.keyword, 'with')
@@ -15,12 +15,12 @@ class AsyncWithStatement extends BaseHandler {
       withItems.push(withItem)
     } while (this.eatLine(ETokenType.punctuation, ','))
 
-    const body = this.astGenerator.statement.blockStatement.handle(asyncToken, environment)
+    const body = this.astGenerator.statement.handleBody(environment, asyncToken)
 
-    const AsyncWithStatement = this.createNode(ENodeType.AsyncWithStatement, {
+    const AsyncWithStatement = createNode(ENodeType.AsyncWithStatement, {
       withItems,
       body,
-      loc: createLoc(asyncToken, body)
+      loc: createLoc(asyncToken, body.at(-1))
     })
 
     return AsyncWithStatement
@@ -36,7 +36,7 @@ class AsyncWithStatement extends BaseHandler {
       ) as TAssignableExpressionNode
     }
 
-    const withItem = this.createNode(ENodeType.WithItem, {
+    const withItem = createNode(ENodeType.WithItem, {
       expression,
       optionalVars,
       loc: createLoc(expression, optionalVars || expression)

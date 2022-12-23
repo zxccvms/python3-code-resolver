@@ -1,9 +1,9 @@
 import { ENodeType, ETokenType, IAnnAssignmentExpression, TExpressionNode } from '../../types'
-import { createLoc, isNode } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, createNode, isNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
-class AnnAssignmentExpression extends BaseHandler {
+class AnnAssignmentExpression extends Node {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment): TExpressionNode {
     if (!this.isToken(ETokenType.punctuation, ':')) return lastNode
 
@@ -25,7 +25,7 @@ class AnnAssignmentExpression extends BaseHandler {
       value = this.astGenerator.expression.handleMaybeTuple(environment)
     }
 
-    const AnnAssignmentExpression = this.createNode(ENodeType.AnnAssignmentExpression, {
+    const AnnAssignmentExpression = createNode(ENodeType.AnnAssignmentExpression, {
       annotation,
       target: lastNode,
       value,

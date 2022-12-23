@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IAssertStatement } from '../../types'
-import { createLoc } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** Assert语句 assert a, b */
-class AssertStatement extends BaseHandler {
+class AssertStatement extends Node {
   handle(environment: EEnvironment): IAssertStatement {
     const assertToken = this.output(ETokenType.keyword, 'assert')
 
@@ -15,7 +15,7 @@ class AssertStatement extends BaseHandler {
       msg = this.astGenerator.expression.handleMaybeIf(environment)
     }
 
-    const AssertStatement = this.createNode(ENodeType.AssertStatement, {
+    const AssertStatement = createNode(ENodeType.AssertStatement, {
       test,
       msg,
       loc: createLoc(assertToken, msg || test)

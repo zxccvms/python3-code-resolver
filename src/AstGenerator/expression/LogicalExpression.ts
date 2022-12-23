@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, ILogicalExpression, TExpressionNode, TToken } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 逻辑表达式 */
-class LogicalExpression extends BaseHandler {
+class LogicalExpression extends Node {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment, disableOr: boolean = false): TExpressionNode {
     if (!this.isContinue(environment)) return lastNode
 
@@ -34,7 +34,7 @@ class LogicalExpression extends BaseHandler {
         ? this.astGenerator.expression.handleMaybeCompare(environment)
         : this.astGenerator.expression.handleMaybeLogical(environment, true)
 
-    const LogicalExpression = this.createNode(ENodeType.LogicalExpression, {
+    const LogicalExpression = createNode(ENodeType.LogicalExpression, {
       left: lastNode,
       right,
       operator: currentToken.value,

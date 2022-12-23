@@ -1,4 +1,4 @@
-import { ENodeType, ETokenType, IBaseNodeAttr, TLoc, TNode, TPositionInfo, TToken } from './types'
+import { ENodeType, ETokenType, IBaseNodeAttr, TLoc, TNode, TNodeMap, TPositionInfo, TToken } from './types'
 
 /** 得到数组的最后一项 */
 export function getLatest<T>(array: Array<T>): T {
@@ -81,6 +81,13 @@ export function isToken<T extends ETokenType, V extends string>(
 export function isNode<T extends ENodeType>(node: TNode, types: T | T[]): node is TNode<T> {
   if (!node) return false
   return toArray(types).some(type => type === node.type)
+}
+
+export function createNode<T extends ENodeType>(type: T, attr: Omit<TNodeMap[T], 'type'> & IBaseNodeAttr): TNode<T> {
+  return {
+    type,
+    ...attr
+  } as TNode<T>
 }
 
 export function createLoc(start: TToken | TNode, end?: TToken | TNode): TLoc {

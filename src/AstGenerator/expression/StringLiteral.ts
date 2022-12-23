@@ -10,9 +10,9 @@ import {
   EStringTokenPrefix,
   TLoc
 } from '../../types'
-import { createLoc, getLatest, getPositionInfo, getTokenExtra, isToken } from '../../utils'
-import AstGenerator from '../AstGenerator'
-import BaseHandler from '../BaseHandler'
+import { createLoc, getLatest, getPositionInfo, getTokenExtra, isToken, createNode } from '../../utils'
+import AstGenerator from '..'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 enum EType {
@@ -28,7 +28,7 @@ interface IItem extends Omit<ICacheStringLiteral, 'prefix'> {
 }
 
 /** 字符串 */
-class StringLiteral extends BaseHandler {
+class StringLiteral extends Node {
   handle(environment: EEnvironment): IStringLiteral | ITemplateLiteral {
     const stringToken = this.tokens.getToken()
     this.check({
@@ -69,7 +69,7 @@ class StringLiteral extends BaseHandler {
     }
 
     if (isTemplate) {
-      const TemplateLiteral = this.createNode(ENodeType.TemplateLiteral, {
+      const TemplateLiteral = createNode(ENodeType.TemplateLiteral, {
         expressions,
         loc: createLoc(stringToken, getLatest(expressions))
       })
@@ -109,7 +109,7 @@ class StringLiteral extends BaseHandler {
     const astGenerator = new AstGenerator(tokens)
     const value = astGenerator.expression.handleMaybeTuple(EEnvironment.bracket)
 
-    const TemplateValue = this.createNode(ENodeType.TemplateValue, {
+    const TemplateValue = createNode(ENodeType.TemplateValue, {
       value,
       loc
     })
@@ -178,7 +178,7 @@ class StringLiteral extends BaseHandler {
   }
 
   private _createStringLiteral(data: ICacheStringLiteral): IStringLiteral {
-    return this.createNode(ENodeType.StringLiteral, {
+    return createNode(ENodeType.StringLiteral, {
       ...data,
       raw: JSON.stringify(data.value)
     })

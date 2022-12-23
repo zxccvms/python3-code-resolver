@@ -27,7 +27,7 @@ const systemSuffixReg16 = /[0123456789ABCDEFabcdef]/
 /** 括号 */
 const bracketReg = /\(|\)|\{|\}|\[|\]/
 /** 标点符号 */
-const punctuationReg = /\.|\,|\:/
+const punctuationReg = /\.|\,|\:|\;/
 /** 标识符 */
 const identifierReg = /[a-z|A-Z|_|\u4e00-\u9fa5|\u0800-\u4e00|\uAC00-\uD7A3]/
 /** 标识符后续 */

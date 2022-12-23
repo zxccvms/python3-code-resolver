@@ -1,11 +1,11 @@
-import AstGenerator from '../AstGenerator'
-import { ENodeType, ETokenType, IBlockStatement, IForStatement, TAssignableExpressionNode } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import AstGenerator from '..'
+import { ENodeType, ETokenType, IForStatement, TAssignableExpressionNode, TNode } from '../../types'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** async for 语句 */
-class AsyncForStatement extends BaseHandler {
+class AsyncForStatement extends Node {
   handle(environment: EEnvironment): IForStatement {
     const asyncToken = this.output(ETokenType.keyword, 'async')
     this.outputLine(ETokenType.keyword, 'for')
@@ -16,20 +16,20 @@ class AsyncForStatement extends BaseHandler {
 
     const iterable = this.astGenerator.expression.handleMaybeTuple(environment)
 
-    const body = this.astGenerator.statement.blockStatement.handle(asyncToken, environment | EEnvironment.loopBody)
+    const body = this.astGenerator.statement.handleBody(environment | EEnvironment.loopBody, asyncToken)
 
-    let elseBody: IBlockStatement = null
+    let elseBody: TNode[] = null
     const elseToken = this.eat(ETokenType.keyword, 'else')
     if (elseToken) {
-      elseBody = this.astGenerator.statement.blockStatement.handle(elseToken, environment)
+      elseBody = this.astGenerator.statement.handleBody(environment, elseToken)
     }
 
-    const ForStatement = this.createNode(ENodeType.ForStatement, {
+    const ForStatement = createNode(ENodeType.ForStatement, {
       target,
       iterable,
       body,
       elseBody,
-      loc: createLoc(asyncToken, elseBody || body)
+      loc: createLoc(asyncToken, (elseBody || body).at(-1))
     })
 
     return ForStatement

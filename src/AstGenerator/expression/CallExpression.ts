@@ -1,6 +1,6 @@
 import { ENodeType, ETokenType, ICallExpression, IKeyword, TExpressionNode } from '../../types'
-import { createLoc, isNode, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isNode, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 interface IState {
@@ -10,7 +10,7 @@ interface IState {
 }
 
 /** 函数调用表达式 */
-class CallExpression extends BaseHandler {
+class CallExpression extends Node {
   handle(lastNode: TExpressionNode, environment: EEnvironment): ICallExpression {
     this.check({
       environment,
@@ -24,7 +24,7 @@ class CallExpression extends BaseHandler {
 
     const rightBracket = this.output(ETokenType.bracket, ')')
 
-    const CallExpression = this.createNode(ENodeType.CallExpression, {
+    const CallExpression = createNode(ENodeType.CallExpression, {
       callee: lastNode,
       args,
       keywords,

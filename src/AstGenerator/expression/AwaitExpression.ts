@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType } from '../../types'
-import { createLoc } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** Await表达式 */
-class AwaitExpression extends BaseHandler {
+class AwaitExpression extends Node {
   handle(environment: EEnvironment) {
     // todo asyncFunction环境校验
     this.check({ environment, isAfter: true })
@@ -13,7 +13,7 @@ class AwaitExpression extends BaseHandler {
 
     const value = this.astGenerator.expression.handleMaybeTuple(environment)
 
-    const AwaitExpression = this.createNode(ENodeType.AwaitExpression, {
+    const AwaitExpression = createNode(ENodeType.AwaitExpression, {
       value,
       loc: createLoc(awaitToken, value)
     })

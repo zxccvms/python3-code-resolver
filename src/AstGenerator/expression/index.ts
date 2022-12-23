@@ -1,6 +1,6 @@
 import { ENodeType, ETokenType, TAssignableExpressionNode, TBasicExpressionNode, TExpressionNode } from '../../types'
 import { createLoc, getPositionInfo, isSameRank, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 import AssignmentExpression from './AssignmentExpression'
@@ -32,7 +32,7 @@ import AwaitExpression from './AwaitExpression'
 import NamedExpression from './NamedExpression'
 import AnnAssignmentExpression from './AnnAssignmentExpression'
 
-class Expression extends BaseHandler {
+class Expression extends Node {
   // 基础表达式
   readonly noneLiteral = new NoneLiteral(this.astGenerator)
   readonly booleanLiteral = new BooleanLiteral(this.astGenerator)
@@ -69,6 +69,7 @@ class Expression extends BaseHandler {
 
   /** 解析表达式 */
   handle(environment: EEnvironment): TExpressionNode {
+    if (!this.hasToken()) return
     return this.handleMaybeAssignment(environment)
   }
 

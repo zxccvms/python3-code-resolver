@@ -1,38 +1,46 @@
-import { ENodeType, ETokenType, IBlockStatement, IExceptHandler, ITryStatement, TExpressionNode } from '../../types'
-import { createLoc, getLatest, isSameRank, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import {
+  ENodeType,
+  ETokenType,
+  IBlockStatement,
+  IExceptHandler,
+  ITryStatement,
+  TExpressionNode,
+  TNode
+} from '../../types'
+import { createLoc, getLatest, isSameRank, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** try语句 */
-class TryStatement extends BaseHandler {
+class TryStatement extends Node {
   handle(environment: EEnvironment): ITryStatement {
     const tryToken = this.output(ETokenType.keyword, 'try')
 
-    const body = this.astGenerator.statement.blockStatement.handle(tryToken, environment)
+    const body = this.astGenerator.statement.handleBody(environment, tryToken)
     const handlers = this._handleHandlers(environment)
 
-    let elseBody: IBlockStatement = null
+    let elseBody: TNode[] = null
     const elseToken = this.eat(ETokenType.keyword, 'else')
     if (elseToken) {
       if (!handlers.length) {
         throw new SyntaxError('Try statement must have at least one except or finally clause')
       }
 
-      elseBody = this.astGenerator.statement.blockStatement.handle(elseToken, environment)
+      elseBody = this.astGenerator.statement.handleBody(environment, elseToken)
     }
 
-    let finalBody: IBlockStatement = null
+    let finalBody: TNode[] = null
     const finallyToken = this.eat(ETokenType.keyword, 'finally')
     if (finallyToken) {
-      finalBody = this.astGenerator.statement.blockStatement.handle(finallyToken, environment)
+      finalBody = this.astGenerator.statement.handleBody(environment, finallyToken)
     }
 
-    const TryStatement = this.createNode(ENodeType.TryStatement, {
+    const TryStatement = createNode(ENodeType.TryStatement, {
       body,
       handlers,
       elseBody,
       finalBody,
-      loc: createLoc(body, finalBody || elseBody || getLatest(handlers))
+      loc: createLoc(tryToken, (finalBody || elseBody || handlers || body).at(-1))
     })
 
     return TryStatement
@@ -53,22 +61,22 @@ class TryStatement extends BaseHandler {
     const exceptToken = this.output(ETokenType.keyword, 'except')
 
     let exceptType: TExpressionNode = null
-    if (!this.isToken(ETokenType.punctuation, ':')) {
+    if (this.isSameLine() && !this.isToken(ETokenType.punctuation, ':')) {
       exceptType = this.astGenerator.expression.handleMaybeIf(environment)
     }
 
     let name: string = null
-    if (this.eat(ETokenType.keyword, 'as')) {
+    if (this.eatLine(ETokenType.keyword, 'as')) {
       name = this.output(ETokenType.identifier).value
     }
 
-    const body = this.astGenerator.statement.blockStatement.handle(exceptToken, environment)
+    const body = this.astGenerator.statement.handleBody(environment, exceptToken)
 
-    const ExceptHandlerStatement = this.createNode(ENodeType.ExceptHandler, {
+    const ExceptHandlerStatement = createNode(ENodeType.ExceptHandler, {
       body,
       exceptType,
       name,
-      loc: createLoc(exceptToken, body)
+      loc: createLoc(exceptToken, body.at(-1))
     })
 
     return ExceptHandlerStatement

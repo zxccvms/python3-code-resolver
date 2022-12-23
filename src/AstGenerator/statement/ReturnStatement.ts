@@ -1,9 +1,9 @@
 import { ENodeType, ETokenType, IReturnStatement } from '../../types'
-import { createLoc, checkBit, isSameRank } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, checkBit, isSameRank, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
-class ReturnStatement extends BaseHandler {
+class ReturnStatement extends Node {
   handle(environment: EEnvironment): IReturnStatement {
     if (!checkBit(environment, EEnvironment.functionBody)) {
       throw new SyntaxError('"return" can be used only within a function')
@@ -16,7 +16,7 @@ class ReturnStatement extends BaseHandler {
       argument = this.astGenerator.expression.handleMaybeTuple(environment)
     }
 
-    const ReturnStatement = this.createNode(ENodeType.ReturnStatement, {
+    const ReturnStatement = createNode(ENodeType.ReturnStatement, {
       argument,
       loc: createLoc(returnToken, argument)
     })

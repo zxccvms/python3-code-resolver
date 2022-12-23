@@ -1,6 +1,6 @@
 export { default as AstToCode, IAstToCodeOptions } from './AstToCode'
 export { default as AstTraverser, TTraverseOptions } from './AstTraverser'
 export { default as CodeScanner } from './CodeScanner'
-export { default as NodeGenerator } from './NodeGenerator'
-export { default as AstGenerator } from './AstGenerator/AstGenerator'
+export { default as AstGenerator } from './AstGenerator'
+export * from './utils'
 export * from './types'

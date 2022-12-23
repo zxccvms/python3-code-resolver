@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IIdentifier, INamedExpression, TExpressionNode } from '../../types'
-import { createLoc, isNode } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isNode, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 命名表达式 */
-class NamedExpression extends BaseHandler {
+class NamedExpression extends Node {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment) {
     if (!isNode(lastNode, ENodeType.Identifier)) return lastNode
     else if (!this.isToken(ETokenType.operator, ':=')) return lastNode
@@ -18,7 +18,7 @@ class NamedExpression extends BaseHandler {
 
     const value = this.astGenerator.expression.handleMaybeIf(environment)
 
-    const NamedExpression = this.createNode(ENodeType.NamedExpression, {
+    const NamedExpression = createNode(ENodeType.NamedExpression, {
       target: lastNode,
       value,
       loc: createLoc(lastNode, value)

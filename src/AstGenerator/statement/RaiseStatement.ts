@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IRaiseStatement, TExpressionNode } from '../../types'
-import { createLoc, isSameRank } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isSameRank, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** raise语句 raise a */
-class RaiseStatement extends BaseHandler {
+class RaiseStatement extends Node {
   handle(environment: EEnvironment): IRaiseStatement {
     const raiseToken = this.output(ETokenType.keyword, 'raise')
 
@@ -18,7 +18,7 @@ class RaiseStatement extends BaseHandler {
       cause = this.astGenerator.expression.handleMaybeIf(environment)
     }
 
-    const RaiseStatement = this.createNode(ENodeType.RaiseStatement, {
+    const RaiseStatement = createNode(ENodeType.RaiseStatement, {
       target,
       cause,
       loc: createLoc(raiseToken, target)

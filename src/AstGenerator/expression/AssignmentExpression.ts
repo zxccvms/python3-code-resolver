@@ -8,11 +8,11 @@ import {
   TNode,
   TToken
 } from '../../types'
-import { createLoc, isNode, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isNode, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
-class AssignmentExpression extends BaseHandler {
+class AssignmentExpression extends Node {
   handleMaybe(lastNode: TExpressionNode, environment: EEnvironment): TExpressionNode {
     if (this.isAssignmentToken()) {
       return this.handle(lastNode as TAssignableExpressionNode, environment)
@@ -43,7 +43,7 @@ class AssignmentExpression extends BaseHandler {
       value = rightNode
     }
 
-    const AssignmentExpression = this.createNode(ENodeType.AssignmentExpression, {
+    const AssignmentExpression = createNode(ENodeType.AssignmentExpression, {
       targets,
       value,
       operator: operatorToken.value,

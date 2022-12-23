@@ -1,14 +1,14 @@
 import { ENodeType, ETokenType, INoneLiteral } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
-class NoneLiteral extends BaseHandler {
+class NoneLiteral extends Node {
   handle(environment: EEnvironment): INoneLiteral {
     this.check({ environment })
 
     const currentToken = this.output(ETokenType.keyword, 'None')
-    const NoneLiteral = this.createNode(ENodeType.NoneLiteral, {
+    const NoneLiteral = createNode(ENodeType.NoneLiteral, {
       loc: createLoc(currentToken, currentToken)
     })
 

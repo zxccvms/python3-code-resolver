@@ -1,20 +1,20 @@
-import { getColumn, isSameRank } from '../utils'
-import NodeGenerator from '../NodeGenerator'
-import { ENodeType, IProgram, TExpressionNode, TNode, TStatementNode, TToken } from '../types'
+import { createNode, getColumn } from '../utils'
+import { ENodeType, ETokenType, IProgram, TExpressionNode, TNode, TStatementNode, TToken } from '../types'
 import Expression from './expression'
 import Statement from './statement'
 import { EEnvironment } from './types'
 import TokenArray from './utils/TokenArray'
+import BaseHandler from './utils/BaseHandler'
 
 /** AST生成器 */
-class AstGenerator {
+class AstGenerator extends BaseHandler {
   tokens: TokenArray
   expression: Expression
   statement: Statement
-  createNode = new NodeGenerator().generate
 
   constructor(tokens: TToken[]) {
     if (!Array.isArray(tokens)) throw new TypeError('tokens is not Array')
+    super()
 
     this.tokens = new TokenArray(tokens)
     this.expression = new Expression(this)
@@ -23,15 +23,17 @@ class AstGenerator {
 
   generate(): IProgram {
     const body = this.handleNodes()
-    const programNode = this.createNode(ENodeType.Program, { body })
+    const programNode = createNode(ENodeType.Program, { body })
 
     return programNode
   }
 
   handleNodes(): TNode[] {
     const nodes = []
-    while (this.tokens.getIndex() < this.tokens.getLength()) {
-      nodes.push(this.handleNode())
+    const tokenLength = this.tokens.getLength()
+    while (this.tokens.getIndex() < tokenLength) {
+      const node = this.handleNode()
+      if (node) nodes.push(node)
     }
 
     return nodes
@@ -40,13 +42,15 @@ class AstGenerator {
   handleNode(
     environment: EEnvironment = EEnvironment.normal,
     indentCount: number = 0
-  ): TExpressionNode | TStatementNode {
-    const lastToken = this.tokens.getToken(-1)
-    const token = this.tokens.getToken()
-    const column = getColumn(token, 'start')
-    if (lastToken && isSameRank([lastToken, token], 'endAndStartLine')) {
-      throw new SyntaxError('Statements must be separated by newlines or semicolons')
-    } else if (indentCount !== column - 1) {
+  ): TExpressionNode | TStatementNode | undefined {
+    if (this.eatLine(ETokenType.punctuation, ';')) {
+      if (this.isSameLine()) {
+        return this.expression.handle(environment)
+      }
+    }
+
+    if (!this.hasToken()) return
+    else if (indentCount !== this.getStartColumn() - 1) {
       throw new SyntaxError('unexpected indent')
     }
 

@@ -5,12 +5,12 @@ import {
   TDecorativeExpressionNode,
   TExpressionNode
 } from '../../types'
-import { createLoc, isToken } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, isToken, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 异步处理函数定义节点 */
-class AsyncFunctionDeclaration extends BaseHandler {
+class AsyncFunctionDeclaration extends Node {
   handle(environment: EEnvironment, decorators?: TDecorativeExpressionNode[]): IAsyncFunctionDeclaration {
     const asyncToken = this.output(ETokenType.keyword, 'async')
     this.outputLine(ETokenType.keyword, 'def')
@@ -31,15 +31,15 @@ class AsyncFunctionDeclaration extends BaseHandler {
       returnType = this.astGenerator.expression.handleMaybeIf(environment)
     }
 
-    const body = this.astGenerator.statement.blockStatement.handle(asyncToken, environment | EEnvironment.functionBody)
+    const body = this.astGenerator.statement.handleBody(environment | EEnvironment.functionBody, asyncToken)
 
-    const AsyncFunctionDeclaration = this.createNode(ENodeType.AsyncFunctionDeclaration, {
+    const AsyncFunctionDeclaration = createNode(ENodeType.AsyncFunctionDeclaration, {
       name: nameToken.value,
       args,
       body,
       returnType,
       decorators,
-      loc: createLoc(decorators?.[0] || asyncToken, body)
+      loc: createLoc(decorators?.[0] || asyncToken, body.at(-1))
     })
 
     return AsyncFunctionDeclaration

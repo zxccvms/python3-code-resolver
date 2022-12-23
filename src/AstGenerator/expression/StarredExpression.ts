@@ -1,10 +1,10 @@
 import { ENodeType, ETokenType, IStarredExpression } from '../../types'
-import { createLoc } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, createNode } from '../../utils'
+import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
 /** 解压表达式 *a */
-class StarredExpression extends BaseHandler {
+class StarredExpression extends Node {
   handle(environment: EEnvironment): IStarredExpression {
     this.check({ environment, isAfter: true, isAssignableExpression: true })
 
@@ -12,7 +12,7 @@ class StarredExpression extends BaseHandler {
 
     const value = this.astGenerator.expression.handleMaybeIf(environment)
 
-    const Starred = this.createNode(ENodeType.StarredExpression, {
+    const Starred = createNode(ENodeType.StarredExpression, {
       value,
       loc: createLoc(xToken, value)
     })

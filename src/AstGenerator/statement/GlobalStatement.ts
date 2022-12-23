@@ -1,9 +1,9 @@
 import { ENodeType, ETokenType, IGlobalStatement, TToken } from '../../types'
-import { createLoc, getLatest } from '../../utils'
-import BaseHandler from '../BaseHandler'
+import { createLoc, getLatest, createNode } from '../../utils'
+import Node from '../utils/Node'
 
 /** 全局变量声明 */
-class GlobalStatement extends BaseHandler {
+class GlobalStatement extends Node {
   handle(): IGlobalStatement {
     const globalToken = this.output(ETokenType.keyword, 'global')
 
@@ -11,9 +11,9 @@ class GlobalStatement extends BaseHandler {
     do {
       const nameToken = this.output(ETokenType.identifier)
       nameTokens.push(nameToken)
-    } while (this.isSameLine(globalToken) && this.eat(ETokenType.punctuation, ','))
+    } while (this.eatLine(ETokenType.punctuation, ','))
 
-    const VariableDeclaration = this.createNode(ENodeType.GlobalStatement, {
+    const VariableDeclaration = createNode(ENodeType.GlobalStatement, {
       names: nameTokens.map(token => token.value),
       loc: createLoc(globalToken, getLatest(nameTokens))
     })
