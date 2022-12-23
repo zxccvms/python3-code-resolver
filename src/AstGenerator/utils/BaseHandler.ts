@@ -71,8 +71,15 @@ class BaseHandler {
     return isSameRank([this.tokens.getToken(-1 + offsetIndex), this.tokens.getToken(offsetIndex)], 'endAndStartLine')
   }
 
-  isToken(types: ETokenType | ETokenType[], value?: string | string[]): boolean {
-    const token = this.tokens.getToken()
+  isBegin(offsetIndex: number = 0) {
+    const lastToken = this.getToken(offsetIndex - 1)
+    if (!lastToken) return true
+
+    return this.isSameLine(offsetIndex)
+  }
+
+  isToken(types: ETokenType | ETokenType[], value?: string | string[], offsetIndex: number = 0): boolean {
+    const token = this.tokens.getToken(offsetIndex)
     return isToken(token, types, value)
   }
 
@@ -114,6 +121,18 @@ class BaseHandler {
     if (!isToken(token, types, value)) {
       throw new TypeError('Unexpected token')
     } else if (!this.isSameLine()) {
+      throw new TypeError('Unexpected token')
+    }
+
+    this.tokens.next()
+    return token
+  }
+
+  outputBegin<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
+    const token = this.tokens.getToken()
+    if (!isToken(token, types, value)) {
+      throw new TypeError('Unexpected token')
+    } else if (!this.isBegin()) {
       throw new TypeError('Unexpected token')
     }
 

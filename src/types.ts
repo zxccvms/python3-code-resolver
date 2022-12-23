@@ -123,6 +123,8 @@ export enum ENodeType {
   TemplateValue = 'TemplateValue',
   /** With语句项 with a,b: 1 */
   WithItem = 'WithItem',
+  /** match语句 case项 */
+  Case = 'Case',
 
   //基础表达式
   /** None */
@@ -236,7 +238,9 @@ export enum ENodeType {
   /** raise语句 */
   RaiseStatement = 'RaiseStatement',
   /** assert语句 */
-  AssertStatement = 'AssertStatement'
+  AssertStatement = 'AssertStatement',
+  /** match语句 */
+  MatchStatement = 'MatchStatement'
 }
 
 /** 特殊的节点映射表 */
@@ -250,6 +254,7 @@ export type TSpecialNodeMap = {
   [ENodeType.Comprehension]: IComprehension
   [ENodeType.TemplateValue]: ITemplateValue
   [ENodeType.WithItem]: IWithItem
+  [ENodeType.Case]: ICase
 }
 
 export type TSpecialNode<T extends keyof TSpecialNodeMap = keyof TSpecialNodeMap> = TSpecialNodeMap[T]
@@ -342,6 +347,7 @@ export type TStatementNodeMap = {
   [ENodeType.DeleteStatement]: IDeleteStatement
   [ENodeType.RaiseStatement]: IRaiseStatement
   [ENodeType.AssertStatement]: IAssertStatement
+  [ENodeType.MatchStatement]: IMatchStatement
 }
 
 export type TStatementNode<T extends keyof TStatementNodeMap = keyof TStatementNodeMap> = TStatementNodeMap[T]
@@ -434,6 +440,12 @@ export interface IWithItem extends IBaseNodeAttr {
   type: ENodeType.SliceExpression
   expression: TExpressionNode
   optionalVars?: TAssignableExpressionNode
+}
+
+export interface ICase extends IBaseNodeAttr {
+  type: ENodeType.Case
+  pattern: TExpressionNode
+  body: TNode[]
 }
 
 // 表达式节点定义
@@ -755,4 +767,10 @@ export interface IAssertStatement extends IBaseNodeAttr {
   type: ENodeType.AssertStatement
   msg?: TExpressionNode
   test: TExpressionNode
+}
+
+export interface IMatchStatement extends IBaseNodeAttr {
+  type: ENodeType.MatchStatement
+  cases: ICase[]
+  subject: TExpressionNode
 }

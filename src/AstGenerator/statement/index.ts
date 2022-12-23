@@ -33,6 +33,7 @@ import NonlocalStatement from './NonlocalStatement'
 import AsyncFunctionDeclaration from './AsyncFunctionDeclaration'
 import AsyncForStatement from './AsyncForStatement'
 import AsyncWithStatement from './AsyncWithStatement'
+import MatchStatement from './MatchStatement'
 
 class Statement extends Node {
   readonly nonlocalStatement = new NonlocalStatement(this.astGenerator)
@@ -56,6 +57,7 @@ class Statement extends Node {
   readonly deleteStatement = new DeleteStatement(this.astGenerator)
   readonly raiseStatement = new RaiseStatement(this.astGenerator)
   readonly assertStatement = new AssertStatement(this.astGenerator)
+  readonly matchStatement = new MatchStatement(this.astGenerator)
 
   /** 处理语句 */
   handle(environment: EEnvironment = EEnvironment.normal): TStatementNode {
@@ -99,6 +101,10 @@ class Statement extends Node {
         return this.raiseStatement.handle(environment)
       case 'assert':
         return this.assertStatement.handle(environment)
+      case 'match': {
+        if (!this.matchStatement.isConform()) break
+        return this.matchStatement.handle(environment)
+      }
       case 'async': {
         const nextToken = this.tokens.getToken(1)
         switch (nextToken.value) {
