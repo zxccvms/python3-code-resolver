@@ -68,8 +68,7 @@ class Expression extends Node {
   readonly comprehension = new Comprehension(this.astGenerator)
 
   /** 解析表达式 */
-  handle(environment: EEnvironment): TExpressionNode {
-    if (!this.hasToken()) return
+  handle(environment: EEnvironment = EEnvironment.normal): TExpressionNode {
     return this.handleMaybeAssignment(environment)
   }
 

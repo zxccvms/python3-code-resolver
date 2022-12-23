@@ -67,8 +67,8 @@ class BaseHandler {
     return this.tokens.getToken(extraIndex)
   }
 
-  isSameLine() {
-    return isSameRank([this.tokens.getToken(-1), this.tokens.getToken()], 'endAndStartLine')
+  isSameLine(offsetIndex = 0) {
+    return isSameRank([this.tokens.getToken(-1 + offsetIndex), this.tokens.getToken(offsetIndex)], 'endAndStartLine')
   }
 
   isToken(types: ETokenType | ETokenType[], value?: string | string[]): boolean {
@@ -172,6 +172,7 @@ class BaseHandler {
 
   getStartColumn() {
     const currentToken = this.tokens.getToken()
+    if (!currentToken) return
     return getColumn(currentToken, 'start')
   }
 }

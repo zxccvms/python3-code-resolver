@@ -58,9 +58,7 @@ class Statement extends Node {
   readonly assertStatement = new AssertStatement(this.astGenerator)
 
   /** 处理语句 */
-  handle(environment: EEnvironment): TStatementNode {
-    if (!this.hasToken()) return
-
+  handle(environment: EEnvironment = EEnvironment.normal): TStatementNode {
     const currentToken = this.getToken()
     switch (currentToken.value) {
       case 'pass':
@@ -121,9 +119,9 @@ class Statement extends Node {
     const nodes: TNode[] = []
     if (this.isSameLine()) {
       do {
-        const node = this.handle(environment) || this.astGenerator.expression.handle(environment)
-        if (node) nodes.push(node)
-      } while (this.eatLine(ETokenType.punctuation, ';'))
+        const node = this.astGenerator.handleNode(environment)
+        nodes.push(node)
+      } while (this.eatLine(ETokenType.punctuation, ';') && this.isSameLine())
     } else {
       const startColumn = getColumn(start, 'start')
       const markColumn = this.getStartColumn()
@@ -132,9 +130,13 @@ class Statement extends Node {
       }
 
       do {
-        const node = this.astGenerator.handleNode(environment, markColumn - 1)
-        if (node) nodes.push(node)
-      } while (this.hasToken() && (this.getStartColumn() === markColumn || this.isToken(ETokenType.punctuation, ';')))
+        const node = this.astGenerator.handleNodeWithCheckIndent(environment, markColumn - 1)
+        nodes.push(node)
+        while (this.eatLine(ETokenType.punctuation, ';') && this.isSameLine()) {
+          const node = this.astGenerator.handleNode(environment)
+          nodes.push(node)
+        }
+      } while (this.getStartColumn() === markColumn)
     }
 
     return nodes

@@ -30,30 +30,30 @@ class AstGenerator extends BaseHandler {
 
   handleNodes(): TNode[] {
     const nodes = []
-    const tokenLength = this.tokens.getLength()
-    while (this.tokens.getIndex() < tokenLength) {
-      const node = this.handleNode()
-      if (node) nodes.push(node)
+    while (this.hasToken()) {
+      const node = this.handleNodeWithCheckIndent()
+      nodes.push(node)
+      while (this.eatLine(ETokenType.punctuation, ';') && this.isSameLine()) {
+        const node = this.handleNode()
+        nodes.push(node)
+      }
     }
 
     return nodes
   }
 
-  handleNode(
-    environment: EEnvironment = EEnvironment.normal,
+  handleNodeWithCheckIndent(
+    environment?: EEnvironment,
     indentCount: number = 0
   ): TExpressionNode | TStatementNode | undefined {
-    if (this.eatLine(ETokenType.punctuation, ';')) {
-      if (this.isSameLine()) {
-        return this.statement.handle(environment) || this.expression.handle(environment)
-      }
-    }
-
-    if (!this.hasToken()) return
-    else if (indentCount !== this.getStartColumn() - 1) {
+    if (indentCount !== this.getStartColumn() - 1) {
       throw new SyntaxError('unexpected indent')
     }
 
+    return this.handleNode(environment)
+  }
+
+  handleNode(environment: EEnvironment = EEnvironment.normal) {
     return this.statement.handle(environment) || this.expression.handle(environment)
   }
 }
