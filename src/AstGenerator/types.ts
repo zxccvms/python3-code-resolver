@@ -15,7 +15,9 @@ export enum EEnvironment {
   /** 赋值环境 */
   assign = 0b10000,
   /** 装饰器环境 */
-  decorative = 0b100000
+  decorative = 0b100000,
+  /** subscript环境 */
+  subscript = 0b1000000
 }
 
 export interface IFindNodesParams<T> {

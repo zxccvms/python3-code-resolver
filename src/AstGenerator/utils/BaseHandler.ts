@@ -83,6 +83,16 @@ class BaseHandler {
     return isToken(token, types, value)
   }
 
+  isTokenLine(
+    environment: EEnvironment,
+    types: ETokenType | ETokenType[],
+    value?: string | string[],
+    offsetIndex: number = 0
+  ) {
+    const token = this.tokens.getToken(offsetIndex)
+    return isToken(token, types, value) && (checkBit(environment, EEnvironment.bracket) || this.isSameLine(offsetIndex))
+  }
+
   isTokens(...tokens: [ETokenType | ETokenType[], string | string[]][]) {
     return tokens.every(([types, value], index) => isToken(this.tokens.getToken(index), types, value))
   }
@@ -96,10 +106,14 @@ class BaseHandler {
     return token
   }
 
-  eatLine<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
+  eatLine<T extends ETokenType, V extends string>(
+    environment: EEnvironment,
+    types: T | T[],
+    value?: V | V[]
+  ): TToken<T, V> {
     const token = this.tokens.getToken()
     if (!isToken(token, types, value)) return
-    else if (!this.isSameLine()) return
+    else if (!checkBit(environment, EEnvironment.bracket) && !this.isSameLine()) return
 
     this.tokens.next()
     return token
@@ -116,11 +130,15 @@ class BaseHandler {
     return token
   }
 
-  outputLine<T extends ETokenType, V extends string>(types: T | T[], value?: V | V[]): TToken<T, V> {
+  outputLine<T extends ETokenType, V extends string>(
+    environment: EEnvironment,
+    types: T | T[],
+    value?: V | V[]
+  ): TToken<T, V> {
     const token = this.tokens.getToken()
     if (!isToken(token, types, value)) {
       throw new TypeError('Unexpected token')
-    } else if (!this.isSameLine()) {
+    } else if (!checkBit(environment, EEnvironment.bracket) && !this.isSameLine()) {
       throw new TypeError('Unexpected token')
     }
 

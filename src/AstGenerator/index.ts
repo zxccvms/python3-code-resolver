@@ -33,7 +33,7 @@ class AstGenerator extends BaseHandler {
     while (this.hasToken()) {
       const node = this.handleNodeWithCheckIndent()
       nodes.push(node)
-      while (this.eatLine(ETokenType.punctuation, ';') && this.isSameLine()) {
+      while (this.eatLine(EEnvironment.normal, ETokenType.punctuation, ';') && this.isSameLine()) {
         const node = this.handleNode()
         nodes.push(node)
       }

@@ -8,11 +8,11 @@ import { EEnvironment } from '../types'
 class AsyncForStatement extends Node {
   handle(environment: EEnvironment): IForStatement {
     const asyncToken = this.output(ETokenType.keyword, 'async')
-    this.outputLine(ETokenType.keyword, 'for')
+    this.outputLine(environment, ETokenType.keyword, 'for')
 
     const target = this._handleTarget(environment)
 
-    this.outputLine(ETokenType.keyword, 'in')
+    this.outputLine(environment, ETokenType.keyword, 'in')
 
     const iterable = this.astGenerator.expression.handleMaybeTuple(environment)
 

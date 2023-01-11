@@ -42,10 +42,10 @@ class TupleExpression extends Node {
   private _handleElements(
     environment: EEnvironment,
     elementStack: TExpressionNode[],
-    handleExpression = (environment: EEnvironment) => this.astGenerator.expression.handleMaybeIf(environment)
+    handleExpression = (environment: EEnvironment) => this.astGenerator.expression.handleMaybeTupleItem(environment)
   ): TExpressionNode[] {
     if (!this.eat(ETokenType.punctuation, ',')) return elementStack
-    else if (this.isToken(ETokenType.bracket, ')')) return elementStack
+    else if (this.isToken(ETokenType.bracket, [')', ']'])) return elementStack
     else if (this.astGenerator.expression.assignmentExpression.isAssignmentToken()) return elementStack
     else if (!this.isContinue(environment)) return elementStack
 

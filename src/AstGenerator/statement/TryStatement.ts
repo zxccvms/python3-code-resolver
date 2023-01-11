@@ -66,7 +66,7 @@ class TryStatement extends Node {
     }
 
     let name: string = null
-    if (this.eatLine(ETokenType.keyword, 'as')) {
+    if (this.eatLine(environment, ETokenType.keyword, 'as')) {
       name = this.output(ETokenType.identifier).value
     }
 

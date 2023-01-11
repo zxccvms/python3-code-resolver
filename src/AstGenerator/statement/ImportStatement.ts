@@ -6,7 +6,7 @@ import { EEnvironment } from '../types'
 
 /** 导入语句 */
 class ImportStatement extends Node {
-  handle(): IImportStatement {
+  handle(environment: EEnvironment): IImportStatement {
     const importToken = this.output(ETokenType.keyword, 'import')
     const names = this._handleNames(importToken)
 

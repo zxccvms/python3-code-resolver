@@ -11,7 +11,7 @@ class ForStatement extends Node {
 
     const target = this._handleTarget(environment)
 
-    this.outputLine(ETokenType.keyword, 'in')
+    this.outputLine(environment, ETokenType.keyword, 'in')
 
     const iterable = this.astGenerator.expression.handleMaybeTuple(environment)
 

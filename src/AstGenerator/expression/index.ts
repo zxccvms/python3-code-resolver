@@ -1,5 +1,5 @@
-import { ENodeType, ETokenType, TAssignableExpressionNode, TBasicExpressionNode, TExpressionNode } from '../../types'
-import { createLoc, getPositionInfo, isSameRank, isToken } from '../../utils'
+import { ETokenType, TBasicExpressionNode, TExpressionNode } from '../../types'
+import { checkBit, getPositionInfo, isToken } from '../../utils'
 import Node from '../utils/Node'
 import { EEnvironment } from '../types'
 
@@ -31,6 +31,7 @@ import Ellipsis from './Ellipsis'
 import AwaitExpression from './AwaitExpression'
 import NamedExpression from './NamedExpression'
 import AnnAssignmentExpression from './AnnAssignmentExpression'
+import SliceExpression from './SliceExpression'
 
 class Expression extends Node {
   // 基础表达式
@@ -52,6 +53,7 @@ class Expression extends Node {
   readonly annAssignmentExpression = new AnnAssignmentExpression(this.astGenerator)
   readonly assignmentExpression = new AssignmentExpression(this.astGenerator)
   readonly memberExpression = new MemberExpression(this.astGenerator)
+  readonly sliceExpression = new SliceExpression(this.astGenerator)
   readonly subscriptExpression = new SubscriptExpression(this.astGenerator)
   readonly callExpression = new CallExpression(this.astGenerator)
   readonly compareExpression = new CompareExpression(this.astGenerator)
@@ -86,8 +88,27 @@ class Expression extends Node {
 
   /** 处理可能是元组表达式 */
   handleMaybeTuple(environment: EEnvironment) {
-    const lastNode = this.handleMaybeIf(environment)
+    const lastNode = this.handleMaybeTupleItem(environment)
     return this.tupleExpression.handleMaybe(lastNode, environment)
+  }
+
+  /** 处理可能是元组项表达式 */
+  handleMaybeTupleItem(environment: EEnvironment) {
+    if (checkBit(environment, EEnvironment.subscript)) {
+      return this.handleMaybeSlice(environment)
+    } else {
+      return this.handleMaybeIf(environment)
+    }
+  }
+
+  /** 处理可能是分割表达式 */
+  handleMaybeSlice(environment: EEnvironment) {
+    if (this.isToken(ETokenType.punctuation, ':')) {
+      return this.sliceExpression.handle(environment)
+    }
+
+    const lastNode = this.handleMaybeIf(environment)
+    return this.sliceExpression.handleMaybe(environment, lastNode)
   }
 
   /** 处理可能是条件表达式 */
@@ -119,19 +140,17 @@ class Expression extends Node {
     environment: EEnvironment,
     lastNode: TExpressionNode = this.handleFirstExpression(environment)
   ): TExpressionNode {
-    if (!this.isContinue(environment)) return lastNode
-
-    const currentToken = this.tokens.getToken()
-    if (isToken(currentToken, ETokenType.punctuation, '.')) {
+    if (this.isTokenLine(environment, ETokenType.punctuation, '.')) {
       const memberExpression = this.memberExpression.handle(lastNode, environment)
       return this.handleMaybeMemberOrSubscriptOrCall(environment, memberExpression)
-    } else if (isToken(currentToken, ETokenType.bracket, '[')) {
+    } else if (this.isTokenLine(environment, ETokenType.bracket, '[')) {
       const subscriptExpression = this.subscriptExpression.handle(lastNode, environment)
       return this.handleMaybeMemberOrSubscriptOrCall(environment, subscriptExpression)
-    } else if (isToken(currentToken, ETokenType.bracket, '(')) {
+    } else if (this.isTokenLine(environment, ETokenType.bracket, '(')) {
       const callExpression = this.callExpression.handle(lastNode, environment)
       return this.handleMaybeMemberOrSubscriptOrCall(environment, callExpression)
     }
+
     return lastNode
   }
 
@@ -168,8 +187,6 @@ class Expression extends Node {
         return this.identifier.handle(environment)
       case ETokenType.number:
         return this.numberLiteral.handle(environment)
-      // case ETokenType.ellipsis:
-      //   return this.ellipsis.handle(environment)
       case ETokenType.keyword:
         switch (currentToken.value) {
           case 'None':

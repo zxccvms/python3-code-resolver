@@ -1,4 +1,15 @@
-import { ENodeType, ETokenType, IBaseNodeAttr, TLoc, TNode, TNodeMap, TPositionInfo, TToken } from './types'
+import {
+  ENodeType,
+  ETokenType,
+  IBaseNodeAttr,
+  TAssignableExpressionNode,
+  TExpressionNode,
+  TLoc,
+  TNode,
+  TNodeMap,
+  TPositionInfo,
+  TToken
+} from './types'
 
 /** 得到数组的最后一项 */
 export function getLatest<T>(array: Array<T>): T {
@@ -147,5 +158,17 @@ export function mergeObject<T extends Record<string, any>>(o: T, p: Partial<T>):
   return {
     ...o,
     ...p
+  }
+}
+
+export function isAssignableExpression(node: TExpressionNode): node is TAssignableExpressionNode {
+  switch (node.type) {
+    case ENodeType.AnnAssignmentExpression:
+    case ENodeType.StarredExpression:
+    case ENodeType.ArrayExpression:
+    case ENodeType.TupleExpression:
+      return true
+    default:
+      return false
   }
 }

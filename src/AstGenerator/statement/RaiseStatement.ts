@@ -14,7 +14,7 @@ class RaiseStatement extends Node {
     }
 
     let cause: TExpressionNode = null
-    if (this.eatLine(ETokenType.keyword, 'from')) {
+    if (this.eatLine(environment, ETokenType.keyword, 'from')) {
       cause = this.astGenerator.expression.handleMaybeIf(environment)
     }
 

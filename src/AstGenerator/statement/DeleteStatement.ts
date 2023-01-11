@@ -5,7 +5,7 @@ import { EEnvironment } from '../types'
 
 /** del语句 */
 class DeleteStatement extends Node {
-  handle(): IDeleteStatement {
+  handle(environment: EEnvironment): IDeleteStatement {
     const delToken = this.output(ETokenType.keyword, 'del')
     const targets = this._handleTargets(delToken)
 

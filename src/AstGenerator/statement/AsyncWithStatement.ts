@@ -7,13 +7,13 @@ import { EEnvironment } from '../types'
 class AsyncWithStatement extends Node {
   handle(environment: EEnvironment): IAsyncWithStatement {
     const asyncToken = this.output(ETokenType.keyword, 'async')
-    this.outputLine(ETokenType.keyword, 'with')
+    this.outputLine(environment, ETokenType.keyword, 'with')
 
     const withItems: IWithItem[] = []
     do {
       const withItem = this._handleWithItem(environment)
       withItems.push(withItem)
-    } while (this.eatLine(ETokenType.punctuation, ','))
+    } while (this.eatLine(environment, ETokenType.punctuation, ','))
 
     const body = this.astGenerator.statement.handleBody(environment, asyncToken)
 

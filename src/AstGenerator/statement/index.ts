@@ -64,7 +64,7 @@ class Statement extends Node {
     const currentToken = this.getToken()
     switch (currentToken.value) {
       case 'pass':
-        return this.emptyStatement.handle()
+        return this.emptyStatement.handle(environment)
       case '@':
         return this._handleDecoratorsInStatement(environment)
       case 'def':
@@ -72,15 +72,15 @@ class Statement extends Node {
       case 'class':
         return this.classDeclaration.handle(environment)
       case 'nonlocal':
-        return this.nonlocalStatement.handle()
+        return this.nonlocalStatement.handle(environment)
       case 'global':
-        return this.globalStatement.handle()
+        return this.globalStatement.handle(environment)
       case 'if':
         return this.ifStatement.handle(environment)
       case 'import':
-        return this.importStatement.handle()
+        return this.importStatement.handle(environment)
       case 'from':
-        return this.importFromStatement.handle()
+        return this.importFromStatement.handle(environment)
       case 'try':
         return this.tryStatement.handle(environment)
       case 'for':
@@ -96,7 +96,7 @@ class Statement extends Node {
       case 'with':
         return this.withStatement.handle(environment)
       case 'del':
-        return this.deleteStatement.handle()
+        return this.deleteStatement.handle(environment)
       case 'raise':
         return this.raiseStatement.handle(environment)
       case 'assert':
@@ -120,14 +120,14 @@ class Statement extends Node {
   }
 
   handleBody(environment: EEnvironment, start: TToken | TNode): TNode[] {
-    this.outputLine(ETokenType.punctuation, ':')
+    this.outputLine(environment, ETokenType.punctuation, ':')
 
     const nodes: TNode[] = []
     if (this.isSameLine()) {
       do {
         const node = this.astGenerator.handleNode(environment)
         nodes.push(node)
-      } while (this.eatLine(ETokenType.punctuation, ';') && this.isSameLine())
+      } while (this.eatLine(environment, ETokenType.punctuation, ';') && this.isSameLine())
     } else {
       const startColumn = getColumn(start, 'start')
       const markColumn = this.getStartColumn()
@@ -138,7 +138,7 @@ class Statement extends Node {
       do {
         const node = this.astGenerator.handleNodeWithCheckIndent(environment, markColumn - 1)
         nodes.push(node)
-        while (this.eatLine(ETokenType.punctuation, ';') && this.isSameLine()) {
+        while (this.eatLine(environment, ETokenType.punctuation, ';') && this.isSameLine()) {
           const node = this.astGenerator.handleNode(environment)
           nodes.push(node)
         }

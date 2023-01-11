@@ -9,7 +9,7 @@ class MatchStatement extends Node {
     const matchToken = this.outputBegin(ETokenType.identifier, 'match')
 
     const subject = this.astGenerator.expression.handleMaybeTuple(environment)
-    this.outputLine(ETokenType.punctuation, ':')
+    this.outputLine(environment, ETokenType.punctuation, ':')
 
     const startColumn = getColumn(matchToken, 'start')
     const markColumn = this.getStartColumn()

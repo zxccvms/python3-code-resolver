@@ -12,7 +12,7 @@ class WithStatement extends Node {
     do {
       const withItem = this._handleWithItem(environment)
       withItems.push(withItem)
-    } while (this.eatLine(ETokenType.punctuation, ','))
+    } while (this.eatLine(environment, ETokenType.punctuation, ','))
 
     const body = this.astGenerator.statement.handleBody(environment, withToken)
 

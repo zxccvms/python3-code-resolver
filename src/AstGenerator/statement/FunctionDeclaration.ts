@@ -9,9 +9,9 @@ class FunctionDeclaration extends Node {
   handle(environment: EEnvironment, decorators?: TDecorativeExpressionNode[]): IFunctionDeclaration {
     const defToken = this.output(ETokenType.keyword, 'def')
 
-    const nameToken = this.outputLine(ETokenType.identifier)
+    const nameToken = this.outputLine(environment, ETokenType.identifier)
 
-    this.outputLine(ETokenType.bracket, '(')
+    this.outputLine(environment, ETokenType.bracket, '(')
 
     const args = this.astGenerator.expression.arguments.handle(
       token => isToken(token, ETokenType.bracket, ')'),
@@ -21,7 +21,7 @@ class FunctionDeclaration extends Node {
     this.output(ETokenType.bracket, ')')
 
     let returnType: TExpressionNode = null
-    if (this.eatLine(ETokenType.operator, '->')) {
+    if (this.eatLine(environment, ETokenType.operator, '->')) {
       returnType = this.astGenerator.expression.handleMaybeIf(environment)
     }
 

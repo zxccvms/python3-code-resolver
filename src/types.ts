@@ -249,7 +249,6 @@ export type TSpecialNodeMap = {
   [ENodeType.Argument]: IArgument
   [ENodeType.Keyword]: IKeyword
   [ENodeType.ExceptHandler]: IExceptHandler
-  [ENodeType.SliceExpression]: ISliceExpression
   [ENodeType.AliasExpression]: IAliasExpression
   [ENodeType.Comprehension]: IComprehension
   [ENodeType.TemplateValue]: ITemplateValue
@@ -284,6 +283,7 @@ export type TExpressionNodeMap = {
   [ENodeType.AssignmentExpression]: IAssignmentExpression
   [ENodeType.AnnAssignmentExpression]: IAnnAssignmentExpression
   [ENodeType.MemberExpression]: IMemberExpression
+  [ENodeType.SliceExpression]: ISliceExpression
   [ENodeType.SubscriptExpression]: ISubscriptExpression
   [ENodeType.CallExpression]: ICallExpression
   [ENodeType.TupleExpression]: ITupleExpression
@@ -607,8 +607,8 @@ export interface IMemberExpression extends IBaseNodeAttr {
 
 export interface ISubscriptExpression extends IBaseNodeAttr {
   type: ENodeType.SubscriptExpression
-  object: TExpressionNode
-  subscript: (TExpressionNode | ISliceExpression)[]
+  value: TExpressionNode
+  slice: TExpressionNode
 }
 
 export interface ICallExpression extends IBaseNodeAttr {
