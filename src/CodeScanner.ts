@@ -18,7 +18,7 @@ const operatorReg3 = /\/\/\=|\*\*\=|\<\<\=|\>\>\=/
 /** 2位操作符 */
 const operatorReg2 = /\*\*|\/\/|\<\<|\>\>|\+\=|\-\=|\*\=|\/\=|\%\=|\|\=|\&\=|\=\=|\!\=|\>\=|\<\=|\^\=|\@\=|\:\=/
 /** 1位操作符 */
-const operatorReg1 = /\&|\||\^|\~|\+|\-|\*|\/|\%|\/|\^|\=|\<|\>|\@/
+const operatorReg1 = /\&|\||\^|\~|\+|\-|\*|\/|\%|\^|\=|\<|\>|\@/
 /** 进制 */
 const systemReg = /0[bBoOxX]/
 const systemSuffixReg2 = /[01]/
@@ -28,10 +28,12 @@ const systemSuffixReg16 = /[0123456789ABCDEFabcdef]/
 const bracketReg = /\(|\)|\{|\}|\[|\]/
 /** 标点符号 */
 const punctuationReg = /\.|\,|\:/
-/** 标识符 */
-const identifierReg = /[a-z|A-Z|_|\u4e00-\u9fa5|\u0800-\u4e00|\uAC00-\uD7A3]/
-/** 标识符后续 */
-const identifierSuffixReg = /[a-z|A-Z|_|\u4e00-\u9fa5|\u0800-\u4e00|\uAC00-\uD7A3|0-9]/
+// /** 标识符 */
+// const identifierReg = /[a-z|A-Z|_|\u4e00-\u9fa5|\u0800-\u4e00|\uAC00-\uD7A3]/
+// /** 标识符后续 */
+// const identifierSuffixReg = /[a-z|A-Z|_|\u4e00-\u9fa5|\u0800-\u4e00|\uAC00-\uD7A3|0-9]/
+/** 可打断标识符的字符 */
+const notIdentifierCharReg = /\&|\||\^|\~|\+|\-|\*|\/|\%|\^|\=|\<|\>|\@|\(|\)|\{|\}|\[|\]|\.|\,|\:|\#|\\|\"|\'|\s|\!/
 
 /** 代码扫描器 */
 class CodeScanner {
@@ -226,9 +228,19 @@ class CodeScanner {
       }
 
       // 处理关键字和标识符
-      else if (identifierReg.test(currentChar)) {
-        const { lineNum, columnNum, betweenContent } = this._findConformString(code.slice(i), char =>
-          identifierSuffixReg.test(char)
+      // else if (identifierReg.test(currentChar)) {
+      //   const { lineNum, columnNum, betweenContent } = this._findConformString(code.slice(i), char =>
+      //     identifierSuffixReg.test(char)
+      //   )
+
+      //   value = currentChar + betweenContent
+      //   type = PYTHON.KEYWORDS.includes(value) ? ETokenType.keyword : ETokenType.identifier
+      //   handleCycleParams(betweenContent.length, lineNum, columnNum)
+      // }
+      else if (!notIdentifierCharReg.test(currentChar)) {
+        const { lineNum, columnNum, betweenContent } = this._findConformString(
+          code.slice(i),
+          char => !notIdentifierCharReg.test(char)
         )
 
         value = currentChar + betweenContent
