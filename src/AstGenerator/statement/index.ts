@@ -75,6 +75,8 @@ class Statement extends BaseHandler {
   /** 处理语句 */
   handle(environment: EEnvironment): TStatementNode {
     const currentToken = this.tokens.getToken()
+    if (currentToken.type !== ETokenType.keyword && currentToken.type !== ETokenType.operator) return
+
     switch (currentToken.value) {
       // case 'pass':
       //   return this.emptyStatement.handle()
